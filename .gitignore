@@ -32,3 +32,4 @@ keen_auth_permissions_demo-*.tar
 npm-debug.log
 /assets/node_modules/
 
+/config/.local.exs
