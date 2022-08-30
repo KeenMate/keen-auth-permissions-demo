@@ -7,7 +7,7 @@ defmodule KeenAuthPermissionsDemo.MixProject do
       version: "0.1.0",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:gettext] ++ Mix.compilers(),
+      compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -48,7 +48,12 @@ defmodule KeenAuthPermissionsDemo.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.5"}
+      {:plug_cowboy, "~> 2.5"},
+      {:pbkdf2_elixir, "~> 2.0"},
+      {:simplificator_3000, "~> 0.2.0"},
+      {:gen_smtp, "~> 1.1"},
+      {:keen_auth, github: "keenmate/keen_auth", branch: "new-vision", override: true},
+      {:keen_auth_permissions, github: "keenmate/keen-auth-permissions", branch: "dev"}
     ]
   end
 

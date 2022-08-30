@@ -2,10 +2,10 @@ import Config
 
 # Configure your database
 config :keen_auth_permissions_demo, KeenAuthPermissionsDemo.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "keen_auth_permissions_demo",
+  password: "keen_auth_permissions_demo",
   hostname: "localhost",
-  database: "keen_auth_permissions_demo_dev",
+  database: "keen_auth_permissions_demo",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10

@@ -1,4 +1,6 @@
 defmodule KeenAuthPermissionsDemoWeb.Router do
+  require KeenAuth
+
   use KeenAuthPermissionsDemoWeb, :router
 
   pipeline :browser do
@@ -8,16 +10,40 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
     plug :put_root_layout, {KeenAuthPermissionsDemoWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug KeenAuth.Plug.FetchUser
   end
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
+  pipeline :authentication do
+    plug :fetch_session
+    plug :put_root_layout, {KeenAuthPermissionsDemoWeb.LayoutView, :root}
+  end
+
+  pipeline :authorization do
+    plug :fetch_session
+    plug KeenAuth.Plug.FetchUser
+  end
+
+  scope "/auth" do
+    pipe_through :browser
+
+    KeenAuth.authentication_routes()
+  end
+
   scope "/", KeenAuthPermissionsDemoWeb do
     pipe_through :browser
 
     get "/", PageController, :index
+    get "/login", LoginController, :login
+
+    get "/register", RegistrationController, :register_get
+    post "/register", RegistrationController, :register_post
+
+    get "/verify", VerificationController, :verify
+    post "/verify", VerificationController, :verify
   end
 
   # Other scopes may use custom stacks.

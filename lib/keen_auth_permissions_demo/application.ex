@@ -20,6 +20,8 @@ defmodule KeenAuthPermissionsDemo.Application do
       # {KeenAuthPermissionsDemo.Worker, arg}
     ]
 
+    create_session_table()
+
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: KeenAuthPermissionsDemo.Supervisor]
@@ -32,5 +34,9 @@ defmodule KeenAuthPermissionsDemo.Application do
   def config_change(changed, _new, removed) do
     KeenAuthPermissionsDemoWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  defp create_session_table() do
+    :ets.new(:session, [:named_table, :public, read_concurrency: true])
   end
 end

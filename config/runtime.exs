@@ -63,6 +63,17 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
+  sender_relay = System.get_env("SENDER_RELAY")
+  # sender_hostname = System.get_env("SENDER_HOSTNAME")
+  sender_username = System.get_env("SENDER_USERNAME")
+  sender_password = System.get_env("SENDER_PASSWORD")
+
+  config :keen_auth_permissions_demo, KeenAuthPermissionsDemo.Mailer,
+    relay: sender_relay,
+    # hostname: sender_hostname,
+    username: sender_username,
+    password: sender_password
+
   # ## Configuring the mailer
   #
   # In production you need to configure the mailer to use a different adapter.

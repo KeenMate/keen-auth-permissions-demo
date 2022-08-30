@@ -5,7 +5,8 @@ defmodule KeenAuthPermissionsDemoWeb.Endpoint do
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
   @session_options [
-    store: :cookie,
+    store: :ets,
+    table: :session,
     key: "_keen_auth_permissions_demo_key",
     signing_salt: "N4iveX1K"
   ]
@@ -19,8 +20,8 @@ defmodule KeenAuthPermissionsDemoWeb.Endpoint do
   plug Plug.Static,
     at: "/",
     from: :keen_auth_permissions_demo,
-    gzip: false,
-    only: ~w(assets fonts images favicon.ico robots.txt)
+    gzip: true
+    # only: ~w(assets fonts images favicon.ico robots.txt)
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
@@ -46,5 +47,6 @@ defmodule KeenAuthPermissionsDemoWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+  plug KeenAuth.Plug
   plug KeenAuthPermissionsDemoWeb.Router
 end

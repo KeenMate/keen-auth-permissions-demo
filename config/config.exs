@@ -47,6 +47,24 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :keen_auth,
+  tenant: 1,
+  db_context: KeenAuthPermissionsDemo.DbContext,
+  unauthorized_redirect: &KeenAuthPermissionsDemoWeb.Auth.Unauthorized.unauthorized_redirect_path/2,
+  email_enabled: true,
+  strategies: [
+    aad: [
+      strategy: Assent.Strategy.AzureAD,
+      mapper: KeenAuth.Mapper.AzureAD,
+      processor: KeenAuthPermissions.Processor.AzureAD
+    ],
+    email: [
+      mapper: KeenAuthPermissions.Mapper.Email,
+      processor: KeenAuthPermissions.Processor.Email,
+      authentication_handler: KeenAuthPermissionsDemoWeb.Auth.EmailAuthenticationHandler
+    ]
+  ]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
