@@ -1,30 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="csrf-token" content={csrf_token_value()}>
-    <%= live_title_tag assigns[:page_title] || "KeenAuthPermissionsDemo", suffix: " · Phoenix Framework" %>
-    <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/app.css")}/>
-    <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
-  </head>
-  <body>
-    <header>
-      <section class="container">
-        <nav>
-          <ul>
-            <li><a href="https://hexdocs.pm/phoenix/overview.html">Get Started</a></li>
-            <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
-              <li><%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %></li>
-            <% end %>
-          </ul>
-        </nav>
-        <a href="https://phoenixframework.org/" class="phx-logo">
-          <img src={Routes.static_path(@conn, "/images/phoenix.png")} alt="Phoenix Framework Logo"/>
-        </a>
-      </section>
-    </header>
-    <%= @inner_content %>
-  </body>
+
+<!--
+ // WEBSITE: https://themefisher.com
+ // TWITTER: https://twitter.com/themefisher
+ // FACEBOOK: https://www.facebook.com/themefisher
+ // GITHUB: https://github.com/themefisher/
+-->
+
+<html lang="zxx">
+
+<head>
+  <meta charset="utf-8">
+  <%= live_title_tag assigns[:page_title] || "KeenAuthPermissionsDemo", suffix: " · Phoenix Framework" %>
+  <meta name="csrf-token" content={csrf_token_value()}>
+
+
+  <!-- mobile responsive meta -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <!-- ** Plugins Needed for the Project ** -->
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha256-L/W5Wfqfa0sdBNIKN9cG6QA5F2qx4qICmU2VgLruv9Y=" crossorigin="anonymous">
+  <!-- themefy-icon -->
+  <link rel="stylesheet" href={Routes.static_path(@conn, "/plugins/themify-icons/themify-icons.css")}>
+  <!-- slick slider -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" integrity="sha256-3h45mwconzsKjTUULjY+EoEkoRhXcOIU4l5YAw2tSOU=" crossorigin="anonymous">
+  <!-- venobox popup -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/venobox@1.8.3/venobox/venobox.css" integrity="sha256-QGl1WGdhfVW34xvGimoMVNcWUkCcBY2HaGjGaMBc948=" crossorigin="anonymous">
+  <!-- aos -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" integrity="sha256-GqiEX9BuR1rv5zPU5Vs2qS/NSHl1BJyBcjQYJ6ycwD4=" crossorigin="anonymous">
+
+  <!-- Main Stylesheet -->
+  <link href={Routes.static_path(@conn, "/css/style.css")} rel="stylesheet">
+  
+  <!--Favicon-->
+  <link rel="shortcut icon" href={Routes.static_path(@conn, "/images/favicon.ico")} type="image/x-icon">
+  <link rel="icon" href={Routes.static_path(@conn, "/images/favicon.ico")} type="image/x-icon">
+
+</head>
+
+<body>
+  
+
+<!-- navigation -->
+<%= render "_navigation.html", assigns %>
+<!-- /navigation -->
+
+<%= @inner_content %>
+
+<!-- footer -->
+<%= render "_footer.html", assigns %>
+<!-- /footer -->
+
+<!-- jQuery -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha256-WqU1JavFxSAMcLP2WIOI+GB2zWmShMI82mTpLDcqFUg=" crossorigin="anonymous"></script>
+<!-- slick slider -->
+<script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js" integrity="sha256-DHF4zGyjT7GOMPBwpeehwoey18z8uiz98G4PRu2lV0A=" crossorigin="anonymous"></script>
+<!-- venobox -->
+<script src="https://cdn.jsdelivr.net/npm/venobox@1.8.3/venobox/venobox.min.js" integrity="sha256-vD6deUu3WkP35ZI4Cw5cBRFo787G6/UNCDsnQJ1+aFk=" crossorigin="anonymous"></script>
+<!-- aos -->
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js" integrity="sha256-pQBbLkFHcP1cy0C8IhoSdxlm0CtcH5yJ2ki9jjgR03c=" crossorigin="anonymous"></script>
+<!-- Main Script -->
+<script src={Routes.static_path(@conn, "/js/script.js")}></script>
+
+</body>
 </html>

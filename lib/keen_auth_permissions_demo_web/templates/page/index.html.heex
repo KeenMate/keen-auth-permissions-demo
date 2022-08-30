@@ -1,41 +1,142 @@
-<section class="phx-hero">
-  <h1><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h1>
-  <p>Peace of mind from prototype to production</p>
+<%= if not is_nil(@current_user) do %>
+<section class="section feature mb-0 pb-0">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center zindex-1">
+        <h1 class="mb-5">{{Tenant name}}<br>
+          Your Team</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-12">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">First</th>
+              <th scope="col">Last</th>
+              <th scope="col">Handle</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">1</th>
+              <td>Mark</td>
+              <td>Otto</td>
+              <td>@mdo</td>
+            </tr>
+            <tr>
+              <th scope="row">2</th>
+              <td>Jacob</td>
+              <td>Thornton</td>
+              <td>@fat</td>
+            </tr>
+            <tr>
+              <th scope="row">3</th>
+              <td colspan="2">Larry the Bird</td>
+              <td>@twitter</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </section>
+<% end %>
 
-<section class="row">
-  <article class="column">
-    <h2>Resources</h2>
-    <ul>
-      <li>
-        <a href="https://hexdocs.pm/phoenix/overview.html">Guides &amp; Docs</a>
-      </li>
-      <li>
-        <a href="https://github.com/phoenixframework/phoenix">Source</a>
-      </li>
-      <li>
-        <a href="https://github.com/phoenixframework/phoenix/blob/v1.6/CHANGELOG.md">v1.6 Changelog</a>
-      </li>
-    </ul>
-  </article>
-  <article class="column">
-    <h2>Help</h2>
-    <ul>
-      <li>
-        <a href="https://elixirforum.com/c/phoenix-forum">Forum</a>
-      </li>
-      <li>
-        <a href="https://web.libera.chat/#elixir">#elixir on Libera Chat (IRC)</a>
-      </li>
-      <li>
-        <a href="https://twitter.com/elixirphoenix">Twitter @elixirphoenix</a>
-      </li>
-      <li>
-        <a href="https://elixir-slackin.herokuapp.com/">Elixir on Slack</a>
-      </li>
-      <li>
-        <a href="https://discord.gg/elixir">Elixir on Discord</a>
-      </li>
-    </ul>
-  </article>
+<!-- feature -->
+<section class="section feature mb-0 pb-0" id="feature">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h2 class="section-title">Awesome Features</h2>
+        <p class="mb-100">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.<br>Excepteur sint occaecat cupidatat non proident</p>
+      </div>
+      <!-- feature item -->
+      <div class="col-md-6 mb-80">
+        <div class="d-flex feature-item">
+          <div>
+            <i class="ti-ruler-pencil feature-icon mr-4"></i>
+          </div>
+          <div>
+            <h4>Awesome Design</h4>
+            <p>Consectetur adipiscing elit donec tempus
+              pellentesque dui.</p>
+          </div>
+        </div>
+      </div>
+      <!-- feature item -->
+      <div class="col-md-6 mb-80">
+        <div class="d-flex feature-item">
+          <div>
+            <i class="ti-layout-cta-left feature-icon mr-4"></i>
+          </div>
+          <div>
+            <h4>Easy Customize</h4>
+            <p>Consectetur adipiscing elit donec tempus
+              pellentesque dui.</p>
+          </div>
+        </div>
+      </div>
+      <!-- feature item -->
+      <div class="col-md-6 mb-80">
+        <div class="d-flex feature-item">
+          <div>
+            <i class="ti-split-v-alt feature-icon mr-4"></i>
+          </div>
+          <div>
+            <h4>Bug free Code</h4>
+            <p>Consectetur adipiscing elit donec tempus
+              pellentesque dui.</p>
+          </div>
+        </div>
+      </div>
+      <!-- feature item -->
+      <div class="col-md-6 mb-80">
+        <div class="d-flex feature-item">
+          <div>
+            <i class="ti-layers-alt feature-icon mr-4"></i>
+          </div>
+          <div>
+            <h4>Organized Layouts</h4>
+            <p>Consectetur adipiscing elit donec tempus
+              pellentesque dui.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <img class="feature-bg-1 up-down-animation" src={Routes.static_path(@conn, "/images/background-shape/feature-bg-1.png")} alt="bg-shape">
+  <img class="feature-bg-2 left-right-animation" src={Routes.static_path(@conn, "/images/background-shape/feature-bg-2.png")} alt="bg-shape">
 </section>
+<!-- /feature -->
+
+<%= if is_nil(@current_user) do %>
+<section class="section feature mb-0">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h2 class="section-title">Register</h2>
+      </div>
+    </div>
+    <div class="row contact-bg p-5 rounded mb-5">
+      <div class="col-lg-7 mb-4 mb-lg-0">
+        <form action={Routes.registration_path(@conn, :register_post)} method="post">
+                    <input type="hidden" name="_csrf_token" value={csrf_token_value()}>
+                    <input type="text" class="form-control mb-3" id="name" name="name" placeholder="Your Name">
+                    <input type="email" class="form-control mb-3" id="email" name="email" placeholder="Your Email">
+                    <input type="password" class="form-control mb-3" id="password" name="password" placeholder="Password">
+                    <button type="submit" value="send" class="btn btn-secondary">REGISTER</button>
+                </form>
+      </div>
+
+        <div class="col-lg-5">
+            <p class="mb-5">If you'll like to know more about our experience designing and delivering cloud solutions, or get advice on your own technology challenges get in touch. With dedicated engineers on-hand 24/7,      we’re set up to become an extension of your team.</p>
+            <a href="tel:+442081446356" class="text-color h5 d-block">+44 20 8144 6356</a>
+            <a href="mailto:info@altostack.io" class="mb-5 text-color h5 d-block">info@altostack.io</a>
+            <p>71 Shelton Street<br>London WC2H 9JQ England</p>
+        </div>
+    </div>
+  </div>
+</section>
+<% end %>
