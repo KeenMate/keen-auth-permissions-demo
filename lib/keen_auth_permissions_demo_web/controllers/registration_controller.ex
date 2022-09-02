@@ -15,7 +15,7 @@ defmodule KeenAuthPermissionsDemoWeb.RegistrationController do
 
   def register_post(conn, params) do
     with {:ok, [user]} <- register_user(params),
-         token = Verification.generate_token(conn, user.user_id),
+         token = Verification.generate_token(conn, :email_verification, user.user_id),
          {:ok, [event_id]} <- create_auth_event(user),
          {:ok, [_]} <- create_token(user, event_id, token),
          {:ok, _} <- Mailer.deliver(email_verification(conn, user, token)) do

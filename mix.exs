@@ -52,6 +52,7 @@ defmodule KeenAuthPermissionsDemo.MixProject do
       {:pbkdf2_elixir, "~> 2.0"},
       {:simplificator_3000, "~> 0.2.0"},
       {:gen_smtp, "~> 1.1"},
+      {:ex_twilio, "~> 0.9.1"},
       {:keen_auth, github: "keenmate/keen_auth", branch: "new-vision", override: true},
       {:keen_auth_permissions, github: "keenmate/keen-auth-permissions", branch: "dev"}
     ]

@@ -28,7 +28,7 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
   end
 
   scope "/auth" do
-    pipe_through :browser
+    pipe_through :authentication
 
     KeenAuth.authentication_routes()
   end
@@ -42,8 +42,17 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
     get "/register", RegistrationController, :register_get
     post "/register", RegistrationController, :register_post
 
-    get "/verify", VerificationController, :verify
-    post "/verify", VerificationController, :verify
+    get "/forgotten-password", ForgottenPasswordController, :forgotten_password_get
+    post "/forgotten-password", ForgottenPasswordController, :forgotten_password_post
+
+    get "/reset-password", PasswordResetController, :reset_password_get
+    post "/reset-password", PasswordResetController, :reset_password_post
+
+    get "/sms-reset", PasswordResetController, :sms_token_reset_get
+    post "/sms-reset", PasswordResetController, :sms_token_reset_post
+
+    get "/verify-email", EmailVerificationController, :verify_email
+    post "/verify-email", EmailVerificationController, :verify_email
   end
 
   # Other scopes may use custom stacks.

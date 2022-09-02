@@ -1215,4 +1215,12 @@ textarea.form-control {
     display: none;
   }
 }
+
+.flash-container {
+  display: flex;
+  position: sticky;
+  top: 8rem;
+  z-index: 1;
+  justify-content: center;
+}
 /*# sourceMappingURL=style.css.map */
