@@ -13,6 +13,11 @@
                     <input type="hidden" name="_csrf_token" value={csrf_token_value()}>
                     <input type="email" class="form-control mb-3" id="email" name="email" placeholder="Your Email">
                     <input type="password" class="form-control mb-3" id="password" name="password" placeholder="Password">
+                    <%= if @error_msg != nil  do %>
+                        <div class="shadow alert alert-danger alert-dismissible fade show" role="alert">
+                        <b><%= @error_msg%></b>
+                        </div>
+                    <% end %>
 
                     <%= link "Reset password", to: Routes.forgotten_password_path(@conn, :forgotten_password_get), class: "d-block mb-3" %>
                     <button type="submit" value="send" class="btn btn-secondary">LOG IN</button>

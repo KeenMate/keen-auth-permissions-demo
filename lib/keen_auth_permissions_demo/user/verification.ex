@@ -1,5 +1,6 @@
 defmodule KeenAuthPermissionsDemo.User.Verification do
   alias Simplificator3000.RandomHelpers
+  alias KeenAuthPermissions.Error.{ErrorParsers, ErrorStruct}
 
   @type token_type() :: :email_verification | :password_reset
 
@@ -20,7 +21,7 @@ defmodule KeenAuthPermissionsDemo.User.Verification do
   @spec verify_token(conn :: Plug.Conn.t(), token_type :: token_type(), token :: binary()) ::
           {:ok, term()} | {:error, term()}
   def verify_token(conn, token_type, token) do
-    Phoenix.Token.verify(conn, type_salt(token_type), token)
+    Phoenix.Token.verify(conn, type_salt(token_type), token) |> parse_result()
   end
 
   defp type_salt(token_type) do
@@ -29,4 +30,14 @@ defmodule KeenAuthPermissionsDemo.User.Verification do
       :password_reset -> "password reset"
     end
   end
+
+  defp parse_result({:error, reason}) do
+    case reason do
+      :invalid -> {:error, ErrorStruct.create(:invalid, "Token is invalid")}
+      :expired -> {:error, ErrorStruct.create(:expired, "Token is expired")}
+      :missing -> {:error, ErrorStruct.create(:missing, "Token not provided")}
+    end
+  end
+
+  defp parse_result(val), do: val
 end

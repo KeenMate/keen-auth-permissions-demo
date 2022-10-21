@@ -5,14 +5,28 @@ defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
   alias KeenAuthPermissionsDemo.SMSSender
   alias KeenAuthPermissionsDemoWeb.Email
   alias KeenAuthPermissionsDemoWeb.SMS
+  alias KeenAuthPermissions.Error.{ErrorParsers, ErrorStruct}
+  alias KeenAuthPermissionsDemoWeb.Helpers.ControllerHelpers
 
   import KeenAuthPermissionsDemo.Helpers
 
   use KeenAuthPermissionsDemoWeb, :controller
 
+  action_fallback KeenAuthPermissionsDemoWeb.PageFallbackHandler
+
   def forgotten_password_get(conn, _params) do
     conn
     |> render("forgotten_password.html")
+  end
+
+  def forgotten_password_post(conn, %{"email" => email, "method" => method})
+      when email == "" or method == "" do
+    conn
+    |> put_flash(
+      :error,
+      "Email cant be empty"
+    )
+    |> redirect(to: Routes.forgotten_password_path(conn, :forgotten_password_get))
   end
 
   def forgotten_password_post(conn, %{"email" => email, "method" => method}) do
@@ -20,7 +34,7 @@ defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
          {:ok, user} <- get_user_by_id(user_identity.user_id) do
       process_reset(method, conn, user)
     else
-      {:error, :no_user} ->
+      {:error, %ErrorStruct{reason: :no_user}} ->
         send_success_response(method, conn)
 
       error ->
@@ -49,37 +63,33 @@ defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
     end
   end
 
-  defp send_success_response("email", conn) do
-    conn
-    |> put_flash(
-      :info,
-      "Password reset link sent, please check your mailbox to reset your password"
-    )
-    |> redirect(to: Routes.page_path(conn, :index))
-  end
+  defp send_success_response("email", conn),
+    do:
+      ControllerHelpers.success_flash_index(
+        conn,
+        "Password reset link sent, please check your mailbox to reset your password"
+      )
 
-  defp send_success_response("sms", conn) do
-    conn
-    |> put_flash(
-      :info,
-      "Password reset token sent, please check your phone to finish the reset process"
-    )
-    |> redirect(to: Routes.page_path(conn, :index))
-  end
+  defp send_success_response("sms", conn),
+    do:
+      ControllerHelpers.success_flash_index(
+        conn,
+        "Password reset token sent, please check your phone to finish the reset process"
+      )
 
   defp get_user_identity_by_email(email) do
     case DbContext.auth_get_user_identity_by_email(1, email, "email") do
       {:ok, [user | _]} -> {:ok, user}
-      {:ok, []} -> {:error, :no_user}
-      {:error, error} -> {:error, error}
+      {:ok, []} -> {:error, ErrorStruct.create(:no_user, "No user with given email exists")}
+      {:error, error} -> {:error, ErrorParsers.parse_error(error)}
     end
   end
 
   defp get_user_by_id(user_id) do
     case DbContext.auth_get_user_by_id(user_id) do
       {:ok, [user | _]} -> {:ok, user}
-      {:ok, []} -> {:error, :no_user}
-      {:error, error} -> {:error, error}
+      {:ok, []} -> {:error, ErrorStruct.create(:no_user, "No user with given email exists")}
+      {:error, error} -> {:error, ErrorParsers.parse_error(error)}
     end
   end
 
@@ -93,6 +103,7 @@ defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
       nil,
       nil
     )
+    |> ErrorParsers.parse_if_error()
   end
 
   defp create_token(method, user, auth_event_id, token) do
@@ -106,5 +117,6 @@ defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
       token,
       nil
     )
+    |> ErrorParsers.parse_if_error()
   end
 end
