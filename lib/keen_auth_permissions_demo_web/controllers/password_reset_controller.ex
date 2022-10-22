@@ -14,6 +14,7 @@ defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
     with {:ok, %{user_id: user_id}} <- Verification.verify_token(conn, :password_reset, token),
          {:ok, _} <- validate_token(user_id, token) do
       conn
+      |> set_title("Password reset")
       |> render("password_reset.html", token: token, method: "email")
     end
   end
@@ -21,6 +22,7 @@ defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
   def reset_password_get(conn, %{"token" => token, "method" => "sms"}) do
     with {:ok, _} <- validate_token(nil, token) do
       conn
+      |> set_title("Password reset")
       |> render("password_reset.html", token: token, method: "sms")
     end
   end

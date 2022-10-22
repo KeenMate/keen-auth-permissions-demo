@@ -20,6 +20,8 @@ defmodule KeenAuthPermissionsDemoWeb do
   def controller do
     quote do
       use Phoenix.Controller, namespace: KeenAuthPermissionsDemoWeb
+      # for page titles
+      use Simplificator3000Phoenix, :controller
 
       import Plug.Conn
       import KeenAuthPermissionsDemoWeb.Gettext
@@ -32,6 +34,10 @@ defmodule KeenAuthPermissionsDemoWeb do
       use Phoenix.View,
         root: "lib/keen_auth_permissions_demo_web/templates",
         namespace: KeenAuthPermissionsDemoWeb
+
+      # for page titles
+
+      use Simplificator3000Phoenix, :view
 
       # Import convenience functions from controllers
       import Phoenix.Controller,

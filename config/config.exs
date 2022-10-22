@@ -8,12 +8,18 @@
 import Config
 
 config :keen_auth_permissions_demo,
-  ecto_repos: [KeenAuthPermissionsDemo.Repo]
+  ecto_repos: [KeenAuthPermissionsDemo.Repo],
+  page_title: "Keen_auth demo",
+  title_separator: "・"
 
 # Configures the endpoint
 config :keen_auth_permissions_demo, KeenAuthPermissionsDemoWeb.Endpoint,
   url: [host: "localhost"],
-  render_errors: [view: KeenAuthPermissionsDemoWeb.ErrorView, accepts: ~w(html json), layout: false],
+  render_errors: [
+    view: KeenAuthPermissionsDemoWeb.ErrorView,
+    accepts: ~w(html json),
+    layout: false
+  ],
   pubsub_server: KeenAuthPermissionsDemo.PubSub,
   live_view: [signing_salt: "6lSr2KoW"]
 
@@ -50,7 +56,8 @@ config :phoenix, :json_library, Jason
 config :keen_auth,
   tenant: 1,
   db_context: KeenAuthPermissionsDemo.DbContext,
-  unauthorized_redirect: &KeenAuthPermissionsDemoWeb.Auth.Unauthorized.unauthorized_redirect_path/2,
+  unauthorized_redirect:
+    &KeenAuthPermissionsDemoWeb.Auth.Unauthorized.unauthorized_redirect_path/2,
   email_enabled: true,
   strategies: [
     aad: [

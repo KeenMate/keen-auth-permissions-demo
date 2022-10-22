@@ -16,6 +16,7 @@ defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
 
   def forgotten_password_get(conn, _params) do
     conn
+    |> set_title("Forgotten password")
     |> render("forgotten_password.html")
   end
 

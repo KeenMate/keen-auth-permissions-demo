@@ -15,6 +15,7 @@ defmodule KeenAuthPermissionsDemoWeb.RegistrationController do
   def register_get(conn, _params) do
     conn
     |> KeenAuthPermissionsDemoWeb.Apps.include(["registration"])
+    |> set_title("Registration")
     |> render("register.html")
   end
 

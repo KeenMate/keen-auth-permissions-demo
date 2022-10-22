@@ -3,6 +3,7 @@ defmodule KeenAuthPermissionsDemoWeb.LoginController do
 
   def login(conn, params) do
     conn
+    |> set_title("Login")
     |> assign(:error_msg, get_login_error(params["error"]))
     |> render("login.html")
   end
