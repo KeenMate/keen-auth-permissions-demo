@@ -1,5 +1,4 @@
-import { registrationUrl } from "../constants/urls";
-import { timeout } from "../helpers/promiseHelpers";
+import { registrationUrl, forgottenPasswordUrl } from "../constants/urls";
 
 class ApiManager {
   constructor() {
@@ -13,6 +12,13 @@ class ApiManager {
       name,
       email,
       password,
+    });
+  }
+
+  async ForgottenPassword(email, method) {
+    return await this.FetchWithToken(forgottenPasswordUrl, {
+      method,
+      email,
     });
   }
 

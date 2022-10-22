@@ -18,8 +18,10 @@
                         <b><%= @error_msg%></b>
                         </div>
                     <% end %>
-
-                    <%= link "Reset password", to: Routes.forgotten_password_path(@conn, :forgotten_password_get), class: "d-block mb-3" %>
+                    <div>
+                        <%= link "Reset password", to: Routes.forgotten_password_path(@conn, :forgotten_password_get), class: "d-inline mb-3 mr-2" %>
+                        <%= link "Register", to: Routes.registration_path(@conn, :register_get), class: "d-inline mb-3" %>
+                    </div>
                     <button type="submit" value="send" class="btn btn-secondary">LOG IN</button>
                 </form>
             </div>

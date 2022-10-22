@@ -12,10 +12,11 @@ defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
 
   use KeenAuthPermissionsDemoWeb, :controller
 
-  action_fallback KeenAuthPermissionsDemoWeb.PageFallbackHandler
+  action_fallback(KeenAuthPermissionsDemoWeb.ApiFallbackHandler)
 
   def forgotten_password_get(conn, _params) do
     conn
+    |> KeenAuthPermissionsDemoWeb.Apps.include(["forgottenPassword"])
     |> set_title("Forgotten password")
     |> render("forgotten_password.html")
   end
@@ -36,7 +37,7 @@ defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
       process_reset(method, conn, user)
     else
       {:error, %ErrorStruct{reason: :no_user}} ->
-        send_success_response(method, conn)
+        send_success_response(conn)
 
       error ->
         error
@@ -49,7 +50,7 @@ defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
     with {:ok, [event_id]} <- create_auth_event(user),
          {:ok, [_]} <- create_token("email", user, event_id, token),
          {:ok, _} <- Mailer.deliver(Email.forgotten_password(conn, user, token)) do
-      send_success_response("email", conn)
+      send_success_response(conn)
     end
   end
 
@@ -60,23 +61,12 @@ defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
          {:ok, [_]} <- create_token("mobile_phone", user, event_id, token),
          :ok <- SMSSender.send_sms("+420 605282932", SMS.forgotten_password(conn, user, token)) do
       IO.puts("SMS Token: #{token}")
-      send_success_response("sms", conn)
+      send_success_response(conn)
     end
   end
 
-  defp send_success_response("email", conn),
-    do:
-      ControllerHelpers.success_flash_index(
-        conn,
-        "Password reset link sent, please check your mailbox to reset your password"
-      )
-
-  defp send_success_response("sms", conn),
-    do:
-      ControllerHelpers.success_flash_index(
-        conn,
-        "Password reset token sent, please check your phone to finish the reset process"
-      )
+  defp send_success_response(conn),
+    do: KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers.success_response(conn, :ok)
 
   defp get_user_identity_by_email(email) do
     case DbContext.auth_get_user_identity_by_email(1, email, "email") do

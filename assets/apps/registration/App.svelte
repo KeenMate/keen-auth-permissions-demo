@@ -1,6 +1,6 @@
 <script>
-  import { bind } from "svelte/internal";
   import Loader from "../../components/Loader.svelte";
+  import { redirectHome } from "../../helpers/helpers";
   import { isEmpty, isValidEmail } from "../../helpers/validationHelpers";
   import Manager from "../../managers/ApiManager";
   import RegistrationForm from "./RegistrationForm.svelte";
@@ -12,8 +12,6 @@
   let loading = false;
 
   function register() {
-    errorMessage = "";
-
     if (!isValid()) {
       return;
     }
@@ -22,8 +20,8 @@
 
     Manager.Register(name, email, password)
       .then((res) => {
-        errorMessage = "";
         complete = true;
+        redirectHome(1500);
       })
       .catch((res) => {
         console.warn(res);
@@ -51,7 +49,7 @@
       errorMessage = "Password has to be at least 4 characters long";
       return false;
     }
-
+    errorMessage = "";
     return true;
   }
 </script>

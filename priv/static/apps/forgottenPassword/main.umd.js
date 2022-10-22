@@ -129,25 +129,6 @@
   function set_current_component(component) {
     current_component = component;
   }
-  function get_current_component() {
-    if (!current_component)
-      throw new Error("Function called outside component initialization");
-    return current_component;
-  }
-  function createEventDispatcher() {
-    const component = get_current_component();
-    return (type, detail, { cancelable = false } = {}) => {
-      const callbacks = component.$$.callbacks[type];
-      if (callbacks) {
-        const event = custom_event(type, detail, { cancelable });
-        callbacks.slice().forEach((fn) => {
-          fn.call(component, event);
-        });
-        return !event.defaultPrevented;
-      }
-      return true;
-    };
-  }
   const dirty_components = [];
   const binding_callbacks = [];
   const render_callbacks = [];
@@ -210,19 +191,6 @@
   }
   const outroing = /* @__PURE__ */ new Set();
   let outros;
-  function group_outros() {
-    outros = {
-      r: 0,
-      c: [],
-      p: outros
-    };
-  }
-  function check_outros() {
-    if (!outros.r) {
-      run_all(outros.c);
-    }
-    outros = outros.p;
-  }
   function transition_in(block, local) {
     if (block && block.i) {
       outroing.delete(block);
@@ -435,8 +403,8 @@
     $inject_state() {
     }
   }
-  const file$2 = "C:/git/keen-auth-permissions-demo/assets/components/Loader.svelte";
-  function create_if_block$2(ctx) {
+  const file$1 = "C:/git/keen-auth-permissions-demo/assets/components/Loader.svelte";
+  function create_if_block$1(ctx) {
     let div2;
     let div0;
     let t;
@@ -453,19 +421,19 @@
         set_style(div0, "inset", "0px");
         set_style(div0, "opacity", "0.85");
         set_style(div0, "backdrop-filter", "blur(2px)");
-        add_location(div0, file$2, 7, 6, 184);
+        add_location(div0, file$1, 7, 6, 184);
         attr_dev(span, "aria-hidden", "true");
         attr_dev(span, "class", "spinner-border");
-        add_location(span, file$2, 15, 8, 475);
+        add_location(span, file$1, 15, 8, 475);
         attr_dev(div1, "class", "position-absolute");
         set_style(div1, "top", "50%");
         set_style(div1, "left", "50%");
         set_style(div1, "transform", "translateX(-50%) translateY(-50%)");
-        add_location(div1, file$2, 11, 6, 333);
+        add_location(div1, file$1, 11, 6, 333);
         attr_dev(div2, "class", "b-overlay position-absolute");
         set_style(div2, "inset", "0px");
         set_style(div2, "z-index", "10");
-        add_location(div2, file$2, 6, 4, 102);
+        add_location(div2, file$1, 6, 4, 102);
       },
       m: function mount(target, anchor) {
         insert_dev(target, div2, anchor);
@@ -481,18 +449,18 @@
     };
     dispatch_dev("SvelteRegisterBlock", {
       block,
-      id: create_if_block$2.name,
+      id: create_if_block$1.name,
       type: "if",
       source: "(6:2) {#if loading}",
       ctx
     });
     return block;
   }
-  function create_fragment$2(ctx) {
+  function create_fragment$1(ctx) {
     let div;
     let t;
     let current;
-    let if_block = ctx[0] && create_if_block$2(ctx);
+    let if_block = ctx[0] && create_if_block$1(ctx);
     const default_slot_template = ctx[2].default;
     const default_slot = create_slot(default_slot_template, ctx, ctx[1], null);
     const block = {
@@ -504,7 +472,7 @@
         if (default_slot)
           default_slot.c();
         set_style(div, "position", "relative");
-        add_location(div, file$2, 4, 0, 46);
+        add_location(div, file$1, 4, 0, 46);
       },
       l: function claim(nodes) {
         throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -524,7 +492,7 @@
           if (if_block)
             ;
           else {
-            if_block = create_if_block$2(ctx2);
+            if_block = create_if_block$1(ctx2);
             if_block.c();
             if_block.m(div, t);
           }
@@ -566,14 +534,14 @@
     };
     dispatch_dev("SvelteRegisterBlock", {
       block,
-      id: create_fragment$2.name,
+      id: create_fragment$1.name,
       type: "component",
       source: "",
       ctx
     });
     return block;
   }
-  function instance$2($$self, $$props, $$invalidate) {
+  function instance$1($$self, $$props, $$invalidate) {
     let { $$slots: slots = {}, $$scope } = $$props;
     validate_slots("Loader", slots, ["default"]);
     let { loading } = $$props;
@@ -606,12 +574,12 @@
   class Loader extends SvelteComponentDev {
     constructor(options) {
       super(options);
-      init(this, options, instance$2, create_fragment$2, safe_not_equal, { loading: 0 });
+      init(this, options, instance$1, create_fragment$1, safe_not_equal, { loading: 0 });
       dispatch_dev("SvelteRegisterComponent", {
         component: this,
         tagName: "Loader",
         options,
-        id: create_fragment$2.name
+        id: create_fragment$1.name
       });
     }
     get loading() {
@@ -620,19 +588,6 @@
     set loading(value) {
       throw new Error("<Loader>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     }
-  }
-  function redirectHome(time) {
-    setTimeout(() => {
-      window.location = "/";
-    }, time);
-  }
-  function isEmpty(s) {
-    return s === null || s === void 0 || s === "";
-  }
-  function isValidEmail(email) {
-    return String(email).toLowerCase().match(
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    );
   }
   const baseApiUrl = "";
   const registrationUrl = baseApiUrl + "/register";
@@ -673,312 +628,28 @@
       throw "Error Comunication with server";
     }
   }
-  const Manager = new ApiManager();
-  const file$1 = "C:/git/keen-auth-permissions-demo/assets/apps/registration/RegistrationForm.svelte";
-  function create_if_block$1(ctx) {
-    let div;
-    let t;
-    const block = {
-      c: function create() {
-        div = element("div");
-        t = text(ctx[3]);
-        attr_dev(div, "class", "alert alert-danger");
-        attr_dev(div, "role", "alert");
-        add_location(div, file$1, 33, 2, 612);
-      },
-      m: function mount(target, anchor) {
-        insert_dev(target, div, anchor);
-        append_dev(div, t);
-      },
-      p: function update2(ctx2, dirty) {
-        if (dirty & 8)
-          set_data_dev(t, ctx2[3]);
-      },
-      d: function destroy(detaching) {
-        if (detaching)
-          detach_dev(div);
-      }
-    };
-    dispatch_dev("SvelteRegisterBlock", {
-      block,
-      id: create_if_block$1.name,
-      type: "if",
-      source: "(33:0) {#if errorMessage}",
-      ctx
-    });
-    return block;
-  }
-  function create_fragment$1(ctx) {
-    let input0;
-    let t0;
-    let input1;
-    let t1;
-    let input2;
-    let t2;
-    let t3;
-    let button;
-    let mounted;
-    let dispose;
-    let if_block = ctx[3] && create_if_block$1(ctx);
-    const block = {
-      c: function create() {
-        input0 = element("input");
-        t0 = space();
-        input1 = element("input");
-        t1 = space();
-        input2 = element("input");
-        t2 = space();
-        if (if_block)
-          if_block.c();
-        t3 = space();
-        button = element("button");
-        button.textContent = "REGISTER";
-        attr_dev(input0, "type", "text");
-        attr_dev(input0, "class", "form-control mb-3");
-        attr_dev(input0, "id", "name");
-        attr_dev(input0, "name", "name");
-        attr_dev(input0, "placeholder", "Your Name");
-        add_location(input0, file$1, 8, 0, 174);
-        attr_dev(input1, "type", "email");
-        attr_dev(input1, "class", "form-control mb-3");
-        attr_dev(input1, "id", "email");
-        attr_dev(input1, "name", "email");
-        attr_dev(input1, "placeholder", "Your Email");
-        add_location(input1, file$1, 16, 0, 306);
-        attr_dev(input2, "type", "password");
-        attr_dev(input2, "class", "form-control mb-3");
-        attr_dev(input2, "id", "password");
-        attr_dev(input2, "name", "password");
-        attr_dev(input2, "placeholder", "Password");
-        add_location(input2, file$1, 24, 0, 443);
-        attr_dev(button, "type", "submit");
-        button.value = "send";
-        attr_dev(button, "class", "btn btn-secondary mb-1");
-        add_location(button, file$1, 37, 0, 696);
-      },
-      l: function claim(nodes) {
-        throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-      },
-      m: function mount(target, anchor) {
-        insert_dev(target, input0, anchor);
-        set_input_value(input0, ctx[0]);
-        insert_dev(target, t0, anchor);
-        insert_dev(target, input1, anchor);
-        set_input_value(input1, ctx[2]);
-        insert_dev(target, t1, anchor);
-        insert_dev(target, input2, anchor);
-        set_input_value(input2, ctx[1]);
-        insert_dev(target, t2, anchor);
-        if (if_block)
-          if_block.m(target, anchor);
-        insert_dev(target, t3, anchor);
-        insert_dev(target, button, anchor);
-        if (!mounted) {
-          dispose = [
-            listen_dev(input0, "input", ctx[5]),
-            listen_dev(input1, "input", ctx[6]),
-            listen_dev(input2, "input", ctx[7]),
-            listen_dev(button, "click", ctx[8], false, false, false)
-          ];
-          mounted = true;
-        }
-      },
-      p: function update2(ctx2, [dirty]) {
-        if (dirty & 1 && input0.value !== ctx2[0]) {
-          set_input_value(input0, ctx2[0]);
-        }
-        if (dirty & 4 && input1.value !== ctx2[2]) {
-          set_input_value(input1, ctx2[2]);
-        }
-        if (dirty & 2 && input2.value !== ctx2[1]) {
-          set_input_value(input2, ctx2[1]);
-        }
-        if (ctx2[3]) {
-          if (if_block) {
-            if_block.p(ctx2, dirty);
-          } else {
-            if_block = create_if_block$1(ctx2);
-            if_block.c();
-            if_block.m(t3.parentNode, t3);
-          }
-        } else if (if_block) {
-          if_block.d(1);
-          if_block = null;
-        }
-      },
-      i: noop,
-      o: noop,
-      d: function destroy(detaching) {
-        if (detaching)
-          detach_dev(input0);
-        if (detaching)
-          detach_dev(t0);
-        if (detaching)
-          detach_dev(input1);
-        if (detaching)
-          detach_dev(t1);
-        if (detaching)
-          detach_dev(input2);
-        if (detaching)
-          detach_dev(t2);
-        if (if_block)
-          if_block.d(detaching);
-        if (detaching)
-          detach_dev(t3);
-        if (detaching)
-          detach_dev(button);
-        mounted = false;
-        run_all(dispose);
-      }
-    };
-    dispatch_dev("SvelteRegisterBlock", {
-      block,
-      id: create_fragment$1.name,
-      type: "component",
-      source: "",
-      ctx
-    });
-    return block;
-  }
-  function instance$1($$self, $$props, $$invalidate) {
-    let { $$slots: slots = {}, $$scope } = $$props;
-    validate_slots("RegistrationForm", slots, []);
-    let { name, password, email, errorMessage } = $$props;
-    const dispatch = createEventDispatcher();
-    $$self.$$.on_mount.push(function() {
-      if (name === void 0 && !("name" in $$props || $$self.$$.bound[$$self.$$.props["name"]])) {
-        console.warn("<RegistrationForm> was created without expected prop 'name'");
-      }
-      if (password === void 0 && !("password" in $$props || $$self.$$.bound[$$self.$$.props["password"]])) {
-        console.warn("<RegistrationForm> was created without expected prop 'password'");
-      }
-      if (email === void 0 && !("email" in $$props || $$self.$$.bound[$$self.$$.props["email"]])) {
-        console.warn("<RegistrationForm> was created without expected prop 'email'");
-      }
-      if (errorMessage === void 0 && !("errorMessage" in $$props || $$self.$$.bound[$$self.$$.props["errorMessage"]])) {
-        console.warn("<RegistrationForm> was created without expected prop 'errorMessage'");
-      }
-    });
-    const writable_props = ["name", "password", "email", "errorMessage"];
-    Object.keys($$props).forEach((key) => {
-      if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$" && key !== "slot")
-        console.warn(`<RegistrationForm> was created with unknown prop '${key}'`);
-    });
-    function input0_input_handler() {
-      name = this.value;
-      $$invalidate(0, name);
-    }
-    function input1_input_handler() {
-      email = this.value;
-      $$invalidate(2, email);
-    }
-    function input2_input_handler() {
-      password = this.value;
-      $$invalidate(1, password);
-    }
-    const click_handler = () => dispatch("register");
-    $$self.$$set = ($$props2) => {
-      if ("name" in $$props2)
-        $$invalidate(0, name = $$props2.name);
-      if ("password" in $$props2)
-        $$invalidate(1, password = $$props2.password);
-      if ("email" in $$props2)
-        $$invalidate(2, email = $$props2.email);
-      if ("errorMessage" in $$props2)
-        $$invalidate(3, errorMessage = $$props2.errorMessage);
-    };
-    $$self.$capture_state = () => ({
-      createEventDispatcher,
-      name,
-      password,
-      email,
-      errorMessage,
-      dispatch
-    });
-    $$self.$inject_state = ($$props2) => {
-      if ("name" in $$props2)
-        $$invalidate(0, name = $$props2.name);
-      if ("password" in $$props2)
-        $$invalidate(1, password = $$props2.password);
-      if ("email" in $$props2)
-        $$invalidate(2, email = $$props2.email);
-      if ("errorMessage" in $$props2)
-        $$invalidate(3, errorMessage = $$props2.errorMessage);
-    };
-    if ($$props && "$$inject" in $$props) {
-      $$self.$inject_state($$props.$$inject);
-    }
-    return [
-      name,
-      password,
-      email,
-      errorMessage,
-      dispatch,
-      input0_input_handler,
-      input1_input_handler,
-      input2_input_handler,
-      click_handler
-    ];
-  }
-  class RegistrationForm extends SvelteComponentDev {
-    constructor(options) {
-      super(options);
-      init(this, options, instance$1, create_fragment$1, safe_not_equal, {
-        name: 0,
-        password: 1,
-        email: 2,
-        errorMessage: 3
-      });
-      dispatch_dev("SvelteRegisterComponent", {
-        component: this,
-        tagName: "RegistrationForm",
-        options,
-        id: create_fragment$1.name
-      });
-    }
-    get name() {
-      throw new Error("<RegistrationForm>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    }
-    set name(value) {
-      throw new Error("<RegistrationForm>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    }
-    get password() {
-      throw new Error("<RegistrationForm>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    }
-    set password(value) {
-      throw new Error("<RegistrationForm>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    }
-    get email() {
-      throw new Error("<RegistrationForm>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    }
-    set email(value) {
-      throw new Error("<RegistrationForm>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    }
-    get errorMessage() {
-      throw new Error("<RegistrationForm>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    }
-    set errorMessage(value) {
-      throw new Error("<RegistrationForm>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    }
+  const ApiManager$1 = new ApiManager();
+  function redirectHome(time) {
+    setTimeout(() => {
+      window.location = "/";
+    }, time);
   }
   const { console: console_1 } = globals;
-  const file = "C:/git/keen-auth-permissions-demo/assets/apps/registration/App.svelte";
+  const file = "C:/git/keen-auth-permissions-demo/assets/apps/forgottenPassword/App.svelte";
   function create_else_block(ctx) {
     let div;
     const block = {
       c: function create() {
         div = element("div");
-        div.textContent = "Registration successfull, click on link in email we send you to activate\r\n      account";
+        div.textContent = "Reset link send.";
         attr_dev(div, "class", "alert alert-success");
         attr_dev(div, "role", "alert");
-        add_location(div, file, 66, 4, 1568);
+        add_location(div, file, 74, 4, 1577);
       },
       m: function mount(target, anchor) {
         insert_dev(target, div, anchor);
       },
       p: noop,
-      i: noop,
-      o: noop,
       d: function destroy(detaching) {
         if (detaching)
           detach_dev(div);
@@ -988,165 +659,182 @@
       block,
       id: create_else_block.name,
       type: "else",
-      source: "(66:2) {:else}",
+      source: "(74:2) {:else}",
       ctx
     });
     return block;
   }
   function create_if_block(ctx) {
-    let registrationform;
-    let updating_name;
-    let updating_password;
-    let updating_email;
-    let updating_errorMessage;
-    let current;
-    function registrationform_name_binding(value) {
-      ctx[7](value);
-    }
-    function registrationform_password_binding(value) {
-      ctx[8](value);
-    }
-    function registrationform_email_binding(value) {
-      ctx[9](value);
-    }
-    function registrationform_errorMessage_binding(value) {
-      ctx[10](value);
-    }
-    let registrationform_props = {};
-    if (ctx[0] !== void 0) {
-      registrationform_props.name = ctx[0];
-    }
-    if (ctx[1] !== void 0) {
-      registrationform_props.password = ctx[1];
-    }
-    if (ctx[2] !== void 0) {
-      registrationform_props.email = ctx[2];
-    }
-    if (ctx[3] !== void 0) {
-      registrationform_props.errorMessage = ctx[3];
-    }
-    registrationform = new RegistrationForm({
-      props: registrationform_props,
-      $$inline: true
-    });
-    binding_callbacks.push(() => bind(registrationform, "name", registrationform_name_binding));
-    binding_callbacks.push(() => bind(registrationform, "password", registrationform_password_binding));
-    binding_callbacks.push(() => bind(registrationform, "email", registrationform_email_binding));
-    binding_callbacks.push(() => bind(registrationform, "errorMessage", registrationform_errorMessage_binding));
-    registrationform.$on("register", ctx[6]);
+    let input;
+    let t0;
+    let button0;
+    let t2;
+    let button1;
+    let t4;
+    let if_block_anchor;
+    let mounted;
+    let dispose;
+    let if_block = ctx[1] && create_if_block_1(ctx);
     const block = {
       c: function create() {
-        create_component(registrationform.$$.fragment);
+        input = element("input");
+        t0 = space();
+        button0 = element("button");
+        button0.textContent = "EMAIL RESET";
+        t2 = space();
+        button1 = element("button");
+        button1.textContent = "SMS RESET";
+        t4 = space();
+        if (if_block)
+          if_block.c();
+        if_block_anchor = empty();
+        attr_dev(input, "type", "email");
+        attr_dev(input, "class", "form-control mb-3");
+        attr_dev(input, "id", "email");
+        attr_dev(input, "name", "email");
+        attr_dev(input, "placeholder", "Your Email");
+        add_location(input, file, 43, 4, 913);
+        attr_dev(button0, "type", "submit");
+        button0.value = "send";
+        attr_dev(button0, "class", "btn btn-secondary");
+        add_location(button0, file, 52, 4, 1084);
+        attr_dev(button1, "type", "submit");
+        button1.value = "send";
+        attr_dev(button1, "class", "btn btn-secondary");
+        add_location(button1, file, 60, 4, 1264);
       },
       m: function mount(target, anchor) {
-        mount_component(registrationform, target, anchor);
-        current = true;
+        insert_dev(target, input, anchor);
+        set_input_value(input, ctx[0]);
+        insert_dev(target, t0, anchor);
+        insert_dev(target, button0, anchor);
+        insert_dev(target, t2, anchor);
+        insert_dev(target, button1, anchor);
+        insert_dev(target, t4, anchor);
+        if (if_block)
+          if_block.m(target, anchor);
+        insert_dev(target, if_block_anchor, anchor);
+        if (!mounted) {
+          dispose = [
+            listen_dev(input, "input", ctx[5]),
+            listen_dev(button0, "click", ctx[6], false, false, false),
+            listen_dev(button1, "click", ctx[7], false, false, false)
+          ];
+          mounted = true;
+        }
       },
       p: function update2(ctx2, dirty) {
-        const registrationform_changes = {};
-        if (!updating_name && dirty & 1) {
-          updating_name = true;
-          registrationform_changes.name = ctx2[0];
-          add_flush_callback(() => updating_name = false);
+        if (dirty & 1 && input.value !== ctx2[0]) {
+          set_input_value(input, ctx2[0]);
         }
-        if (!updating_password && dirty & 2) {
-          updating_password = true;
-          registrationform_changes.password = ctx2[1];
-          add_flush_callback(() => updating_password = false);
+        if (ctx2[1]) {
+          if (if_block) {
+            if_block.p(ctx2, dirty);
+          } else {
+            if_block = create_if_block_1(ctx2);
+            if_block.c();
+            if_block.m(if_block_anchor.parentNode, if_block_anchor);
+          }
+        } else if (if_block) {
+          if_block.d(1);
+          if_block = null;
         }
-        if (!updating_email && dirty & 4) {
-          updating_email = true;
-          registrationform_changes.email = ctx2[2];
-          add_flush_callback(() => updating_email = false);
-        }
-        if (!updating_errorMessage && dirty & 8) {
-          updating_errorMessage = true;
-          registrationform_changes.errorMessage = ctx2[3];
-          add_flush_callback(() => updating_errorMessage = false);
-        }
-        registrationform.$set(registrationform_changes);
-      },
-      i: function intro(local) {
-        if (current)
-          return;
-        transition_in(registrationform.$$.fragment, local);
-        current = true;
-      },
-      o: function outro(local) {
-        transition_out(registrationform.$$.fragment, local);
-        current = false;
       },
       d: function destroy(detaching) {
-        destroy_component(registrationform, detaching);
+        if (detaching)
+          detach_dev(input);
+        if (detaching)
+          detach_dev(t0);
+        if (detaching)
+          detach_dev(button0);
+        if (detaching)
+          detach_dev(t2);
+        if (detaching)
+          detach_dev(button1);
+        if (detaching)
+          detach_dev(t4);
+        if (if_block)
+          if_block.d(detaching);
+        if (detaching)
+          detach_dev(if_block_anchor);
+        mounted = false;
+        run_all(dispose);
       }
     };
     dispatch_dev("SvelteRegisterBlock", {
       block,
       id: create_if_block.name,
       type: "if",
-      source: "(58:2) {#if !complete}",
+      source: "(43:2) {#if !complete}",
+      ctx
+    });
+    return block;
+  }
+  function create_if_block_1(ctx) {
+    let div;
+    let t;
+    const block = {
+      c: function create() {
+        div = element("div");
+        t = text(ctx[1]);
+        attr_dev(div, "class", "alert alert-danger");
+        attr_dev(div, "role", "alert");
+        add_location(div, file, 69, 6, 1466);
+      },
+      m: function mount(target, anchor) {
+        insert_dev(target, div, anchor);
+        append_dev(div, t);
+      },
+      p: function update2(ctx2, dirty) {
+        if (dirty & 2)
+          set_data_dev(t, ctx2[1]);
+      },
+      d: function destroy(detaching) {
+        if (detaching)
+          detach_dev(div);
+      }
+    };
+    dispatch_dev("SvelteRegisterBlock", {
+      block,
+      id: create_if_block_1.name,
+      type: "if",
+      source: "(69:4) {#if errorMessage}",
       ctx
     });
     return block;
   }
   function create_default_slot(ctx) {
-    let current_block_type_index;
-    let if_block;
     let if_block_anchor;
-    let current;
-    const if_block_creators = [create_if_block, create_else_block];
-    const if_blocks = [];
     function select_block_type(ctx2, dirty) {
-      if (!ctx2[4])
-        return 0;
-      return 1;
+      if (!ctx2[2])
+        return create_if_block;
+      return create_else_block;
     }
-    current_block_type_index = select_block_type(ctx);
-    if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    let current_block_type = select_block_type(ctx);
+    let if_block = current_block_type(ctx);
     const block = {
       c: function create() {
         if_block.c();
         if_block_anchor = empty();
       },
       m: function mount(target, anchor) {
-        if_blocks[current_block_type_index].m(target, anchor);
+        if_block.m(target, anchor);
         insert_dev(target, if_block_anchor, anchor);
-        current = true;
       },
       p: function update2(ctx2, dirty) {
-        let previous_block_index = current_block_type_index;
-        current_block_type_index = select_block_type(ctx2);
-        if (current_block_type_index === previous_block_index) {
-          if_blocks[current_block_type_index].p(ctx2, dirty);
+        if (current_block_type === (current_block_type = select_block_type(ctx2)) && if_block) {
+          if_block.p(ctx2, dirty);
         } else {
-          group_outros();
-          transition_out(if_blocks[previous_block_index], 1, 1, () => {
-            if_blocks[previous_block_index] = null;
-          });
-          check_outros();
-          if_block = if_blocks[current_block_type_index];
-          if (!if_block) {
-            if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx2);
+          if_block.d(1);
+          if_block = current_block_type(ctx2);
+          if (if_block) {
             if_block.c();
-          } else {
-            if_block.p(ctx2, dirty);
+            if_block.m(if_block_anchor.parentNode, if_block_anchor);
           }
-          transition_in(if_block, 1);
-          if_block.m(if_block_anchor.parentNode, if_block_anchor);
         }
       },
-      i: function intro(local) {
-        if (current)
-          return;
-        transition_in(if_block);
-        current = true;
-      },
-      o: function outro(local) {
-        transition_out(if_block);
-        current = false;
-      },
       d: function destroy(detaching) {
-        if_blocks[current_block_type_index].d(detaching);
+        if_block.d(detaching);
         if (detaching)
           detach_dev(if_block_anchor);
       }
@@ -1155,7 +843,7 @@
       block,
       id: create_default_slot.name,
       type: "slot",
-      source: "(57:0) <Loader bind:loading>",
+      source: "(42:0) <Loader bind:loading>",
       ctx
     });
     return block;
@@ -1165,14 +853,14 @@
     let updating_loading;
     let current;
     function loader_loading_binding(value) {
-      ctx[11](value);
+      ctx[8](value);
     }
     let loader_props = {
       $$slots: { default: [create_default_slot] },
       $$scope: { ctx }
     };
-    if (ctx[5] !== void 0) {
-      loader_props.loading = ctx[5];
+    if (ctx[3] !== void 0) {
+      loader_props.loading = ctx[3];
     }
     loader = new Loader({ props: loader_props, $$inline: true });
     binding_callbacks.push(() => bind(loader, "loading", loader_loading_binding));
@@ -1189,12 +877,12 @@
       },
       p: function update2(ctx2, [dirty]) {
         const loader_changes = {};
-        if (dirty & 8223) {
+        if (dirty & 1031) {
           loader_changes.$$scope = { dirty, ctx: ctx2 };
         }
-        if (!updating_loading && dirty & 32) {
+        if (!updating_loading && dirty & 8) {
           updating_loading = true;
-          loader_changes.loading = ctx2[5];
+          loader_changes.loading = ctx2[3];
           add_flush_callback(() => updating_loading = false);
         }
         loader.$set(loader_changes);
@@ -1225,41 +913,30 @@
   function instance($$self, $$props, $$invalidate) {
     let { $$slots: slots = {}, $$scope } = $$props;
     validate_slots("App", slots, []);
-    let name, password, email;
+    let email;
     let errorMessage = "", complete = false;
     let loading = false;
-    function register() {
-      if (!isValid()) {
-        return;
-      }
-      $$invalidate(5, loading = true);
-      Manager.Register(name, email, password).then((res) => {
-        $$invalidate(4, complete = true);
+    function sendRequest(method) {
+      $$invalidate(3, loading = true);
+      if (!isValid())
+        ;
+      ApiManager$1.ForgottenPassword(email, method).then((res) => {
+        $$invalidate(2, complete = true);
         redirectHome(1500);
       }).catch((res) => {
         var _a;
         console.warn(res);
         if (res == null ? void 0 : res.error) {
-          $$invalidate(3, errorMessage = (_a = res == null ? void 0 : res.error) == null ? void 0 : _a.msg);
+          $$invalidate(1, errorMessage = (_a = res == null ? void 0 : res.error) == null ? void 0 : _a.msg);
+        } else {
+          $$invalidate(1, errorMessage = "Server error");
         }
       }).finally(() => {
-        $$invalidate(5, loading = false);
+        $$invalidate(3, loading = false);
       });
     }
     function isValid() {
-      if (isEmpty(name) || name.lenght > 4) {
-        $$invalidate(3, errorMessage = "Name has to be at least 4 characters long");
-        return false;
-      }
-      if (isEmpty(email) || !isValidEmail(email)) {
-        $$invalidate(3, errorMessage = "Email need to be valid");
-        return false;
-      }
-      if (isEmpty(password) || password.lenght < 8) {
-        $$invalidate(3, errorMessage = "Password has to be at least 4 characters long");
-        return false;
-      }
-      $$invalidate(3, errorMessage = "");
+      $$invalidate(1, errorMessage = "");
       return true;
     }
     const writable_props = [];
@@ -1267,71 +944,53 @@
       if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$" && key !== "slot")
         console_1.warn(`<App> was created with unknown prop '${key}'`);
     });
-    function registrationform_name_binding(value) {
-      name = value;
-      $$invalidate(0, name);
+    function input_input_handler() {
+      email = this.value;
+      $$invalidate(0, email);
     }
-    function registrationform_password_binding(value) {
-      password = value;
-      $$invalidate(1, password);
-    }
-    function registrationform_email_binding(value) {
-      email = value;
-      $$invalidate(2, email);
-    }
-    function registrationform_errorMessage_binding(value) {
-      errorMessage = value;
-      $$invalidate(3, errorMessage);
-    }
+    const click_handler = () => {
+      sendRequest("email");
+    };
+    const click_handler_1 = () => {
+      sendRequest("sms");
+    };
     function loader_loading_binding(value) {
       loading = value;
-      $$invalidate(5, loading);
+      $$invalidate(3, loading);
     }
     $$self.$capture_state = () => ({
       Loader,
+      ApiManager: ApiManager$1,
       redirectHome,
-      isEmpty,
-      isValidEmail,
-      Manager,
-      RegistrationForm,
-      name,
-      password,
       email,
       errorMessage,
       complete,
       loading,
-      register,
+      sendRequest,
       isValid
     });
     $$self.$inject_state = ($$props2) => {
-      if ("name" in $$props2)
-        $$invalidate(0, name = $$props2.name);
-      if ("password" in $$props2)
-        $$invalidate(1, password = $$props2.password);
       if ("email" in $$props2)
-        $$invalidate(2, email = $$props2.email);
+        $$invalidate(0, email = $$props2.email);
       if ("errorMessage" in $$props2)
-        $$invalidate(3, errorMessage = $$props2.errorMessage);
+        $$invalidate(1, errorMessage = $$props2.errorMessage);
       if ("complete" in $$props2)
-        $$invalidate(4, complete = $$props2.complete);
+        $$invalidate(2, complete = $$props2.complete);
       if ("loading" in $$props2)
-        $$invalidate(5, loading = $$props2.loading);
+        $$invalidate(3, loading = $$props2.loading);
     };
     if ($$props && "$$inject" in $$props) {
       $$self.$inject_state($$props.$$inject);
     }
     return [
-      name,
-      password,
       email,
       errorMessage,
       complete,
       loading,
-      register,
-      registrationform_name_binding,
-      registrationform_password_binding,
-      registrationform_email_binding,
-      registrationform_errorMessage_binding,
+      sendRequest,
+      input_input_handler,
+      click_handler,
+      click_handler_1,
       loader_loading_binding
     ];
   }
@@ -1353,6 +1012,6 @@
       props
     });
   }
-  window.AppsManager.register("registration", constructor);
+  window.AppsManager.register("forgottenPassword", constructor);
 });
 //# sourceMappingURL=main.umd.js.map
