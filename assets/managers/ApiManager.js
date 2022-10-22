@@ -1,4 +1,9 @@
-import { registrationUrl, forgottenPasswordUrl } from "../constants/urls";
+import {
+  registrationUrl,
+  forgottenPasswordUrl,
+  resetPasswrodUrl,
+} from "../constants/urls";
+import { getQueryVariable } from "../helpers/helpers";
 
 class ApiManager {
   constructor() {
@@ -19,6 +24,17 @@ class ApiManager {
     return await this.FetchWithToken(forgottenPasswordUrl, {
       method,
       email,
+    });
+  }
+
+  async PasswordReset(password) {
+    let url = resetPasswrodUrl(
+      getQueryVariable("token"),
+      getQueryVariable("method")
+    );
+
+    return await this.FetchWithToken(url, {
+      password,
     });
   }
 

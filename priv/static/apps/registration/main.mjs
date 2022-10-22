@@ -622,6 +622,17 @@ function redirectHome(time) {
     window.location = "/";
   }, time);
 }
+function getQueryVariable(variable) {
+  var query = window.location.search.substring(1);
+  var vars = query.split("&");
+  for (var i = 0; i < vars.length; i++) {
+    var pair = vars[i].split("=");
+    if (decodeURIComponent(pair[0]) == variable) {
+      return decodeURIComponent(pair[1]);
+    }
+  }
+  console.log("Query variable %s not found", variable);
+}
 function isEmpty(s) {
   return s === null || s === void 0 || s === "";
 }
@@ -633,6 +644,7 @@ function isValidEmail(email) {
 const baseApiUrl = "";
 const registrationUrl = baseApiUrl + "/register";
 const forgottenPasswordUrl = baseApiUrl + "/forgotten-password";
+const resetPasswrodUrl = (token, method) => baseApiUrl + `/reset-password?token=${token}&method=${method}`;
 class ApiManager {
   constructor() {
     this.token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
@@ -648,6 +660,15 @@ class ApiManager {
     return await this.FetchWithToken(forgottenPasswordUrl, {
       method,
       email
+    });
+  }
+  async PasswordReset(password) {
+    let url = resetPasswrodUrl(
+      getQueryVariable("token"),
+      getQueryVariable("method")
+    );
+    return await this.FetchWithToken(url, {
+      password
     });
   }
   async FetchWithToken(url, bodyObject, method = "post") {

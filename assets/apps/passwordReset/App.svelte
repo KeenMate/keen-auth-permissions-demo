@@ -1,25 +1,24 @@
 <script>
   import Loader from "../../components/Loader.svelte";
   import ApiManager from "../../managers/ApiManager";
-  import { redirectHome } from "../../helpers/helpers";
-  import { isEmpty, isValidEmail } from "../../helpers/validationHelpers";
+  import { redirect, redirectHome } from "../../helpers/helpers";
 
-  let email;
+  let password, passwordAgain;
 
   let errorMessage = "",
     complete = false;
   let loading = false;
 
-  function sendRequest(method) {
+  function sendRequest() {
+    loading = true;
     if (!isValid()) {
       return;
     }
-    loading = true;
 
-    ApiManager.ForgottenPassword(email, method)
+    ApiManager.PasswordReset(password)
       .then(() => {
         complete = true;
-        redirectHome(5000);
+        redirect("login", 3000);
       })
       .catch((res) => {
         console.warn(res);
@@ -35,13 +34,8 @@
   }
 
   function isValid() {
-    if (isEmpty(email)) {
-      errorMessage = "Email cant be empty";
-      return false;
-    }
-
-    if (!isValidEmail(email)) {
-      errorMessage = "Email isnt valid";
+    if (password !== passwordAgain) {
+      errorMessage = "Password are not same";
       return false;
     }
 
@@ -53,29 +47,27 @@
 <Loader bind:loading>
   {#if !complete}
     <input
-      type="email"
+      type="password"
       class="form-control mb-3"
-      id="email"
-      name="email"
-      placeholder="Your Email"
-      bind:value={email}
+      id="password"
+      name="password"
+      placeholder="New Password"
+      bind:value={password}
+    />
+    <input
+      type="password"
+      class="form-control mb-3"
+      id="password_verification"
+      name="password_verification"
+      placeholder="Password Verification"
+      bind:value={passwordAgain}
     />
 
     <button
       type="submit"
       value="send"
       class="btn btn-secondary"
-      on:click={() => {
-        sendRequest("email");
-      }}>EMAIL RESET</button
-    >
-    <button
-      type="submit"
-      value="send"
-      class="btn btn-secondary"
-      on:click={() => {
-        sendRequest("sms");
-      }}>SMS RESET</button
+      on:click={sendRequest}>CHANGE PASSWORD</button
     >
     {#if errorMessage}
       <div class="alert alert-danger" role="alert">
@@ -83,6 +75,8 @@
       </div>
     {/if}
   {:else}
-    <div class="alert alert-success" role="alert">Reset link send.</div>
+    <div class="alert alert-success" role="alert">
+      Password reseted successfully. You can now login with you new password.
+    </div>
   {/if}
 </Loader>

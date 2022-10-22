@@ -594,6 +594,11 @@ function redirectHome(time) {
     window.location = "/";
   }, time);
 }
+function redirect(url, time) {
+  setTimeout(() => {
+    window.location = url;
+  }, time);
+}
 function getQueryVariable(variable) {
   var query = window.location.search.substring(1);
   var vars = query.split("&");
@@ -651,25 +656,17 @@ class ApiManager {
   }
 }
 const ApiManager$1 = new ApiManager();
-function isEmpty(s) {
-  return s === null || s === void 0 || s === "";
-}
-function isValidEmail(email) {
-  return String(email).toLowerCase().match(
-    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-  );
-}
 const { console: console_1 } = globals;
-const file = "C:/git/keen-auth-permissions-demo/assets/apps/forgottenPassword/App.svelte";
+const file = "C:/git/keen-auth-permissions-demo/assets/apps/passwordReset/App.svelte";
 function create_else_block(ctx) {
   let div;
   const block = {
     c: function create() {
       div = element("div");
-      div.textContent = "Reset link send.";
+      div.textContent = "Password reseted successfully. You can now login with you new password.";
       attr_dev(div, "class", "alert alert-success");
       attr_dev(div, "role", "alert");
-      add_location(div, file, 85, 4, 1857);
+      add_location(div, file, 77, 4, 1737);
     },
     m: function mount(target, anchor) {
       insert_dev(target, div, anchor);
@@ -684,75 +681,80 @@ function create_else_block(ctx) {
     block,
     id: create_else_block.name,
     type: "else",
-    source: "(85:2) {:else}",
+    source: "(77:2) {:else}",
     ctx
   });
   return block;
 }
 function create_if_block(ctx) {
-  let input;
+  let input0;
   let t0;
-  let button0;
-  let t2;
-  let button1;
-  let t4;
+  let input1;
+  let t1;
+  let button;
+  let t3;
   let if_block_anchor;
   let mounted;
   let dispose;
-  let if_block = ctx[1] && create_if_block_1(ctx);
+  let if_block = ctx[2] && create_if_block_1(ctx);
   const block = {
     c: function create() {
-      input = element("input");
+      input0 = element("input");
       t0 = space();
-      button0 = element("button");
-      button0.textContent = "EMAIL RESET";
-      t2 = space();
-      button1 = element("button");
-      button1.textContent = "SMS RESET";
-      t4 = space();
+      input1 = element("input");
+      t1 = space();
+      button = element("button");
+      button.textContent = "CHANGE PASSWORD";
+      t3 = space();
       if (if_block)
         if_block.c();
       if_block_anchor = empty();
-      attr_dev(input, "type", "email");
-      attr_dev(input, "class", "form-control mb-3");
-      attr_dev(input, "id", "email");
-      attr_dev(input, "name", "email");
-      attr_dev(input, "placeholder", "Your Email");
-      add_location(input, file, 54, 4, 1193);
-      attr_dev(button0, "type", "submit");
-      button0.value = "send";
-      attr_dev(button0, "class", "btn btn-secondary");
-      add_location(button0, file, 63, 4, 1364);
-      attr_dev(button1, "type", "submit");
-      button1.value = "send";
-      attr_dev(button1, "class", "btn btn-secondary");
-      add_location(button1, file, 71, 4, 1544);
+      attr_dev(input0, "type", "password");
+      attr_dev(input0, "class", "form-control mb-3");
+      attr_dev(input0, "id", "password");
+      attr_dev(input0, "name", "password");
+      attr_dev(input0, "placeholder", "New Password");
+      add_location(input0, file, 48, 4, 1044);
+      attr_dev(input1, "type", "password");
+      attr_dev(input1, "class", "form-control mb-3");
+      attr_dev(input1, "id", "password_verification");
+      attr_dev(input1, "name", "password_verification");
+      attr_dev(input1, "placeholder", "Password Verification");
+      add_location(input1, file, 56, 4, 1227);
+      attr_dev(button, "type", "submit");
+      button.value = "send";
+      attr_dev(button, "class", "btn btn-secondary");
+      add_location(button, file, 65, 4, 1452);
     },
     m: function mount(target, anchor) {
-      insert_dev(target, input, anchor);
-      set_input_value(input, ctx[0]);
+      insert_dev(target, input0, anchor);
+      set_input_value(input0, ctx[0]);
       insert_dev(target, t0, anchor);
-      insert_dev(target, button0, anchor);
-      insert_dev(target, t2, anchor);
-      insert_dev(target, button1, anchor);
-      insert_dev(target, t4, anchor);
+      insert_dev(target, input1, anchor);
+      set_input_value(input1, ctx[1]);
+      insert_dev(target, t1, anchor);
+      insert_dev(target, button, anchor);
+      insert_dev(target, t3, anchor);
       if (if_block)
         if_block.m(target, anchor);
       insert_dev(target, if_block_anchor, anchor);
       if (!mounted) {
         dispose = [
-          listen_dev(input, "input", ctx[5]),
-          listen_dev(button0, "click", ctx[6], false, false, false),
-          listen_dev(button1, "click", ctx[7], false, false, false)
+          listen_dev(input0, "input", ctx[6]),
+          listen_dev(input1, "input", ctx[7]),
+          listen_dev(button, "click", ctx[5], false, false, false)
         ];
         mounted = true;
       }
     },
     p: function update2(ctx2, dirty) {
-      if (dirty & 1 && input.value !== ctx2[0]) {
-        set_input_value(input, ctx2[0]);
+      if (dirty & 1 && input0.value !== ctx2[0]) {
+        set_input_value(input0, ctx2[0]);
       }
-      if (ctx2[1]) {
+      if (dirty & 2 && input1.value !== ctx2[1]) {
+        set_input_value(input1, ctx2[1]);
+      }
+      if (ctx2[2]) {
         if (if_block) {
           if_block.p(ctx2, dirty);
         } else {
@@ -767,17 +769,17 @@ function create_if_block(ctx) {
     },
     d: function destroy(detaching) {
       if (detaching)
-        detach_dev(input);
+        detach_dev(input0);
       if (detaching)
         detach_dev(t0);
       if (detaching)
-        detach_dev(button0);
+        detach_dev(input1);
       if (detaching)
-        detach_dev(t2);
+        detach_dev(t1);
       if (detaching)
-        detach_dev(button1);
+        detach_dev(button);
       if (detaching)
-        detach_dev(t4);
+        detach_dev(t3);
       if (if_block)
         if_block.d(detaching);
       if (detaching)
@@ -790,7 +792,7 @@ function create_if_block(ctx) {
     block,
     id: create_if_block.name,
     type: "if",
-    source: "(54:2) {#if !complete}",
+    source: "(48:2) {#if !complete}",
     ctx
   });
   return block;
@@ -801,18 +803,18 @@ function create_if_block_1(ctx) {
   const block = {
     c: function create() {
       div = element("div");
-      t = text(ctx[1]);
+      t = text(ctx[2]);
       attr_dev(div, "class", "alert alert-danger");
       attr_dev(div, "role", "alert");
-      add_location(div, file, 80, 6, 1746);
+      add_location(div, file, 72, 6, 1626);
     },
     m: function mount(target, anchor) {
       insert_dev(target, div, anchor);
       append_dev(div, t);
     },
     p: function update2(ctx2, dirty) {
-      if (dirty & 2)
-        set_data_dev(t, ctx2[1]);
+      if (dirty & 4)
+        set_data_dev(t, ctx2[2]);
     },
     d: function destroy(detaching) {
       if (detaching)
@@ -823,7 +825,7 @@ function create_if_block_1(ctx) {
     block,
     id: create_if_block_1.name,
     type: "if",
-    source: "(80:4) {#if errorMessage}",
+    source: "(72:4) {#if errorMessage}",
     ctx
   });
   return block;
@@ -831,7 +833,7 @@ function create_if_block_1(ctx) {
 function create_default_slot(ctx) {
   let if_block_anchor;
   function select_block_type(ctx2, dirty) {
-    if (!ctx2[2])
+    if (!ctx2[3])
       return create_if_block;
     return create_else_block;
   }
@@ -868,7 +870,7 @@ function create_default_slot(ctx) {
     block,
     id: create_default_slot.name,
     type: "slot",
-    source: "(53:0) <Loader bind:loading>",
+    source: "(47:0) <Loader bind:loading>",
     ctx
   });
   return block;
@@ -884,8 +886,8 @@ function create_fragment(ctx) {
     $$slots: { default: [create_default_slot] },
     $$scope: { ctx }
   };
-  if (ctx[3] !== void 0) {
-    loader_props.loading = ctx[3];
+  if (ctx[4] !== void 0) {
+    loader_props.loading = ctx[4];
   }
   loader = new Loader({ props: loader_props, $$inline: true });
   binding_callbacks.push(() => bind(loader, "loading", loader_loading_binding));
@@ -902,12 +904,12 @@ function create_fragment(ctx) {
     },
     p: function update2(ctx2, [dirty]) {
       const loader_changes = {};
-      if (dirty & 1031) {
+      if (dirty & 1039) {
         loader_changes.$$scope = { dirty, ctx: ctx2 };
       }
-      if (!updating_loading && dirty & 8) {
+      if (!updating_loading && dirty & 16) {
         updating_loading = true;
-        loader_changes.loading = ctx2[3];
+        loader_changes.loading = ctx2[4];
         add_flush_callback(() => updating_loading = false);
       }
       loader.$set(loader_changes);
@@ -938,39 +940,35 @@ function create_fragment(ctx) {
 function instance($$self, $$props, $$invalidate) {
   let { $$slots: slots = {}, $$scope } = $$props;
   validate_slots("App", slots, []);
-  let email;
+  let password, passwordAgain;
   let errorMessage = "", complete = false;
   let loading = false;
-  function sendRequest(method) {
+  function sendRequest() {
+    $$invalidate(4, loading = true);
     if (!isValid()) {
       return;
     }
-    $$invalidate(3, loading = true);
-    ApiManager$1.ForgottenPassword(email, method).then(() => {
-      $$invalidate(2, complete = true);
-      redirectHome(5e3);
+    ApiManager$1.PasswordReset(password).then(() => {
+      $$invalidate(3, complete = true);
+      redirect("login", 3e3);
     }).catch((res) => {
       var _a;
       console.warn(res);
       if (res == null ? void 0 : res.error) {
-        $$invalidate(1, errorMessage = (_a = res == null ? void 0 : res.error) == null ? void 0 : _a.msg);
+        $$invalidate(2, errorMessage = (_a = res == null ? void 0 : res.error) == null ? void 0 : _a.msg);
       } else {
-        $$invalidate(1, errorMessage = "Server error");
+        $$invalidate(2, errorMessage = "Server error");
       }
     }).finally(() => {
-      $$invalidate(3, loading = false);
+      $$invalidate(4, loading = false);
     });
   }
   function isValid() {
-    if (isEmpty(email)) {
-      $$invalidate(1, errorMessage = "Email cant be empty");
+    if (password !== passwordAgain) {
+      $$invalidate(2, errorMessage = "Password are not same");
       return false;
     }
-    if (!isValidEmail(email)) {
-      $$invalidate(1, errorMessage = "Email isnt valid");
-      return false;
-    }
-    $$invalidate(1, errorMessage = "");
+    $$invalidate(2, errorMessage = "");
     return true;
   }
   const writable_props = [];
@@ -978,27 +976,25 @@ function instance($$self, $$props, $$invalidate) {
     if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$" && key !== "slot")
       console_1.warn(`<App> was created with unknown prop '${key}'`);
   });
-  function input_input_handler() {
-    email = this.value;
-    $$invalidate(0, email);
+  function input0_input_handler() {
+    password = this.value;
+    $$invalidate(0, password);
   }
-  const click_handler = () => {
-    sendRequest("email");
-  };
-  const click_handler_1 = () => {
-    sendRequest("sms");
-  };
+  function input1_input_handler() {
+    passwordAgain = this.value;
+    $$invalidate(1, passwordAgain);
+  }
   function loader_loading_binding(value) {
     loading = value;
-    $$invalidate(3, loading);
+    $$invalidate(4, loading);
   }
   $$self.$capture_state = () => ({
     Loader,
     ApiManager: ApiManager$1,
+    redirect,
     redirectHome,
-    isEmpty,
-    isValidEmail,
-    email,
+    password,
+    passwordAgain,
     errorMessage,
     complete,
     loading,
@@ -1006,27 +1002,29 @@ function instance($$self, $$props, $$invalidate) {
     isValid
   });
   $$self.$inject_state = ($$props2) => {
-    if ("email" in $$props2)
-      $$invalidate(0, email = $$props2.email);
+    if ("password" in $$props2)
+      $$invalidate(0, password = $$props2.password);
+    if ("passwordAgain" in $$props2)
+      $$invalidate(1, passwordAgain = $$props2.passwordAgain);
     if ("errorMessage" in $$props2)
-      $$invalidate(1, errorMessage = $$props2.errorMessage);
+      $$invalidate(2, errorMessage = $$props2.errorMessage);
     if ("complete" in $$props2)
-      $$invalidate(2, complete = $$props2.complete);
+      $$invalidate(3, complete = $$props2.complete);
     if ("loading" in $$props2)
-      $$invalidate(3, loading = $$props2.loading);
+      $$invalidate(4, loading = $$props2.loading);
   };
   if ($$props && "$$inject" in $$props) {
     $$self.$inject_state($$props.$$inject);
   }
   return [
-    email,
+    password,
+    passwordAgain,
     errorMessage,
     complete,
     loading,
     sendRequest,
-    input_input_handler,
-    click_handler,
-    click_handler_1,
+    input0_input_handler,
+    input1_input_handler,
     loader_loading_binding
   ];
 }
@@ -1048,5 +1046,5 @@ function constructor(element2, props) {
     props
   });
 }
-window.AppsManager.register("forgottenPassword", constructor);
+window.AppsManager.register("passwordReset", constructor);
 //# sourceMappingURL=main.mjs.map

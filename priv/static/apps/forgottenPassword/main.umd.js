@@ -592,6 +592,23 @@
   const baseApiUrl = "";
   const registrationUrl = baseApiUrl + "/register";
   const forgottenPasswordUrl = baseApiUrl + "/forgotten-password";
+  const resetPasswrodUrl = (token, method) => baseApiUrl + `/reset-password?token=${token}&method=${method}`;
+  function redirectHome(time) {
+    setTimeout(() => {
+      window.location = "/";
+    }, time);
+  }
+  function getQueryVariable(variable) {
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i = 0; i < vars.length; i++) {
+      var pair = vars[i].split("=");
+      if (decodeURIComponent(pair[0]) == variable) {
+        return decodeURIComponent(pair[1]);
+      }
+    }
+    console.log("Query variable %s not found", variable);
+  }
   class ApiManager {
     constructor() {
       this.token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
@@ -607,6 +624,15 @@
       return await this.FetchWithToken(forgottenPasswordUrl, {
         method,
         email
+      });
+    }
+    async PasswordReset(password) {
+      let url = resetPasswrodUrl(
+        getQueryVariable("token"),
+        getQueryVariable("method")
+      );
+      return await this.FetchWithToken(url, {
+        password
       });
     }
     async FetchWithToken(url, bodyObject, method = "post") {
@@ -629,10 +655,13 @@
     }
   }
   const ApiManager$1 = new ApiManager();
-  function redirectHome(time) {
-    setTimeout(() => {
-      window.location = "/";
-    }, time);
+  function isEmpty(s) {
+    return s === null || s === void 0 || s === "";
+  }
+  function isValidEmail(email) {
+    return String(email).toLowerCase().match(
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    );
   }
   const { console: console_1 } = globals;
   const file = "C:/git/keen-auth-permissions-demo/assets/apps/forgottenPassword/App.svelte";
@@ -644,7 +673,7 @@
         div.textContent = "Reset link send.";
         attr_dev(div, "class", "alert alert-success");
         attr_dev(div, "role", "alert");
-        add_location(div, file, 74, 4, 1577);
+        add_location(div, file, 85, 4, 1857);
       },
       m: function mount(target, anchor) {
         insert_dev(target, div, anchor);
@@ -659,7 +688,7 @@
       block,
       id: create_else_block.name,
       type: "else",
-      source: "(74:2) {:else}",
+      source: "(85:2) {:else}",
       ctx
     });
     return block;
@@ -693,15 +722,15 @@
         attr_dev(input, "id", "email");
         attr_dev(input, "name", "email");
         attr_dev(input, "placeholder", "Your Email");
-        add_location(input, file, 43, 4, 913);
+        add_location(input, file, 54, 4, 1193);
         attr_dev(button0, "type", "submit");
         button0.value = "send";
         attr_dev(button0, "class", "btn btn-secondary");
-        add_location(button0, file, 52, 4, 1084);
+        add_location(button0, file, 63, 4, 1364);
         attr_dev(button1, "type", "submit");
         button1.value = "send";
         attr_dev(button1, "class", "btn btn-secondary");
-        add_location(button1, file, 60, 4, 1264);
+        add_location(button1, file, 71, 4, 1544);
       },
       m: function mount(target, anchor) {
         insert_dev(target, input, anchor);
@@ -765,7 +794,7 @@
       block,
       id: create_if_block.name,
       type: "if",
-      source: "(43:2) {#if !complete}",
+      source: "(54:2) {#if !complete}",
       ctx
     });
     return block;
@@ -779,7 +808,7 @@
         t = text(ctx[1]);
         attr_dev(div, "class", "alert alert-danger");
         attr_dev(div, "role", "alert");
-        add_location(div, file, 69, 6, 1466);
+        add_location(div, file, 80, 6, 1746);
       },
       m: function mount(target, anchor) {
         insert_dev(target, div, anchor);
@@ -798,7 +827,7 @@
       block,
       id: create_if_block_1.name,
       type: "if",
-      source: "(69:4) {#if errorMessage}",
+      source: "(80:4) {#if errorMessage}",
       ctx
     });
     return block;
@@ -843,7 +872,7 @@
       block,
       id: create_default_slot.name,
       type: "slot",
-      source: "(42:0) <Loader bind:loading>",
+      source: "(53:0) <Loader bind:loading>",
       ctx
     });
     return block;
@@ -917,12 +946,13 @@
     let errorMessage = "", complete = false;
     let loading = false;
     function sendRequest(method) {
+      if (!isValid()) {
+        return;
+      }
       $$invalidate(3, loading = true);
-      if (!isValid())
-        ;
-      ApiManager$1.ForgottenPassword(email, method).then((res) => {
+      ApiManager$1.ForgottenPassword(email, method).then(() => {
         $$invalidate(2, complete = true);
-        redirectHome(1500);
+        redirectHome(5e3);
       }).catch((res) => {
         var _a;
         console.warn(res);
@@ -936,6 +966,14 @@
       });
     }
     function isValid() {
+      if (isEmpty(email)) {
+        $$invalidate(1, errorMessage = "Email cant be empty");
+        return false;
+      }
+      if (!isValidEmail(email)) {
+        $$invalidate(1, errorMessage = "Email isnt valid");
+        return false;
+      }
       $$invalidate(1, errorMessage = "");
       return true;
     }
@@ -962,6 +1000,8 @@
       Loader,
       ApiManager: ApiManager$1,
       redirectHome,
+      isEmpty,
+      isValidEmail,
       email,
       errorMessage,
       complete,

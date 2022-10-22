@@ -8,12 +8,13 @@ defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
 
   use KeenAuthPermissionsDemoWeb, :controller
 
-  action_fallback(KeenAuthPermissionsDemoWeb.PageFallbackHandler)
+  action_fallback(KeenAuthPermissionsDemoWeb.ToIndexFallbackHandler)
 
   def reset_password_get(conn, %{"token" => token, "method" => "email"}) do
     with {:ok, %{user_id: user_id}} <- Verification.verify_token(conn, :password_reset, token),
          {:ok, _} <- validate_token(user_id, token) do
       conn
+      |> KeenAuthPermissionsDemoWeb.Apps.include(["passwordReset"])
       |> set_title("Password reset")
       |> render("password_reset.html", token: token, method: "email")
     end
@@ -27,16 +28,16 @@ defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
     end
   end
 
+  def reset_password_get(conn, _) do
+    ControllerHelpers.error_flash_index(conn, "Token or method missing")
+  end
+
   def reset_password_post(conn, %{
         "token" => token,
         "method" => method,
-        "password" => password,
-        "password_verification" => password_verification
+        "password" => password
       }) do
-    case password == password_verification do
-      true -> process_password_reset(conn, token, method, password)
-      false -> process_password_mismatch(conn, token, method)
-    end
+    process_password_reset(conn, token, method, password)
   end
 
   def sms_token_reset_get(conn, _params) do
@@ -51,24 +52,18 @@ defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
     )
   end
 
-  defp process_password_mismatch(conn, token, method) do
-    conn
-    |> put_flash(:error, "Passwords do not match")
-    |> render("password_reset.html", token: token, method: method)
-  end
-
   defp process_password_reset(conn, token, "email", password) do
     with {:ok, %{user_id: user_id}} <- Verification.verify_token(conn, :password_reset, token),
          {:ok, _} <- validate_token(user_id, token, true),
          {:ok, _} <- update_password(user_id, password) do
-      ControllerHelpers.success_flash_index(conn, "Password reset successful")
+      KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers.success_response(conn, :ok)
     end
   end
 
   defp process_password_reset(conn, token, "sms", password) do
     with {:ok, token} <- validate_token(nil, token, true),
          {:ok, _} <- update_password(token.user_id, password) do
-      ControllerHelpers.success_flash_index(conn, "Password reset successful")
+      KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers.success_response(conn, :ok)
     end
   end
 

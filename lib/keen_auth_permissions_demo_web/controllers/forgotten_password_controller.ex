@@ -6,7 +6,6 @@ defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
   alias KeenAuthPermissionsDemoWeb.Email
   alias KeenAuthPermissionsDemoWeb.SMS
   alias KeenAuthPermissions.Error.{ErrorParsers, ErrorStruct}
-  alias KeenAuthPermissionsDemoWeb.Helpers.ControllerHelpers
 
   import KeenAuthPermissionsDemo.Helpers
 
