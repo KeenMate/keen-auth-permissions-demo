@@ -121,13 +121,7 @@
     </div>
     <div class="row contact-bg p-5 rounded mb-5">
       <div class="col-lg-7 mb-4 mb-lg-0">
-        <form action={Routes.registration_path(@conn, :register_post)} method="post">
-                    <input type="hidden" name="_csrf_token" value={csrf_token_value()}>
-                    <input type="text" class="form-control mb-3" id="name" name="name" placeholder="Your Name">
-                    <input type="email" class="form-control mb-3" id="email" name="email" placeholder="Your Email">
-                    <input type="password" class="form-control mb-3" id="password" name="password" placeholder="Password">
-                    <button type="submit" value="send" class="btn btn-secondary">REGISTER</button>
-                </form>
+       <div data-app="registration" ></div>
       </div>
 
         <div class="col-lg-5">

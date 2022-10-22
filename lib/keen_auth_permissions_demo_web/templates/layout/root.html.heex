@@ -14,7 +14,7 @@
   <%= live_title_tag assigns[:page_title] || "KeenAuthPermissionsDemo", suffix: " · Phoenix Framework" %>
   <meta name="csrf-token" content={csrf_token_value()}>
 
-
+  <%= csrf_meta_tag() %>
   <!-- mobile responsive meta -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -31,12 +31,18 @@
   <!-- aos -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" integrity="sha256-GqiEX9BuR1rv5zPU5Vs2qS/NSHl1BJyBcjQYJ6ycwD4=" crossorigin="anonymous">
 
-  <!-- Main Stylesheet -->
-  <link href={Routes.static_path(@conn, "/css/style.css")} rel="stylesheet">
-  
   <!--Favicon-->
   <link rel="shortcut icon" href={Routes.static_path(@conn, "/images/favicon.ico")} type="image/x-icon">
   <link rel="icon" href={Routes.static_path(@conn, "/images/favicon.ico")} type="image/x-icon">
+
+
+  <script defer type="text/javascript"  type="module" src={Routes.static_path(@conn, "/js/main.mjs")}></script>
+  <%= render "_component_scripts.html", additional_scripts: Map.get(assigns, :additional_scripts, []) %>
+
+
+  <%= render_existing KeenAuthPermissionsDemoWeb.LayoutView, "app.styles.html", assigns %>
+  <%= render "_component_styles.html", additional_styles: Map.get(assigns, :additional_styles, []) %>
+  <%= render_existing view_module(@conn), String.replace_suffix(view_template(@conn), ".html", "") <> ".styles.html", assigns %>
 
 </head>
 
@@ -94,6 +100,9 @@
 <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js" integrity="sha256-pQBbLkFHcP1cy0C8IhoSdxlm0CtcH5yJ2ki9jjgR03c=" crossorigin="anonymous"></script>
 <!-- Main Script -->
 <script src={Routes.static_path(@conn, "/js/script.js")}></script>
+
+<%= render_existing KeenAuthPermissionsDemoWeb.LayoutView, "app.scripts.html", assigns %>
+<%= render_existing view_module(@conn), String.replace_suffix(view_template(@conn), ".html", "") <> ".scripts.html", assigns %>
 
 </body>
 </html>

@@ -3,17 +3,18 @@ defmodule KeenAuthPermissionsDemoWeb.RegistrationController do
   alias KeenAuthPermissionsDemo.User.Verification
   alias KeenAuthPermissionsDemo.Mailer
   alias KeenAuthPermissions.Error.{ErrorParsers}
-  alias KeenAuthPermissionsDemoWeb.Helpers.ControllerHelpers
+  alias KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers
 
   import KeenAuthPermissionsDemo.User.Password
   import KeenAuthPermissionsDemoWeb.Email
 
   use KeenAuthPermissionsDemoWeb, :controller
 
-  action_fallback(KeenAuthPermissionsDemoWeb.PageFallbackHandler)
+  action_fallback(KeenAuthPermissionsDemoWeb.ApiFallbackHandler)
 
   def register_get(conn, _params) do
     conn
+    |> KeenAuthPermissionsDemoWeb.Apps.include(["registration"])
     |> render("register.html")
   end
 
@@ -24,20 +25,15 @@ defmodule KeenAuthPermissionsDemoWeb.RegistrationController do
          {:ok, [event_id]} <- create_auth_event(user),
          {:ok, [_]} <- create_token(user, event_id, token),
          {:ok, _} <- Mailer.deliver(email_verification(conn, user, token)) do
-      ControllerHelpers.success_flash_index(
-        conn,
-        "Registration successful, please visit your mailbox to confirm your e-mail address"
-      )
+      KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers.success_response(conn)
     end
   end
 
   def register_post(conn, _) do
-    conn
-    |> put_flash(
-      :error,
-      "Name, email or password cant be empty"
+    KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers.error_response(conn,
+      reason: "empty_field",
+      msg: "Name, email or password cant be empty"
     )
-    |> redirect(to: Routes.registration_path(conn, :register_get))
   end
 
   defp register_user(email, password, name) do
