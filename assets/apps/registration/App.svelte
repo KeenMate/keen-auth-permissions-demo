@@ -27,6 +27,8 @@
         console.warn(res);
         if (res?.error) {
           errorMessage = res?.error?.msg;
+        } else {
+          errorMessage = "Server error try again later";
         }
       })
       .finally(() => {

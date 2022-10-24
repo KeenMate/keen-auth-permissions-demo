@@ -11,7 +11,11 @@ defmodule KeenAuthPermissionsDemoWeb.ApiFallbackHandler do
     ConnHelpers.error_response(conn, reason: reason, msg: message)
   end
 
-  def call(conn, _) do
+  def call(conn, {:error, atom}) when is_atom(atom) do
+    ConnHelpers.error_response(conn, reason: Atom.to_string(atom))
+  end
+
+  def call(conn, _er) do
     ConnHelpers.error_response(conn, reason: "error", msg: "internal server error")
   end
 end

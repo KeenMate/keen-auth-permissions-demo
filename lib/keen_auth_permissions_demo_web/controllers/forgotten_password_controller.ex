@@ -1,13 +1,6 @@
 defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
-  alias KeenAuthPermissionsDemo.User.Verification
-  alias KeenAuthPermissionsDemo.Mailer
-  alias KeenAuthPermissionsDemo.SMSSender
-  alias KeenAuthPermissionsDemoWeb.Email
-  alias KeenAuthPermissionsDemoWeb.SMS
   alias KeenAuthPermissions.Error.ErrorStruct
-
-  import KeenAuthPermissionsDemo.Helpers
-  import KeenAuthPermissionsDemoWeb.Auth.AuthenticationProvider
+  alias KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager, as: Auth
 
   use KeenAuthPermissionsDemoWeb, :controller
 
@@ -31,10 +24,13 @@ defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
   end
 
   def forgotten_password_post(conn, %{"email" => email, "method" => method}) do
-    with {:ok, user_identity} <- get_user_identity_by_email(email),
-         {:ok, user} <- get_user_by_id(user_identity.user_id) do
-      process_reset(method, conn, user)
+    with {:ok, user} <- Auth.get_user_by_email(email),
+         {:ok, token} <- Auth.send_password_reset_token(conn, user, method) do
+      IO.inspect(token, label: "password reset token:")
+
+      send_success_response(conn)
     else
+      # prevent username leaking
       {:error, %ErrorStruct{reason: :no_user}} ->
         send_success_response(conn)
 
@@ -43,27 +39,6 @@ defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
     end
   end
 
-  defp process_reset("email", conn, user) do
-    token = Verification.generate_token(conn, :password_reset, user.user_id)
-
-    with {:ok, [event_id]} <- create_auth_event(user, "email_verification"),
-         {:ok, [_]} <- create_password_reset_token("email", user, event_id, token),
-         {:ok, _} <- Mailer.deliver(Email.forgotten_password(conn, user, token)) do
-      send_success_response(conn)
-    end
-  end
-
-  defp process_reset("sms", conn, user) do
-    token = get_random_triplet()
-
-    with {:ok, [event_id]} <- create_auth_event(user, "email_verification"),
-         {:ok, [_]} <- create_password_reset_token("mobile_phone", user, event_id, token),
-         :ok <- SMSSender.send_sms("+420 608179168", SMS.forgotten_password(conn, user, token)) do
-      IO.puts("SMS Token: #{token}")
-      send_success_response(conn)
-    end
-  end
-
   defp send_success_response(conn),
-    do: KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers.success_response(conn, :ok)
+    do: ConnHelpers.success_response(conn, :ok)
 end

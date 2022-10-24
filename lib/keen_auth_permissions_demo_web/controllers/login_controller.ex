@@ -18,7 +18,7 @@ defmodule KeenAuthPermissionsDemoWeb.LoginController do
         "Wrong password or username"
 
       "inactive" ->
-        "Account is not activated"
+        "Account is not activated go to"
 
       _ ->
         nil

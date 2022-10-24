@@ -4,12 +4,12 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationProvider do
 
   import KeenAuthPermissionsDemo.User.Password
 
-  def create_auth_event(user, event_code) do
+  def create_auth_event(user_id, event_code) do
     DbContext.auth_create_auth_event(
       "system",
       1,
       event_code,
-      user.user_id,
+      user_id,
       nil,
       nil,
       nil
@@ -66,11 +66,11 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationProvider do
     |> ErrorParsers.parse_if_error()
   end
 
-  def create_email_verification_token(user, auth_event_id, token) do
+  def create_email_verification_token(user_id, auth_event_id, token) do
     DbContext.auth_create_token(
       "system",
       1,
-      user.user_id,
+      user_id,
       auth_event_id,
       "email_verification",
       "email",
@@ -80,11 +80,11 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationProvider do
     |> ErrorParsers.parse_if_error()
   end
 
-  def create_password_reset_token(method, user, auth_event_id, token) do
+  def create_password_reset_token(method, user_id, auth_event_id, token) do
     DbContext.auth_create_token(
       "system",
       1,
-      user.user_id,
+      user_id,
       auth_event_id,
       "password_reset",
       method,

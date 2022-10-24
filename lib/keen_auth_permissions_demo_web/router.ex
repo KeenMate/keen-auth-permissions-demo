@@ -55,6 +55,9 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
     get "/verify-email", EmailVerificationController, :verify_email
     post "/verify-email", EmailVerificationController, :verify_email
 
+    get "/resend-email", EmailVerificationController, :resend_email
+    post "/resend-email", EmailVerificationController, :resend_email_post
+
     get "/private", PrivateController, :private_page_get
   end
 

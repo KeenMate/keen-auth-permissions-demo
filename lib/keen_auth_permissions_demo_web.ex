@@ -26,6 +26,8 @@ defmodule KeenAuthPermissionsDemoWeb do
       import Plug.Conn
       import KeenAuthPermissionsDemoWeb.Gettext
       alias KeenAuthPermissionsDemoWeb.Router.Helpers, as: Routes
+
+      alias KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers
     end
   end
 

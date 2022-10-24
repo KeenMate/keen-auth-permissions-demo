@@ -1,10 +1,5 @@
 defmodule KeenAuthPermissionsDemoWeb.RegistrationController do
-  alias KeenAuthPermissionsDemo.User.Verification
-  alias KeenAuthPermissionsDemo.Mailer
-  alias KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers
-
-  import KeenAuthPermissionsDemoWeb.Email
-  import KeenAuthPermissionsDemoWeb.Auth.AuthenticationProvider
+  alias KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager, as: Auth
 
   use KeenAuthPermissionsDemoWeb, :controller
 
@@ -17,21 +12,9 @@ defmodule KeenAuthPermissionsDemoWeb.RegistrationController do
     |> render("register.html")
   end
 
-  def register_post(conn, %{"email" => email, "name" => name, "password" => password})
-      when email != "" and name != "" and password != "" do
-    with {:ok, [user]} <- register_user(email, password, name),
-         token = Verification.generate_token(conn, :email_verification, user.user_id),
-         {:ok, [event_id]} <- create_auth_event(user, "email_verification"),
-         {:ok, [_]} <- create_email_verification_token(user, event_id, token),
-         {:ok, _} <- Mailer.deliver(email_verification(conn, user, token)) do
+  def register_post(conn, %{"email" => email, "name" => name, "password" => password}) do
+    with :ok <- Auth.register_user(conn, email, password, name) do
       ConnHelpers.success_response(conn)
     end
-  end
-
-  def register_post(conn, _) do
-    ConnHelpers.error_response(conn,
-      reason: "empty_field",
-      msg: "Name, email or password cant be empty"
-    )
   end
 end
