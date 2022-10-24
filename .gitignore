@@ -30,6 +30,10 @@ keen_auth_permissions_demo-*.tar
 
 # In case you use Node.js/npm, you want to ignore these.
 npm-debug.log
+
 /assets/node_modules/
 
 /config/.local.exs
+
+/priv/static/js
+/priv/static/apps
