@@ -58,7 +58,7 @@ defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
 
     with {:ok, [event_id]} <- create_auth_event(user, "email_verification"),
          {:ok, [_]} <- create_password_reset_token("mobile_phone", user, event_id, token),
-         :ok <- SMSSender.send_sms("+420 605282932", SMS.forgotten_password(conn, user, token)) do
+         :ok <- SMSSender.send_sms("+420 608179168", SMS.forgotten_password(conn, user, token)) do
       IO.puts("SMS Token: #{token}")
       send_success_response(conn)
     end
