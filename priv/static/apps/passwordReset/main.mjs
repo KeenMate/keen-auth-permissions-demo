@@ -589,6 +589,7 @@ const baseApiUrl = "";
 const registrationUrl = baseApiUrl + "/register";
 const forgottenPasswordUrl = baseApiUrl + "/forgotten-password";
 const resetPasswrodUrl = (token, method) => baseApiUrl + `/reset-password?token=${token}&method=${method}`;
+const smsTokenReset = baseApiUrl + "/sms-reset";
 function redirectHome(time) {
   setTimeout(() => {
     window.location = "/";
@@ -634,6 +635,11 @@ class ApiManager {
     );
     return await this.FetchWithToken(url, {
       password
+    });
+  }
+  async SmsToken(token) {
+    return await this.FetchWithToken(smsTokenReset, {
+      token
     });
   }
   async FetchWithToken(url, bodyObject, method = "post") {
@@ -944,10 +950,10 @@ function instance($$self, $$props, $$invalidate) {
   let errorMessage = "", complete = false;
   let loading = false;
   function sendRequest() {
-    $$invalidate(4, loading = true);
     if (!isValid()) {
       return;
     }
+    $$invalidate(4, loading = true);
     ApiManager$1.PasswordReset(password).then(() => {
       $$invalidate(3, complete = true);
       redirect("login", 3e3);

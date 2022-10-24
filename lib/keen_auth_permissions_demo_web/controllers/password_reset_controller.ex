@@ -1,11 +1,8 @@
 defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
-  alias KeenAuthPermissionsDemo.DbContext
   alias KeenAuthPermissionsDemo.User.Verification
   alias KeenAuthPermissionsDemoWeb.Helpers.ControllerHelpers
-  alias KeenAuthPermissions.Error.{ErrorParsers}
 
-  import KeenAuthPermissionsDemo.User.Password
-
+  import KeenAuthPermissionsDemoWeb.Auth.AuthenticationProvider
   use KeenAuthPermissionsDemoWeb, :controller
 
   action_fallback(KeenAuthPermissionsDemoWeb.ToIndexFallbackHandler)
@@ -42,13 +39,14 @@ defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
 
   def sms_token_reset_get(conn, _params) do
     conn
+    |> KeenAuthPermissionsDemoWeb.Apps.include(["smsToken"])
     |> render("sms_token_reset.html")
   end
 
   def sms_token_reset_post(conn, %{"token" => token}) do
-    conn
-    |> redirect(
-      to: Routes.password_reset_path(conn, :reset_password_get, method: "sms", token: token)
+    KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers.success_response(
+      conn,
+      Routes.password_reset_path(conn, :reset_password_get, method: "sms", token: token)
     )
   end
 
@@ -65,26 +63,5 @@ defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
          {:ok, _} <- update_password(token.user_id, password) do
       KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers.success_response(conn, :ok)
     end
-  end
-
-  defp validate_token(user_id, token, invalidate \\ false) do
-    case DbContext.auth_validate_token("system", 1, user_id, token, nil, nil, nil, invalidate) do
-      {:ok, [token | _]} -> {:ok, token}
-      {:error, err} -> {:error, ErrorParsers.parse_error(err)}
-    end
-  end
-
-  defp update_password(user_id, password) do
-    DbContext.auth_update_user_password(
-      "system",
-      1,
-      user_id,
-      hash_password(password),
-      nil,
-      nil,
-      nil,
-      nil
-    )
-    |> ErrorParsers.parse_if_error()
   end
 end

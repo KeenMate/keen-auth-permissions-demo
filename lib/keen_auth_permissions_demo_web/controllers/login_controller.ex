@@ -19,7 +19,7 @@ defmodule KeenAuthPermissionsDemoWeb.LoginController do
       "inactive" ->
         "Account is not activated"
 
-      nil ->
+      _ ->
         nil
     end
   end

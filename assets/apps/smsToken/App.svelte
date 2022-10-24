@@ -1,9 +1,10 @@
 <script>
   import Loader from "../../components/Loader.svelte";
   import ApiManager from "../../managers/ApiManager";
-  import { redirect, redirectHome } from "../../helpers/helpers";
+  import { redirect } from "../../helpers/helpers";
+  import { isEmpty } from "../../helpers/validationHelpers";
 
-  let password, passwordAgain;
+  let token;
 
   let errorMessage = "",
     complete = false;
@@ -15,10 +16,11 @@
     }
     loading = true;
 
-    ApiManager.PasswordReset(password)
-      .then(() => {
+    ApiManager.SmsToken(token)
+      .then((res) => {
+        console.log(res);
         complete = true;
-        redirect("login", 3000);
+        redirect(res.data, 500);
       })
       .catch((res) => {
         console.warn(res);
@@ -34,8 +36,8 @@
   }
 
   function isValid() {
-    if (password !== passwordAgain) {
-      errorMessage = "Password are not same";
+    if (isEmpty(token)) {
+      errorMessage = "Token cant be empty";
       return false;
     }
 
@@ -47,27 +49,18 @@
 <Loader bind:loading>
   {#if !complete}
     <input
-      type="password"
       class="form-control mb-3"
-      id="password"
-      name="password"
-      placeholder="New Password"
-      bind:value={password}
-    />
-    <input
-      type="password"
-      class="form-control mb-3"
-      id="password_verification"
-      name="password_verification"
-      placeholder="Password Verification"
-      bind:value={passwordAgain}
+      id="token"
+      name="token"
+      placeholder="Enter your reset token"
+      bind:value={token}
     />
 
     <button
       type="submit"
       value="send"
       class="btn btn-secondary"
-      on:click={sendRequest}>CHANGE PASSWORD</button
+      on:click={sendRequest}>SUBMIT</button
     >
     {#if errorMessage}
       <div class="alert alert-danger" role="alert">
@@ -76,7 +69,7 @@
     {/if}
   {:else}
     <div class="alert alert-success" role="alert">
-      Password reseted successfully. You can now login with you new password.
+      Redirecting to password reset page
     </div>
   {/if}
 </Loader>

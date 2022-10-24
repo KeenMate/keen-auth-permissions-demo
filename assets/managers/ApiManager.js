@@ -2,6 +2,7 @@ import {
   registrationUrl,
   forgottenPasswordUrl,
   resetPasswrodUrl,
+  smsTokenReset,
 } from "../constants/urls";
 import { getQueryVariable } from "../helpers/helpers";
 
@@ -35,6 +36,12 @@ class ApiManager {
 
     return await this.FetchWithToken(url, {
       password,
+    });
+  }
+
+  async SmsToken(token) {
+    return await this.FetchWithToken(smsTokenReset, {
+      token,
     });
   }
 

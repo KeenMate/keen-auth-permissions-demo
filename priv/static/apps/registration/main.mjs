@@ -645,6 +645,7 @@ const baseApiUrl = "";
 const registrationUrl = baseApiUrl + "/register";
 const forgottenPasswordUrl = baseApiUrl + "/forgotten-password";
 const resetPasswrodUrl = (token, method) => baseApiUrl + `/reset-password?token=${token}&method=${method}`;
+const smsTokenReset = baseApiUrl + "/sms-reset";
 class ApiManager {
   constructor() {
     this.token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
@@ -669,6 +670,11 @@ class ApiManager {
     );
     return await this.FetchWithToken(url, {
       password
+    });
+  }
+  async SmsToken(token) {
+    return await this.FetchWithToken(smsTokenReset, {
+      token
     });
   }
   async FetchWithToken(url, bodyObject, method = "post") {

@@ -8,13 +8,8 @@
         </div>
 
         <div class="row contact-bg p-5 rounded mb-5">
-            <div class="col-lg-7 mb-4 mb-lg-0">
-                <form action={Routes.password_reset_path(@conn, :sms_token_reset_post)} method="post">
-                    <input type="hidden" name="_csrf_token" value={csrf_token_value()}>
-                    <input class="form-control mb-3" id="token" name="token" placeholder="Enter your reset token">
-
-                    <button type="submit" value="send" class="btn btn-secondary">SUBMIT</button>
-                </form>
+            <div class="col-lg-7 mb-4 mb-lg-0" data-app="smsToken">
+                
             </div>
 
             <div class="col-lg-5">

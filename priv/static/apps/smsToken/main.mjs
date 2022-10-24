@@ -590,9 +590,9 @@ const registrationUrl = baseApiUrl + "/register";
 const forgottenPasswordUrl = baseApiUrl + "/forgotten-password";
 const resetPasswrodUrl = (token, method) => baseApiUrl + `/reset-password?token=${token}&method=${method}`;
 const smsTokenReset = baseApiUrl + "/sms-reset";
-function redirectHome(time) {
+function redirect(url, time) {
   setTimeout(() => {
-    window.location = "/";
+    window.location = url;
   }, time);
 }
 function getQueryVariable(variable) {
@@ -660,22 +660,17 @@ const ApiManager$1 = new ApiManager();
 function isEmpty(s) {
   return s === null || s === void 0 || s === "";
 }
-function isValidEmail(email) {
-  return String(email).toLowerCase().match(
-    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-  );
-}
 const { console: console_1 } = globals;
-const file = "C:/git/keen-auth-permissions-demo/assets/apps/forgottenPassword/App.svelte";
+const file = "C:/git/keen-auth-permissions-demo/assets/apps/smsToken/App.svelte";
 function create_else_block(ctx) {
   let div;
   const block = {
     c: function create() {
       div = element("div");
-      div.textContent = "Reset link send.";
+      div.textContent = "Redirecting to password reset page";
       attr_dev(div, "class", "alert alert-success");
       attr_dev(div, "role", "alert");
-      add_location(div, file, 85, 4, 1857);
+      add_location(div, file, 70, 4, 1521);
     },
     m: function mount(target, anchor) {
       insert_dev(target, div, anchor);
@@ -690,7 +685,7 @@ function create_else_block(ctx) {
     block,
     id: create_else_block.name,
     type: "else",
-    source: "(85:2) {:else}",
+    source: "(70:2) {:else}",
     ctx
   });
   return block;
@@ -698,10 +693,8 @@ function create_else_block(ctx) {
 function create_if_block(ctx) {
   let input;
   let t0;
-  let button0;
+  let button;
   let t2;
-  let button1;
-  let t4;
   let if_block_anchor;
   let mounted;
   let dispose;
@@ -710,46 +703,35 @@ function create_if_block(ctx) {
     c: function create() {
       input = element("input");
       t0 = space();
-      button0 = element("button");
-      button0.textContent = "EMAIL RESET";
+      button = element("button");
+      button.textContent = "SUBMIT";
       t2 = space();
-      button1 = element("button");
-      button1.textContent = "SMS RESET";
-      t4 = space();
       if (if_block)
         if_block.c();
       if_block_anchor = empty();
-      attr_dev(input, "type", "email");
       attr_dev(input, "class", "form-control mb-3");
-      attr_dev(input, "id", "email");
-      attr_dev(input, "name", "email");
-      attr_dev(input, "placeholder", "Your Email");
-      add_location(input, file, 54, 4, 1193);
-      attr_dev(button0, "type", "submit");
-      button0.value = "send";
-      attr_dev(button0, "class", "btn btn-secondary");
-      add_location(button0, file, 63, 4, 1364);
-      attr_dev(button1, "type", "submit");
-      button1.value = "send";
-      attr_dev(button1, "class", "btn btn-secondary");
-      add_location(button1, file, 71, 4, 1544);
+      attr_dev(input, "id", "token");
+      attr_dev(input, "name", "token");
+      attr_dev(input, "placeholder", "Enter your reset token");
+      add_location(input, file, 50, 4, 1082);
+      attr_dev(button, "type", "submit");
+      button.value = "send";
+      attr_dev(button, "class", "btn btn-secondary");
+      add_location(button, file, 58, 4, 1245);
     },
     m: function mount(target, anchor) {
       insert_dev(target, input, anchor);
       set_input_value(input, ctx[0]);
       insert_dev(target, t0, anchor);
-      insert_dev(target, button0, anchor);
+      insert_dev(target, button, anchor);
       insert_dev(target, t2, anchor);
-      insert_dev(target, button1, anchor);
-      insert_dev(target, t4, anchor);
       if (if_block)
         if_block.m(target, anchor);
       insert_dev(target, if_block_anchor, anchor);
       if (!mounted) {
         dispose = [
           listen_dev(input, "input", ctx[5]),
-          listen_dev(button0, "click", ctx[6], false, false, false),
-          listen_dev(button1, "click", ctx[7], false, false, false)
+          listen_dev(button, "click", ctx[4], false, false, false)
         ];
         mounted = true;
       }
@@ -777,13 +759,9 @@ function create_if_block(ctx) {
       if (detaching)
         detach_dev(t0);
       if (detaching)
-        detach_dev(button0);
+        detach_dev(button);
       if (detaching)
         detach_dev(t2);
-      if (detaching)
-        detach_dev(button1);
-      if (detaching)
-        detach_dev(t4);
       if (if_block)
         if_block.d(detaching);
       if (detaching)
@@ -796,7 +774,7 @@ function create_if_block(ctx) {
     block,
     id: create_if_block.name,
     type: "if",
-    source: "(54:2) {#if !complete}",
+    source: "(50:2) {#if !complete}",
     ctx
   });
   return block;
@@ -810,7 +788,7 @@ function create_if_block_1(ctx) {
       t = text(ctx[1]);
       attr_dev(div, "class", "alert alert-danger");
       attr_dev(div, "role", "alert");
-      add_location(div, file, 80, 6, 1746);
+      add_location(div, file, 65, 6, 1410);
     },
     m: function mount(target, anchor) {
       insert_dev(target, div, anchor);
@@ -829,7 +807,7 @@ function create_if_block_1(ctx) {
     block,
     id: create_if_block_1.name,
     type: "if",
-    source: "(80:4) {#if errorMessage}",
+    source: "(65:4) {#if errorMessage}",
     ctx
   });
   return block;
@@ -874,7 +852,7 @@ function create_default_slot(ctx) {
     block,
     id: create_default_slot.name,
     type: "slot",
-    source: "(53:0) <Loader bind:loading>",
+    source: "(49:0) <Loader bind:loading>",
     ctx
   });
   return block;
@@ -884,7 +862,7 @@ function create_fragment(ctx) {
   let updating_loading;
   let current;
   function loader_loading_binding(value) {
-    ctx[8](value);
+    ctx[6](value);
   }
   let loader_props = {
     $$slots: { default: [create_default_slot] },
@@ -908,7 +886,7 @@ function create_fragment(ctx) {
     },
     p: function update2(ctx2, [dirty]) {
       const loader_changes = {};
-      if (dirty & 1031) {
+      if (dirty & 263) {
         loader_changes.$$scope = { dirty, ctx: ctx2 };
       }
       if (!updating_loading && dirty & 8) {
@@ -944,17 +922,18 @@ function create_fragment(ctx) {
 function instance($$self, $$props, $$invalidate) {
   let { $$slots: slots = {}, $$scope } = $$props;
   validate_slots("App", slots, []);
-  let email;
+  let token;
   let errorMessage = "", complete = false;
   let loading = false;
-  function sendRequest(method) {
+  function sendRequest() {
     if (!isValid()) {
       return;
     }
     $$invalidate(3, loading = true);
-    ApiManager$1.ForgottenPassword(email, method).then(() => {
+    ApiManager$1.SmsToken(token).then((res) => {
+      console.log(res);
       $$invalidate(2, complete = true);
-      redirectHome(5e3);
+      redirect(res.data, 500);
     }).catch((res) => {
       var _a;
       console.warn(res);
@@ -968,12 +947,8 @@ function instance($$self, $$props, $$invalidate) {
     });
   }
   function isValid() {
-    if (isEmpty(email)) {
-      $$invalidate(1, errorMessage = "Email cant be empty");
-      return false;
-    }
-    if (!isValidEmail(email)) {
-      $$invalidate(1, errorMessage = "Email isnt valid");
+    if (isEmpty(token)) {
+      $$invalidate(1, errorMessage = "Token cant be empty");
       return false;
     }
     $$invalidate(1, errorMessage = "");
@@ -985,15 +960,9 @@ function instance($$self, $$props, $$invalidate) {
       console_1.warn(`<App> was created with unknown prop '${key}'`);
   });
   function input_input_handler() {
-    email = this.value;
-    $$invalidate(0, email);
+    token = this.value;
+    $$invalidate(0, token);
   }
-  const click_handler = () => {
-    sendRequest("email");
-  };
-  const click_handler_1 = () => {
-    sendRequest("sms");
-  };
   function loader_loading_binding(value) {
     loading = value;
     $$invalidate(3, loading);
@@ -1001,10 +970,9 @@ function instance($$self, $$props, $$invalidate) {
   $$self.$capture_state = () => ({
     Loader,
     ApiManager: ApiManager$1,
-    redirectHome,
+    redirect,
     isEmpty,
-    isValidEmail,
-    email,
+    token,
     errorMessage,
     complete,
     loading,
@@ -1012,8 +980,8 @@ function instance($$self, $$props, $$invalidate) {
     isValid
   });
   $$self.$inject_state = ($$props2) => {
-    if ("email" in $$props2)
-      $$invalidate(0, email = $$props2.email);
+    if ("token" in $$props2)
+      $$invalidate(0, token = $$props2.token);
     if ("errorMessage" in $$props2)
       $$invalidate(1, errorMessage = $$props2.errorMessage);
     if ("complete" in $$props2)
@@ -1025,14 +993,12 @@ function instance($$self, $$props, $$invalidate) {
     $$self.$inject_state($$props.$$inject);
   }
   return [
-    email,
+    token,
     errorMessage,
     complete,
     loading,
     sendRequest,
     input_input_handler,
-    click_handler,
-    click_handler_1,
     loader_loading_binding
   ];
 }
@@ -1054,5 +1020,5 @@ function constructor(element2, props) {
     props
   });
 }
-window.AppsManager.register("forgottenPassword", constructor);
+window.AppsManager.register("smsToken", constructor);
 //# sourceMappingURL=main.mjs.map
