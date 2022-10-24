@@ -1,11 +1,12 @@
 defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
   alias KeenAuthPermissionsDemo.User.Verification
   alias KeenAuthPermissionsDemoWeb.Helpers.ControllerHelpers
+  alias KeenAuthPermissions.Error.ErrorStruct
 
   import KeenAuthPermissionsDemoWeb.Auth.AuthenticationProvider
   use KeenAuthPermissionsDemoWeb, :controller
 
-  action_fallback(KeenAuthPermissionsDemoWeb.ToIndexFallbackHandler)
+  action_fallback(KeenAuthPermissionsDemoWeb.ApiFallbackHandler)
 
   def reset_password_get(conn, %{"token" => token, "method" => "email"}) do
     with {:ok, %{user_id: user_id}} <- Verification.verify_token(conn, :password_reset, token),
@@ -14,14 +15,21 @@ defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
       |> KeenAuthPermissionsDemoWeb.Apps.include(["passwordReset"])
       |> set_title("Password reset")
       |> render("password_reset.html", token: token, method: "email")
+    else
+      {:error, %ErrorStruct{} = error} ->
+        ControllerHelpers.error_flash_index(conn, error.message)
     end
   end
 
   def reset_password_get(conn, %{"token" => token, "method" => "sms"}) do
     with {:ok, _} <- validate_token(nil, token) do
       conn
+      |> KeenAuthPermissionsDemoWeb.Apps.include(["passwordReset"])
       |> set_title("Password reset")
       |> render("password_reset.html", token: token, method: "sms")
+    else
+      {:error, %ErrorStruct{} = error} ->
+        ControllerHelpers.error_flash_index(conn, error.message)
     end
   end
 

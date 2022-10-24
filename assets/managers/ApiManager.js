@@ -28,11 +28,8 @@ class ApiManager {
     });
   }
 
-  async PasswordReset(password) {
-    let url = resetPasswrodUrl(
-      getQueryVariable("token"),
-      getQueryVariable("method")
-    );
+  async PasswordReset(token, method, password) {
+    let url = resetPasswrodUrl(token, method);
 
     return await this.FetchWithToken(url, {
       password,

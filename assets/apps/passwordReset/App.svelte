@@ -1,7 +1,9 @@
 <script>
   import Loader from "../../components/Loader.svelte";
   import ApiManager from "../../managers/ApiManager";
-  import { redirect, redirectHome } from "../../helpers/helpers";
+  import { redirect } from "../../helpers/helpers";
+
+  export let token, type;
 
   let password, passwordAgain;
 
@@ -15,7 +17,7 @@
     }
     loading = true;
 
-    ApiManager.PasswordReset(password)
+    ApiManager.PasswordReset(token, type, password)
       .then(() => {
         complete = true;
         redirect("login", 3000);

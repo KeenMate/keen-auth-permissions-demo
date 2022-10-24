@@ -19,6 +19,7 @@
     ApiManager.SmsToken(token)
       .then((res) => {
         console.log(res);
+        console.log("WTFFFFFFFFFFFFFFFFFFFFFFFF");
         complete = true;
         redirect(res.data, 500);
       })

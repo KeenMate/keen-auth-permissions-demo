@@ -1,7 +1,7 @@
 <script>
   import Loader from "../../components/Loader.svelte";
   import ApiManager from "../../managers/ApiManager";
-  import { redirectHome } from "../../helpers/helpers";
+  import { redirect } from "../../helpers/helpers";
   import { isEmpty, isValidEmail } from "../../helpers/validationHelpers";
 
   let email;
@@ -10,28 +10,28 @@
     complete = false;
   let loading = false;
 
-  function sendRequest(method) {
+  async function sendRequest(method) {
     if (!isValid()) {
       return;
     }
     loading = true;
 
-    ApiManager.ForgottenPassword(email, method)
-      .then(() => {
-        complete = true;
-        redirectHome(5000);
-      })
-      .catch((res) => {
-        console.warn(res);
-        if (res?.error) {
-          errorMessage = res?.error?.msg;
-        } else {
-          errorMessage = "Server error";
-        }
-      })
-      .finally(() => {
-        loading = false;
-      });
+    try {
+      await ApiManager.ForgottenPassword(email, method);
+      complete = method;
+
+      if (method === "sms") {
+        redirect("/sms-reset", 2000);
+      }
+    } catch (res) {
+      console.warn(res);
+      if (res?.error) {
+        errorMessage = res?.error?.msg;
+      } else {
+        errorMessage = "Server error";
+      }
+    }
+    loading = false;
   }
 
   function isValid() {
@@ -83,6 +83,12 @@
       </div>
     {/if}
   {:else}
-    <div class="alert alert-success" role="alert">Reset link send.</div>
+    <div class="alert alert-success" role="alert">
+      {#if complete === "sms"}
+        Reset code send.
+      {:else}
+        Reset link send to your email, click on intros.
+      {/if}
+    </div>
   {/if}
 </Loader>
