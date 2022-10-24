@@ -5,6 +5,7 @@ defmodule KeenAuthPermissionsDemoWeb.LoginController do
     conn
     |> set_title("Login")
     |> assign(:error_msg, get_login_error(params["error"]))
+    |> assign(:redirect_to, params["redirect_to"])
     |> render("login.html")
   end
 

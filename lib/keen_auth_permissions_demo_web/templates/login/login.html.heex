@@ -22,7 +22,13 @@
                         <%= link "Reset password", to: Routes.forgotten_password_path(@conn, :forgotten_password_get), class: "d-inline mb-3 mr-2" %>
                         <%= link "Register", to: Routes.registration_path(@conn, :register_get), class: "d-inline mb-3" %>
                     </div>
-                    <button type="submit" value="send" class="btn btn-secondary">LOG IN</button>
+                    <div>
+
+                    <button type="submit" value="send" class="btn btn-secondary d-inline">LOG IN</button>
+                    <a class="btn btn-secondary d-inline" href={Routes.authentication_path(@conn, :new, :aad, redirect_to: @redirect_to)} role="button">Azure</a>
+                    </div>
+
+
                 </form>
             </div>
 

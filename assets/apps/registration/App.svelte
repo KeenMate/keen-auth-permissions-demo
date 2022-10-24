@@ -1,6 +1,6 @@
 <script>
   import Loader from "../../components/Loader.svelte";
-  import { redirectHome } from "../../helpers/helpers";
+  import { redirect } from "../../helpers/helpers";
   import { isEmpty, isValidEmail } from "../../helpers/validationHelpers";
   import Manager from "../../managers/ApiManager";
   import RegistrationForm from "./RegistrationForm.svelte";
@@ -19,9 +19,9 @@
     loading = true;
 
     Manager.Register(name, email, password)
-      .then((res) => {
+      .then(() => {
         complete = true;
-        redirectHome(1500);
+        redirect("login", 5000);
       })
       .catch((res) => {
         console.warn(res);
@@ -66,7 +66,7 @@
   {:else}
     <div class="alert alert-success" role="alert">
       Registration successfull, click on link in email we send you to activate
-      account
+      account.
     </div>
   {/if}
 </Loader>

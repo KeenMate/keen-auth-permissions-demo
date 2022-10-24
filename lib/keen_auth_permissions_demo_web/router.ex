@@ -54,6 +54,8 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
 
     get "/verify-email", EmailVerificationController, :verify_email
     post "/verify-email", EmailVerificationController, :verify_email
+
+    get "/private", PrivateController, :private_page_get
   end
 
   # Other scopes may use custom stacks.

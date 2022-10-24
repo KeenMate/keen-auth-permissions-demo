@@ -12,24 +12,14 @@
           <li class="nav-item">
             <a class="nav-link" href={Routes.page_path(@conn, :index)}>Home</a>
           </li>
+      <%!-- authenticated routes --%>
+
+        <%= if not is_nil(@current_user) do %>
           <li class="nav-item">
-            <a class="nav-link page-scroll" href="#feature">Feature</a>
+            <a class="nav-link" href={Routes.private_path(@conn, :private_page_get)}>Private </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="about.html">About</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="service.html">Service</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link page-scroll" href="#team">Team</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link page-scroll" href="#pricing">Pricing</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="contact.html">Contact</a>
-          </li>
+        <% end %>
+
         </ul>
         <%= if is_nil(@current_user) do %>
         <a href={Routes.login_path(@conn, :login)} class="btn btn-primary ml-lg-3 primary-shadow">Log In</a>
