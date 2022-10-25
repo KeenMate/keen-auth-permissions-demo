@@ -7,13 +7,9 @@
             </div>
         </div>
         <div class="row contact-bg p-5 rounded mb-5">
-            <div class="col-lg-7 mb-4 mb-lg-0">
+            <div class="col-lg-7 mb-4 mb-lg-0" data-app="resendEmail">
                 
-                <form method="POST" action={Routes.email_verification_path(@conn, :resend_email)} > 
-                    <input type="hidden" name="_csrf_token" value={csrf_token_value()}>
-                  <input type="email" name="email" id="email" class="form-control mb-3">
-                  <input type="submit" value="resend" class="btn btn-secondary">
-                </form>
+                
             </div>
 
             <div class="col-lg-5">

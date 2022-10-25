@@ -11,7 +11,7 @@ defmodule KeenAuthPermissionsDemo.Helpers do
     |> Enum.join("-")
   end
 
-  def get_random_number(min \\ 1, max \\ 999999, padding \\ 6) do
+  def get_random_number(min \\ 1, max \\ 999_999, padding \\ 6) do
     get_random_int(min, max)
     |> Integer.to_string()
     |> String.pad_leading(padding, "0")

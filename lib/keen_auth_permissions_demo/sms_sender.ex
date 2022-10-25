@@ -9,11 +9,14 @@ defmodule KeenAuthPermissionsDemo.SMSSender do
     ExTwilio.Message.create(
       to: to,
       body: message,
-      messaging_service_sid: Application.fetch_env!(:keen_auth_permissions_demo, :twilio_service_sid) |> IO.inspect(label: "Twilio SID")
+      messaging_service_sid:
+        Application.fetch_env!(:keen_auth_permissions_demo, :twilio_service_sid)
+        |> IO.inspect(label: "Twilio SID")
       # status_callback: "http://97313c4346f0.ngrok.io/api/sms/notify"
     )
     |> case do
-      {:ok, _} -> :ok
+      {:ok, _} ->
+        :ok
 
       {:error, %{"code" => 21604}, 400} ->
         {:error, :missing_phone}

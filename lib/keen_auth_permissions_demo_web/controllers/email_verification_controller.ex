@@ -1,6 +1,7 @@
 defmodule KeenAuthPermissionsDemoWeb.EmailVerificationController do
   alias KeenAuthPermissionsDemoWeb.Helpers.ControllerHelpers
   alias KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager, as: Auth
+  alias KeenAuthPermissions.Error.ErrorStruct
 
   use KeenAuthPermissionsDemoWeb, :controller
 
@@ -15,16 +16,25 @@ defmodule KeenAuthPermissionsDemoWeb.EmailVerificationController do
     end
   end
 
-  def resend_email(conn, _) do
+  def resend_verification(conn, _) do
     conn
     |> set_title("Resend email verification")
     |> KeenAuthPermissionsDemoWeb.Apps.include(["resendEmail"])
     |> render("resend_email.html")
   end
 
-  def resend_email_post(conn, %{"email" => email}) do
+  def resend_verification_post(conn, %{"email" => email}) do
     with :ok <- Auth.resend_verification_email(conn, email) do
       ConnHelpers.success_response(conn, :ok)
+    else
+      {:error,
+       %ErrorStruct{
+         reason: :user_doesnt_exist
+       }} ->
+        ConnHelpers.success_response(conn, :ok)
+
+      err ->
+        err
     end
   end
 end

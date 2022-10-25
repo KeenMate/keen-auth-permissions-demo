@@ -4,7 +4,7 @@ defmodule KeenAuthPermissionsDemoWeb.LoginController do
   def login(conn, params) do
     conn
     |> set_title("Login")
-    |> assign(:error_msg, get_login_error(params["error"]))
+    |> assign(:error, get_login_error(params["error"]))
     |> assign(:redirect_to, params["redirect_to"])
     |> render("login.html")
   end
@@ -12,13 +12,17 @@ defmodule KeenAuthPermissionsDemoWeb.LoginController do
   def get_login_error(err) do
     case err do
       "generic" ->
-        "Couldnt log you in"
+        %{msg: "Couldnt log you in"}
 
       "wrong_password_or_username" ->
-        "Wrong password or username"
+        %{msg: "Wrong password or username"}
 
       "inactive" ->
-        "Account is not activated go to"
+        %{
+          msg: "Account is not activated go to",
+          link: "/resend-verification",
+          link_title: "Resend verification email"
+        }
 
       _ ->
         nil
