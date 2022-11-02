@@ -28,6 +28,10 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
     plug KeenAuth.Plug.FetchUser
   end
 
+  pipeline :require_authenticated do
+    plug KeenAuth.Plug.RequireAuthenticated
+  end
+
   scope "/auth" do
     pipe_through :authentication
 
@@ -38,27 +42,45 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+		# authorization pages
     get "/login", LoginController, :login
-
     get "/register", RegistrationController, :register_get
-    post "/register", RegistrationController, :register_post
-
     get "/forgotten-password", ForgottenPasswordController, :forgotten_password_get
-    post "/forgotten-password", ForgottenPasswordController, :forgotten_password_post
-
     get "/reset-password", PasswordResetController, :reset_password_get
-    post "/reset-password", PasswordResetController, :reset_password_post
-
     get "/sms-reset", PasswordResetController, :sms_token_reset_get
-    post "/sms-reset", PasswordResetController, :sms_token_reset_post
-
     get "/verify-email", EmailVerificationController, :verify_email
-    post "/verify-email", EmailVerificationController, :verify_email
-
     get "/resend-verification", EmailVerificationController, :resend_verification
+
+    scope "/" do
+      pipe_through :require_authenticated
+
+      get "/private", PrivateController, :private_page_get
+
+      get "/groups", PageController, :groups
+    end
+  end
+
+  scope "/api", KeenAuthPermissionsDemoWeb do
+    pipe_through :api
+
+		# authorization
+    post "/register", RegistrationController, :register_post
+    post "/forgotten-password", ForgottenPasswordController, :forgotten_password_post
+    post "/reset-password", PasswordResetController, :reset_password_post
+    post "/sms-reset", PasswordResetController, :sms_token_reset_post
+    post "/verify-email", EmailVerificationController, :verify_email
     post "/resend-verification", EmailVerificationController, :resend_verification_post
 
-    get "/private", PrivateController, :private_page_get
+    # protected api
+    scope "/" do
+      pipe_through :authorization
+
+			#tenant specific
+			scope "/:tenant/" do
+				get "/groups", Api.GroupsApiController, :get_groups_for_tenant
+
+			end
+    end
   end
 
   # Other scopes may use custom stacks.

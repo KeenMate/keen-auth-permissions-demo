@@ -1,8 +1,9 @@
 defmodule KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers do
   use KeenAuthPermissionsDemoWeb, :controller
+  alias KeenAuthPermissionsDemo.Helpers.MapHelpers
 
   def success(data \\ nil, metadata \\ nil) do
-    %{data: data, metadata: metadata}
+    %{data: MapHelpers.camelize(data), metadata: MapHelpers.camelize(metadata)}
   end
 
   def success_response(conn, data \\ nil, metadata \\ nil) do

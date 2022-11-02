@@ -8,6 +8,7 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager do
 
   alias KeenAuthPermissionsDemoWeb.Auth.AuthenticationProvider, as: Db
 
+  #!SECTION Basic registration, login and password reset
   def create_email_verification_token(conn, user) do
     with token <- Verification.generate_token(conn, :email_verification, user.user_id),
          {:ok, [event_id]} <- Db.create_auth_event(user.user_id, "email_verification"),
@@ -108,5 +109,16 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager do
          SMSSender.send_sms("+420 608179168", SMS.forgotten_password(conn, user, token)) do
       {:ok, token}
     end
+  end
+
+  #!SECTION Groups managmet
+
+  def get_groups(conn, tenant) when is_bitstring(tenant) do
+    {num, _} = Integer.parse(tenant)
+    get_groups(conn, num)
+  end
+
+  def get_groups(conn, tenant) do
+    Db.get_groups(conn.assigns.current_user, tenant)
   end
 end

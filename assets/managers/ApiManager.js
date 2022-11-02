@@ -1,72 +1,51 @@
 import {
-  registrationUrl,
-  forgottenPasswordUrl,
-  resetPasswrodUrl,
-  smsTokenReset,
-  resendVerification,
+	registrationUrl,
+	forgottenPasswordUrl,
+	resetPasswrodUrl,
+	smsTokenReset,
+	resendVerification,
 } from "../constants/urls";
+import { BaseApiManager } from "./BaseApiProvider";
 
-class ApiManager {
-  constructor() {
-    this.token = document
-      .querySelector('meta[name="csrf-token"]')
-      .getAttribute("content");
-  }
+class ApiManager extends BaseApiManager {
+	constructor() {
+		super();
+	}
 
-  async Register(name, email, password) {
-    return await this.FetchWithToken(registrationUrl, {
-      name,
-      email,
-      password,
-    });
-  }
+	async Register(name, email, password) {
+		return await this.Post(registrationUrl, {
+			name,
+			email,
+			password,
+		});
+	}
 
-  async ForgottenPassword(email, method) {
-    return await this.FetchWithToken(forgottenPasswordUrl, {
-      method,
-      email,
-    });
-  }
+	async ForgottenPassword(email, method) {
+		return await this.Post(forgottenPasswordUrl, {
+			method,
+			email,
+		});
+	}
 
-  async PasswordReset(token, method, password) {
-    let url = resetPasswrodUrl(token, method);
+	async PasswordReset(token, method, password) {
+		let url = resetPasswrodUrl(token, method);
 
-    return await this.FetchWithToken(url, {
-      password,
-    });
-  }
+		return await this.Post(url, {
+			password,
+		});
+	}
 
-  async SmsToken(token) {
-    return await this.FetchWithToken(smsTokenReset, {
-      token,
-    });
-  }
+	async SmsToken(token) {
+		return await this.Post(smsTokenReset, {
+			token,
+		});
+	}
 
-  async ResendVerification(email) {
-    return await this.FetchWithToken(resendVerification, {
-      email,
-    });
-  }
-
-  async FetchWithToken(url, bodyObject, method = "post") {
-    let res = await fetch(url, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-Token": this.token,
-      },
-      body: JSON.stringify(bodyObject),
-    });
-
-    if (res.status === 200) {
-      return await res.json();
-    }
-    if (res.status === 500) {
-      throw await res.json();
-    }
-    console.log(res);
-    throw "Error Comunication with server";
-  }
+	async ResendVerification(email) {
+		return await this.Post(resendVerification, {
+			email,
+		});
+	}
 }
 
 export default new ApiManager();

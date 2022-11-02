@@ -98,4 +98,9 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationProvider do
     DbContext.auth_enable_user_identity("system", 1, user_id, "email")
     |> ErrorParsers.parse_if_error()
   end
+
+  def get_groups(%KeenAuthPermissions.User{username: requested_by, user_id: id}, tenant) do
+    DbContext.auth_get_tenant_groups(requested_by, id, tenant)
+    |> ErrorParsers.parse_if_error()
+  end
 end
