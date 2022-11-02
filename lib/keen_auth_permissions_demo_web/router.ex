@@ -42,7 +42,7 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
-		# authorization pages
+    # authorization pages
     get "/login", LoginController, :login
     get "/register", RegistrationController, :register_get
     get "/forgotten-password", ForgottenPasswordController, :forgotten_password_get
@@ -63,7 +63,7 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
   scope "/api", KeenAuthPermissionsDemoWeb do
     pipe_through :api
 
-		# authorization
+    # authorization
     post "/register", RegistrationController, :register_post
     post "/forgotten-password", ForgottenPasswordController, :forgotten_password_post
     post "/reset-password", PasswordResetController, :reset_password_post
@@ -75,11 +75,26 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
     scope "/" do
       pipe_through :authorization
 
-			#tenant specific
-			scope "/:tenant/" do
-				get "/groups", Api.GroupsApiController, :get_groups_for_tenant
+      # tenant specific
+      scope "/:tenant/" do
+        scope "/groups" do
+          get "", Api.GroupsApiController, :get_groups_for_tenant
+					put "", Api.GroupsApiController, :create_group
 
-			end
+          scope "/:group_id" do
+						get "", Api.GroupsApiController,:group_info
+            delete "", Api.GroupsApiController, :delete_group
+
+            patch "enable", Api.GroupsApiController, :enable_group
+            patch "disable", Api.GroupsApiController, :disable_group
+            patch "lock", Api.GroupsApiController, :lock_group
+            patch "unlock", Api.GroupsApiController, :unlock_group
+						#members
+						put ":user_id", Api.GroupsApiController, :add_user_to_group
+						delete ":user_id", Api.GroupsApiController, :remove_user_from_group
+          end
+        end
+      end
     end
   end
 

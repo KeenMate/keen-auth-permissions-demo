@@ -103,4 +103,67 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationProvider do
     DbContext.auth_get_tenant_groups(requested_by, id, tenant)
     |> ErrorParsers.parse_if_error()
   end
+
+  def enable_group(
+        %KeenAuthPermissions.User{username: username, user_id: id},
+        tenant,
+        group_id
+      ) do
+    DbContext.auth_enable_user_group(username, id, tenant, group_id)
+    |> ErrorParsers.parse_if_error()
+  end
+
+  def disable_group(
+        %KeenAuthPermissions.User{username: username, user_id: id},
+        tenant,
+        group_id
+      ) do
+    DbContext.auth_disable_user_group(username, id, tenant, group_id)
+    |> ErrorParsers.parse_if_error()
+  end
+
+  def lock_group(
+        %KeenAuthPermissions.User{username: username, user_id: id},
+        tenant,
+        group_id
+      ) do
+    DbContext.auth_lock_user_group(username, id, tenant, group_id)
+    |> ErrorParsers.parse_if_error()
+  end
+
+  def unlock_group(
+        %KeenAuthPermissions.User{username: username, user_id: id},
+        tenant,
+        group_id
+      ) do
+    DbContext.auth_unlock_user_group(username, id, tenant, group_id)
+    |> ErrorParsers.parse_if_error()
+  end
+
+  def delete_group(
+        %KeenAuthPermissions.User{username: username, user_id: id},
+        tenant,
+        group_id
+      ) do
+    DbContext.auth_delete_user_group(username, id, tenant, group_id)
+    |> ErrorParsers.parse_if_error()
+  end
+
+  def group_info(
+        %KeenAuthPermissions.User{username: username, user_id: id},
+        tenant,
+        group_id
+      ) do
+    DbContext.auth_get_user_group_by_id(username, id, tenant, group_id)
+    |> ErrorParsers.parse_if_error()
+  end
+
+  def get_group_members(
+        %KeenAuthPermissions.User{username: username, user_id: id},
+        tenant,
+        group_id
+      ) do
+    DbContext.auth_get_user_group_members(username, id, tenant, group_id)
+    |> ErrorParsers.parse_if_error()
+  end
 end

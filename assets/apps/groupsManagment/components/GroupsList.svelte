@@ -16,6 +16,9 @@
 			<th scope="col">Title</th>
 			<th scope="col">Code</th>
 			<th scope="col">Members</th>
+			<th scope="col">Active</th>
+			<th scope="col">Assignable</th>
+			<th scope="col">External</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -25,6 +28,9 @@
 				<td on:click={() => openDetail(group)}>{group.groupTitle}</td>
 				<td>{group.groupCode}</td>
 				<td>{group.membersCount}</td>
+				<td>{group.isActive}</td>
+				<td>{group.isAssignable}</td>
+				<td>{group.isExternal}</td>
 			</tr>
 		{/each}
 	</tbody>

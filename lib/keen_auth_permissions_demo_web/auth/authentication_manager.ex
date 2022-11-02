@@ -113,12 +113,47 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager do
 
   #!SECTION Groups managmet
 
-  def get_groups(conn, tenant) when is_bitstring(tenant) do
-    {num, _} = Integer.parse(tenant)
-    get_groups(conn, num)
+  def get_groups(conn, tenant) do
+    Db.get_groups(user(conn), num(tenant))
   end
 
-  def get_groups(conn, tenant) do
-    Db.get_groups(conn.assigns.current_user, tenant)
+  def enable_group(conn, tenant, group) do
+    Db.enable_group(user(conn), num(tenant), num(group))
   end
+
+  def disable_group(conn, tenant, group) do
+    Db.disable_group(user(conn), num(tenant), num(group))
+  end
+
+  def lock_group(conn, tenant, group) do
+    Db.lock_group(user(conn), num(tenant), num(group))
+  end
+
+  def unlock_group(conn, tenant, group) do
+    Db.unlock_group(user(conn), num(tenant), num(group))
+  end
+
+  def delete_group(conn, tenant, group) do
+    Db.delete_group(user(conn), num(tenant), num(group))
+  end
+
+  def group_info(conn, tenant, group) do
+    with {:ok, [group_info]} <- Db.group_info(user(conn), num(tenant), num(group)) do
+      {:ok, group_info}
+    end
+  end
+
+  def get_group_members(conn, tenant, group) do
+    Db.get_group_members(user(conn), num(tenant), num(group))
+  end
+
+  #!SECTION Helpers
+  defp user(conn) when conn.assigns.current_user != nil, do: conn.assigns.current_user
+
+  defp num(n) when is_bitstring(n) do
+    {n, _} = Integer.parse(n)
+    n
+  end
+
+  defp num(n) when is_number(n), do: n
 end
