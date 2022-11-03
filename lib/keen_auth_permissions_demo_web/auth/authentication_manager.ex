@@ -137,14 +137,34 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager do
     Db.delete_group(user(conn), num(tenant), num(group))
   end
 
-  def group_info(conn, tenant, group) do
-    with {:ok, [group_info]} <- Db.group_info(user(conn), num(tenant), num(group)) do
+  def group_info(conn, tenant, group_id) do
+    with {:ok, [group_info]} <- Db.group_info(user(conn), num(tenant), group_id),
+         {:ok, members} <- Db.get_group_members(user(conn), num(tenant), group_id) do
+      group_info = Map.put(group_info, :members, members)
       {:ok, group_info}
     end
   end
 
   def get_group_members(conn, tenant, group) do
     Db.get_group_members(user(conn), num(tenant), num(group))
+  end
+
+  def create_group(conn, tenant, group) do
+    is_asignable = Map.get(group, :is_asignable, true)
+    is_active = Map.get(group, :is_active, true)
+    is_external = Map.get(group, :is_external, false)
+
+    with {:ok, [new_group_id]} <-
+           Db.create_group(
+             user(conn),
+             num(tenant),
+             group.title,
+             is_asignable,
+             is_active,
+             is_external
+           ) do
+      {:ok, new_group_id}
+    end
   end
 
   #!SECTION Helpers

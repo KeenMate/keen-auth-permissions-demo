@@ -47,9 +47,23 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
   end
 
   def group_info(conn, %{"group_id" => group_id, "tenant" => tenant}) do
-    with {:ok, group_info} <- Manager.group_info(conn, tenant, group_id),
-         {:ok, members} <- Manager.get_group_members(conn, tenant, group_id) do
-      group_info = Map.put(group_info, :members, members)
+    with {:ok, group_info} <- Manager.group_info(conn, tenant, group_id) do
+      conn |> ConnHelpers.success_response(group_info)
+    end
+  end
+
+  def create_group(conn, %{"tenant" => tenant}) do
+    body = conn.body_params
+
+    group = %{
+      title: body["title"],
+      is_asignable: body["isAsignable"],
+      is_active: body["isActive"],
+      is_external: body["isExternal"]
+    }
+
+    with {:ok, new_group_id} <- Manager.create_group(conn, tenant, group),
+         {:ok, group_info} <- Manager.group_info(conn, tenant, new_group_id) do
       conn |> ConnHelpers.success_response(group_info)
     end
   end

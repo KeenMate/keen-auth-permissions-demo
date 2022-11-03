@@ -166,4 +166,23 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationProvider do
     DbContext.auth_get_user_group_members(username, id, tenant, group_id)
     |> ErrorParsers.parse_if_error()
   end
+
+  def create_group(
+        %KeenAuthPermissions.User{username: username, user_id: id},
+        tenant,
+        title,
+        is_asignable,
+        is_active,
+        is_external
+      ) do
+    DbContext.auth_create_user_group(
+      username,
+      id,
+      title,
+      tenant,
+      is_asignable,
+      is_active,
+      is_external
+    )
+  end
 end
