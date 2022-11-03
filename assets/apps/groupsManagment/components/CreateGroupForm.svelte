@@ -21,6 +21,10 @@
 			errorMessage = "Title cant be empty";
 		}
 	}
+
+	function close() {
+		dispatch("close");
+	}
 </script>
 
 <button on:click={close}>close</button>

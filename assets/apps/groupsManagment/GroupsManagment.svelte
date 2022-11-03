@@ -21,6 +21,7 @@
 
 	function showList() {
 		group = null;
+		openCreate = false;
 	}
 
 	async function setActive({ setTo, groupId }) {
@@ -66,7 +67,11 @@
 
 <Modal>
 	{#if openCreate}
-		<CreateGroupForm on:create={(e) => createGroup(e.detail)} {errorMessage} />
+		<CreateGroupForm
+			on:create={(e) => createGroup(e.detail)}
+			{errorMessage}
+			on:close={showList}
+		/>
 	{:else if group}
 		<GroupDetail {group} on:close={showList} {errorMessage} />
 	{:else}
