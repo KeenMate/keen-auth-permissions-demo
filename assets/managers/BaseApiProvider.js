@@ -16,7 +16,13 @@ export class BaseApiManager {
 		});
 
 		if (res.status === 200) {
-			return await res.json();
+			let json = await res.json();
+
+			console.debug(`[API CALL] called ${method} on ${url}`, {
+				response: json,
+			});
+
+			return json;
 		}
 		if (res.status === 500) {
 			throw await res.json();
@@ -31,5 +37,15 @@ export class BaseApiManager {
 
 	async Post(url, body) {
 		return await this.FetchWithToken(url, body, "POST");
+	}
+
+	async Put(url, body) {
+		return await this.FetchWithToken(url, body, "PUT");
+	}
+	async Patch(url, body) {
+		return await this.FetchWithToken(url, body, "PATCH");
+	}
+	async Delete(url, body) {
+		return await this.FetchWithToken(url, body, "DELETE");
 	}
 }

@@ -171,7 +171,7 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationProvider do
         %KeenAuthPermissions.User{username: username, user_id: id},
         tenant,
         title,
-        is_asignable,
+        is_assignable,
         is_active,
         is_external
       ) do
@@ -180,7 +180,7 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationProvider do
       id,
       title,
       tenant,
-      is_asignable,
+      is_assignable,
       is_active,
       is_external
     )

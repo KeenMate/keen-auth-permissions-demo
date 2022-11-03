@@ -57,7 +57,7 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
 
     group = %{
       title: body["title"],
-      is_asignable: body["isAsignable"],
+      is_assignable: body["isAssignable"],
       is_active: body["isActive"],
       is_external: body["isExternal"]
     }

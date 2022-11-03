@@ -138,8 +138,8 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager do
   end
 
   def group_info(conn, tenant, group_id) do
-    with {:ok, [group_info]} <- Db.group_info(user(conn), num(tenant), group_id),
-         {:ok, members} <- Db.get_group_members(user(conn), num(tenant), group_id) do
+    with {:ok, [group_info]} <- Db.group_info(user(conn), num(tenant), num(group_id)),
+         {:ok, members} <- Db.get_group_members(user(conn), num(tenant), num(group_id)) do
       group_info = Map.put(group_info, :members, members)
       {:ok, group_info}
     end
@@ -150,7 +150,7 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager do
   end
 
   def create_group(conn, tenant, group) do
-    is_asignable = Map.get(group, :is_asignable, true)
+    is_assignable = Map.get(group, :is_assignable, true)
     is_active = Map.get(group, :is_active, true)
     is_external = Map.get(group, :is_external, false)
 
@@ -159,7 +159,7 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager do
              user(conn),
              num(tenant),
              group.title,
-             is_asignable,
+             is_assignable,
              is_active,
              is_external
            ) do

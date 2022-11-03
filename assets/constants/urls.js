@@ -10,7 +10,16 @@ export const resendVerification = baseApiUrl + "/resend-verification";
 export const GroupsEndpoint = (tenant) => {
 	let base = `${baseApiUrl}/${tenant}/groups`;
 	return {
-		base: baseApiUrl + "/" + tenant + "/groups",
+		base: base,
 		getAll: base,
+		create: base,
+		get: (group_id) => `${base}/${group_id}`,
+		delete: (group_id) => `${base}/${group_id}`,
+		enable: (group_id) => `${base}/${group_id}/enable`,
+		disable: (group_id) => `${base}/${group_id}/disable`,
+		lock: (group_id) => `${base}/${group_id}/lock`,
+		unlock: (group_id) => `${base}/${group_id}/unlock`,
+		addUser: (group_id, user_id) => `${base}/${group_id}/${user_id}`,
+		removeUser: (group_id, user_id) => `${base}/${group_id}/${user_id}`,
 	};
 };
