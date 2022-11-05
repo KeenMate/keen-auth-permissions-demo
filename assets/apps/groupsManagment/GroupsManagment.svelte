@@ -38,6 +38,10 @@
 		});
 	}
 
+	async function deleteGroup(group) {
+		callApi(async () => await manager.deleteGroup(group.userGroupId));
+	}
+
 	async function callApi(func, load = true) {
 		try {
 			await func();
@@ -82,6 +86,7 @@
 			on:set-active={(e) => setActive(e.detail)}
 			on:set-locked={(e) => setLocked(e.detail)}
 			on:open-create={() => (openCreate = true)}
+			on:delete={(e) => deleteGroup(e.detail)}
 		/>
 	{/if}
 </Modal>

@@ -15,6 +15,9 @@
 	function setLocked(group, setTo) {
 		dispatch("set-locked", { groupId: group.userGroupId, setTo });
 	}
+	function deleteGroup(group) {
+		dispatch("delete", group);
+	}
 
 	function openCreate() {
 		dispatch("open-create");
@@ -59,6 +62,8 @@
 							Unl
 						{/if}
 					</button>
+
+					<button on:click={()=> deleteGroup(group)}>Del</button>
 				</th>
 				<th scope="row">{group.userGroupId}</th>
 				<td on:click={() => openDetail(group)}>{group.groupTitle}</td>
