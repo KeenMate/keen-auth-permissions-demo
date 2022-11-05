@@ -19,7 +19,10 @@
 	function valid() {
 		if (!title) {
 			errorMessage = "Title cant be empty";
+			return false;
 		}
+
+		return true;
 	}
 
 	function close() {

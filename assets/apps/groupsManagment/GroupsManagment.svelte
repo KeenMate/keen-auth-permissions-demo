@@ -42,7 +42,7 @@
 		callApi(async () => await manager.deleteGroup(group.userGroupId));
 	}
 
-	async function callApi(func, load = true) {
+	async function callApi(func, shouldLoad = true) {
 		try {
 			await func();
 		} catch (res) {
@@ -53,7 +53,7 @@
 			}
 			return;
 		}
-		if (load) {
+		if (shouldLoad) {
 			load();
 		}
 
