@@ -25,7 +25,7 @@ export class GroupsManager extends BaseApiManager {
 
 	async deleteGroup(groupId) {
 		let res = await this.Delete(this.endpoint.delete(groupId));
-	return res.data;
+		return res.data;
 	}
 	async setEnable(groupId, setTo) {
 		let res;
@@ -46,6 +46,15 @@ export class GroupsManager extends BaseApiManager {
 			res = await this.Patch(this.endpoint.unlock(groupId));
 		}
 
+		return res.data;
+	}
+
+	async addMember(groupId, UserId) {
+		let res = await this.Put(this.endpoint.addMember(groupId, UserId));
+		return res.data;
+	}
+	async removeMember(groupId, UserId) {
+		let res = await this.Delete(this.endpoint.removeMember(groupId, UserId));
 		return res.data;
 	}
 }

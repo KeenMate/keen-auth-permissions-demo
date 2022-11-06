@@ -14,9 +14,12 @@
 	let errorMessage;
 	let openCreate = false;
 
-	function showDetail(g) {
+	async function showDetail(g) {
 		console.log("show detail of " + g.userGroupId);
-		callApi(async () => (group = await manager.getGroup(g.userGroupId)), false);
+		await callApi(
+			async () => (group = await manager.getGroup(g.userGroupId)),
+			false
+		);
 	}
 
 	function showList() {
@@ -40,6 +43,19 @@
 
 	async function deleteGroup(group) {
 		callApi(async () => await manager.deleteGroup(group.userGroupId));
+	}
+
+	async function addMember(groupId, userId) {
+		await callApi(async () => {
+			await manager.addMember(groupId, userId);
+			await showDetail(group);
+		});
+	}
+	async function removeMember(groupId, userId) {
+		callApi(async () => {
+			await manager.removeMember(groupId, userId);
+			await showDetail(group);
+		});
 	}
 
 	async function callApi(func, shouldLoad = true) {
@@ -77,7 +93,13 @@
 			on:close={showList}
 		/>
 	{:else if group}
-		<GroupDetail {group} on:close={showList} {errorMessage} />
+		<GroupDetail
+			{group}
+			on:close={showList}
+			{errorMessage}
+			on:add-member={(e) => addMember(group.userGroupId, e.detail)}
+			on:remove-member={(e) => removeMember(group.userGroupId, e.detail)}
+		/>
 	{:else}
 		<GroupsList
 			{errorMessage}

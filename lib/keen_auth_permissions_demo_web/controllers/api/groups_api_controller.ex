@@ -73,6 +73,9 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
         "tenant" => tenant,
         "user_id" => target_user_id
       }) do
+    with {:ok, member_id} <- Manager.add_member_to_group(conn, tenant, group_id, target_user_id) do
+      conn |> ConnHelpers.success_response(member_id)
+    end
   end
 
   def remove_user_from_group(conn, %{
@@ -80,5 +83,9 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
         "tenant" => tenant,
         "user_id" => target_user_id
       }) do
+    with {:ok, _} <-
+           Manager.remove_member_from_group(conn, tenant, group_id, target_user_id) do
+      conn |> ConnHelpers.success_response(nil)
+    end
   end
 end

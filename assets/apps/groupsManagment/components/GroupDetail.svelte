@@ -2,10 +2,20 @@
 	import { createEventDispatcher } from "svelte";
 
 	export let group;
+	export let errorMessage;
 	const dispatch = createEventDispatcher();
 
 	function close() {
 		dispatch("close");
+	}
+
+	let userId;
+	function addMember() {
+		dispatch("add-member", userId);
+	}
+
+	function removeMember(id) {
+		dispatch("remove-member", id);
 	}
 </script>
 
@@ -18,8 +28,17 @@ default:{group.isDefault}<br />
 external:{group.isExternal}<br />
 system:{group.isSystem}<br />
 <h3>Members</h3>
+
+<input type="text" bind:value={userId} />
+<button on:click={addMember}> add</button>
+{#if errorMessage}
+	<div class="alert alert-danger" role="alert">
+		{errorMessage}
+	</div>
+{/if}
 <table class="table">
 	<thead>
+		<th />
 		<th>ID</th>
 		<th>Name</th>
 		<th>Manual</th>
@@ -29,6 +48,7 @@ system:{group.isSystem}<br />
 	<tbody>
 		{#each group.members as member}
 			<tr>
+				<td><button on:click={() => removeMember(member.userId)}>R</button></td>
 				<td>{member.userId}</td>
 				<td>{member.userDisplayName}</td>
 				<td>{member.manualAssignment}</td>

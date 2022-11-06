@@ -167,6 +167,28 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager do
     end
   end
 
+  def add_member_to_group(conn, tenant_id, group_id, target_user_id) do
+    user = user(conn)
+    tenant_id = num(tenant_id)
+    group_id = num(group_id)
+    target_user_id = num(target_user_id)
+
+    with {:ok, [member_id]} <- Db.add_group_member(user, tenant_id, group_id, target_user_id) do
+      {:ok, member_id}
+    end
+  end
+
+  def remove_member_from_group(conn, tenant_id, group_id, target_user_id) do
+    user = user(conn)
+    tenant_id = num(tenant_id)
+    group_id = num(group_id)
+    target_user_id = num(target_user_id)
+
+    with {:ok, [member_id]} <- Db.remove_group_member(user, tenant_id, group_id, target_user_id) do
+      {:ok, member_id}
+    end
+  end
+
   #!SECTION Helpers
   defp user(conn) when conn.assigns.current_user != nil, do: conn.assigns.current_user
 
