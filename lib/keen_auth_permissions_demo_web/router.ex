@@ -32,6 +32,11 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
     plug KeenAuth.Plug.RequireAuthenticated
   end
 
+  pipeline :protected_api do
+    plug :authorization
+    plug KeenAuthPermissionsDemoWeb.ProtectedApi
+  end
+
   scope "/auth" do
     pipe_through :authentication
 
@@ -73,7 +78,7 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
 
     # protected api
     scope "/" do
-      pipe_through :authorization
+      pipe_through :protected_api
 
       # tenant specific
       scope "/:tenant/" do

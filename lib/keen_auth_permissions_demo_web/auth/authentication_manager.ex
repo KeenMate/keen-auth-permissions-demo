@@ -189,6 +189,17 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager do
     end
   end
 
+  #!SECTION Users
+  def get_tenant_users(conn, tenant_id) do
+    #!ignore query for now
+    user = user(conn)
+    tenant_id = num(tenant_id)
+
+    with {:ok, users} <- Db.get_all_users(user, tenant_id) do
+      {:ok, users}
+    end
+  end
+
   #!SECTION Helpers
   defp user(conn) when conn.assigns.current_user != nil, do: conn.assigns.current_user
 

@@ -99,6 +99,8 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationProvider do
     |> ErrorParsers.parse_if_error()
   end
 
+  #!SECTION Groups
+
   def get_groups(%KeenAuthPermissions.User{username: requested_by, user_id: id}, tenant_id) do
     DbContext.auth_get_tenant_groups(requested_by, id, tenant_id)
     |> ErrorParsers.parse_if_error()
@@ -219,6 +221,15 @@ defmodule KeenAuthPermissionsDemoWeb.Auth.AuthenticationProvider do
       group_id,
       target_user_id
     )
+    |> ErrorParsers.parse_if_error()
+  end
+
+  #!SECTION Users
+  def get_all_users(
+        %KeenAuthPermissions.User{username: username, user_id: user_id},
+        tenant_id
+      ) do
+    DbContext.auth_get_tenant_users(username, user_id, tenant_id)
     |> ErrorParsers.parse_if_error()
   end
 end
