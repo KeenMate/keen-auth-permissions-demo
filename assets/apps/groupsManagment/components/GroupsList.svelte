@@ -1,5 +1,6 @@
 <script>
 	import { createEventDispatcher } from "svelte";
+	import GroupActions from "./GroupActions.svelte";
 
 	export let groups;
 	export let errorMessage;
@@ -29,7 +30,11 @@
 		{errorMessage}
 	</div>
 {/if}
-<button class="btn btn-primary" on:click={openCreate}>create group</button>
+
+<div class="mb-2">
+	<button class="btn btn-primary" on:click={openCreate}>create new group</button
+	>
+</div>
 
 <table class="table">
 	<thead>
@@ -47,26 +52,19 @@
 	<tbody>
 		{#each groups as group}
 			<tr>
-				<th>
-					<button on:click={() => setActive(group, !group.isActive)}
-						>{#if group.isActive}
-							Dis
-						{:else}
-							Ena
-						{/if}
-					</button>
-					<button on:click={() => setLocked(group, group.isAssignable)}
-						>{#if group.isAssignable}
-							Loc
-						{:else}
-							Unl
-						{/if}
-					</button>
-
-					<button on:click={()=> deleteGroup(group)}>Del</button>
-				</th>
+				<GroupActions
+					{group}
+					on:set-active={() => setActive(group, !group.isActive)}
+					on:set-lock={() => setLocked(group, group.isAssignable)}
+					on:delete={() => deleteGroup(group)}
+					on:show={() => openDetail(group)}
+				/>
 				<th scope="row">{group.userGroupId}</th>
-				<td on:click={() => openDetail(group)}>{group.groupTitle}</td>
+				<td
+					class="clickable"
+					on:click={() => openDetail(group)}
+					on:keydown={() => openDetail(group)}>{group.groupTitle}</td
+				>
 				<td>{group.groupCode}</td>
 				<td>{group.membersCount}</td>
 				<td>{group.isActive}</td>
@@ -76,3 +74,9 @@
 		{/each}
 	</tbody>
 </table>
+
+<style>
+	.clickable {
+		cursor: pointer;
+	}
+</style>

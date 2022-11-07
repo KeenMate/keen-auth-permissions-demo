@@ -11,6 +11,10 @@
 
 	let userId;
 	function addMember() {
+		if (!userId) {
+			errorMessage = "userId cant be null";
+			return;
+		}
 		dispatch("add-member", userId);
 	}
 
@@ -19,18 +23,27 @@
 	}
 </script>
 
-<button on:click={close}>close</button>
+<div class="d-flex">
+	<button on:click={close} class="btn btn-muted ml-auto"
+		><i class="fa-solid fa-xmark" /></button
+	>
+</div>
 <h1>#{group.userGroupId} {group.title}</h1>
-({group.code})<br />
+<h4>({group.code})</h4>
 active: {group.isActive} <br />
-assignable:{group.isAssignable}<br />
-default:{group.isDefault}<br />
-external:{group.isExternal}<br />
-system:{group.isSystem}<br />
+assignable: {group.isAssignable}<br />
+default: {group.isDefault}<br />
+external: {group.isExternal}<br />
+system: {group.isSystem}<br />
 <h3>Members</h3>
 
-<input type="text" bind:value={userId} />
-<button on:click={addMember}> add</button>
+<input
+	type="number"
+	bind:value={userId}
+	placeholder="user_id"
+	class="form-control"
+/>
+<button on:click={addMember} class="btn"> Add new member</button>
 {#if errorMessage}
 	<div class="alert alert-danger" role="alert">
 		{errorMessage}
@@ -48,7 +61,14 @@ system:{group.isSystem}<br />
 	<tbody>
 		{#each group.members as member}
 			<tr>
-				<td><button on:click={() => removeMember(member.userId)}>R</button></td>
+				<td
+					><button
+						title="Remove member"
+						class="btn btn-outline btn-sm"
+						on:click={() => removeMember(member.userId)}
+						><i class="fa-solid fa-user-minus" /></button
+					></td
+				>
 				<td>{member.userId}</td>
 				<td>{member.userDisplayName}</td>
 				<td>{member.manualAssignment}</td>
@@ -58,3 +78,16 @@ system:{group.isSystem}<br />
 		{/each}
 	</tbody>
 </table>
+
+<style>
+	.btn-sm {
+		padding: 0.25rem 0.5rem;
+		font-size: 0.875rem;
+		line-height: 1.5;
+		border-radius: 0.2rem;
+	}
+
+	.form-control {
+		height: calc(1.5em + 0.75rem + 2px);
+	}
+</style>
