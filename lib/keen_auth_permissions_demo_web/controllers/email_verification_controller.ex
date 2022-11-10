@@ -1,6 +1,6 @@
 defmodule KeenAuthPermissionsDemoWeb.EmailVerificationController do
   alias KeenAuthPermissionsDemoWeb.Helpers.ControllerHelpers
-  alias KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager, as: Auth
+  alias KeenAuthPermissionsDemo.Auth.AuthManager, as: Auth
   alias KeenAuthPermissions.Error.ErrorStruct
 
   use KeenAuthPermissionsDemoWeb, :controller

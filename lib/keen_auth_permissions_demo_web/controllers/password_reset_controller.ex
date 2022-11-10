@@ -1,7 +1,7 @@
 defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
   alias KeenAuthPermissionsDemoWeb.Helpers.ControllerHelpers
   alias KeenAuthPermissions.Error.ErrorStruct
-  alias KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager, as: Auth
+  alias KeenAuthPermissionsDemo.Auth.AuthManager, as: Auth
 
   use KeenAuthPermissionsDemoWeb, :controller
 

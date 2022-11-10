@@ -1,5 +1,5 @@
 defmodule KeenAuthPermissionsDemoWeb.RegistrationController do
-  alias KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager, as: Auth
+  alias KeenAuthPermissionsDemo.Auth.AuthManager, as: Auth
 
   use KeenAuthPermissionsDemoWeb, :controller
 

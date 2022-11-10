@@ -102,13 +102,17 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
 
         scope "/users" do
           get "", Api.UsersApiController, :get_users
+        end
+      end
 
-          scope "/:user_id" do
-            patch "enable", Api.UsersApiController, :enable_user
-            patch "disable", Api.UsersApiController, :disable_user
-            patch "lock", Api.UsersApiController, :lock_user
-            patch "unlock", Api.UsersApiController, :unlock_user
-          end
+      scope "/users" do
+        # get "", Api.UsersApiController, :get_all_users
+
+        scope "/:user_id" do
+          patch "enable", Api.UsersApiController, :enable_user
+          patch "disable", Api.UsersApiController, :disable_user
+          patch "lock", Api.UsersApiController, :lock_user
+          patch "unlock", Api.UsersApiController, :unlock_user
         end
       end
     end

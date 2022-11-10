@@ -1,6 +1,6 @@
 defmodule KeenAuthPermissionsDemoWeb.Api.UsersApiController do
   use KeenAuthPermissionsDemoWeb, :controller
-  alias KeenAuthPermissionsDemoWeb.Auth.AuthenticationManager, as: Manager
+  alias KeenAuthPermissionsDemo.Auth.UsersManager, as: Manager
 
   action_fallback(KeenAuthPermissionsDemoWeb.ApiFallbackHandler)
 
@@ -17,15 +17,27 @@ defmodule KeenAuthPermissionsDemoWeb.Api.UsersApiController do
     end
   end
 
-  def enable_user(conn, %{"tenant" => tenant_id, "user_id" => user_id}) do
+  def enable_user(conn, %{"user_id" => user_id}) do
+    with {:ok, _} <- Manager.enable_user(conn, user_id) do
+      conn |> ConnHelpers.success_response()
+    end
   end
 
-  def disable_user(conn, %{"tenant" => tenant_id, "user_id" => user_id}) do
+  def disable_user(conn, %{"user_id" => user_id}) do
+    with {:ok, _} <- Manager.disable_user(conn, user_id) do
+      conn |> ConnHelpers.success_response()
+    end
   end
 
-  def lock_user(conn, %{"tenant" => tenant_id, "user_id" => user_id}) do
+  def lock_user(conn, %{"user_id" => user_id}) do
+    with {:ok, _} <- Manager.lock_user(conn, user_id) do
+      conn |> ConnHelpers.success_response()
+    end
   end
 
-  def unlock_user(conn, %{"tenant" => tenant_id, "user_id" => user_id}) do
+  def unlock_user(conn, %{"user_id" => user_id}) do
+    with {:ok, _} <- Manager.unlock_user(conn, user_id) do
+      conn |> ConnHelpers.success_response()
+    end
   end
 end
