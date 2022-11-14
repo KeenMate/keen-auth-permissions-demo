@@ -14,12 +14,9 @@
 	let errorMessage;
 	let openCreate = false;
 
-	async function showDetail(g) {
-		console.log("show detail of " + g.userGroupId);
-		await callApi(
-			async () => (group = await manager.getGroup(g.userGroupId)),
-			false
-		);
+	async function showDetail(groupId) {
+		console.log("show detail of " + groupId);
+		await callApi(async () => (group = await manager.getGroup(groupId)), false);
 	}
 
 	function showList() {
@@ -48,15 +45,24 @@
 	async function addMember(groupId, userId) {
 		await callApi(async () => {
 			await manager.addMember(groupId, userId);
-			await showDetail(group);
+			await showDetail(group.userGroupId);
 		});
 	}
 	async function removeMember(groupId, userId) {
 		callApi(async () => {
 			await manager.removeMember(groupId, userId);
-			await showDetail(group);
+			await showDetail(group.userGroupId);
 		});
 	}
+
+	async function load() {
+		console.log("load");
+		callApi(async () => (groups = (await manager.getGroups()) ?? []), false);
+	}
+
+	onMount(async () => {
+		load();
+	});
 
 	async function callApi(func, shouldLoad = true) {
 		try {
@@ -75,14 +81,6 @@
 
 		errorMessage = null;
 	}
-
-	onMount(async () => {
-		load();
-	});
-
-	async function load() {
-		groups = (await manager.getGroups()) ?? [];
-	}
 </script>
 
 <Modal>
@@ -99,12 +97,13 @@
 			{errorMessage}
 			on:add-member={(e) => addMember(group.userGroupId, e.detail)}
 			on:remove-member={(e) => removeMember(group.userGroupId, e.detail)}
+			on:reload={(e) => showDetail(e.detail)}
 		/>
 	{:else}
 		<GroupsList
 			{errorMessage}
 			{groups}
-			on:open-detail={(e) => showDetail(e.detail)}
+			on:open-detail={(e) => showDetail(e.detail.userGroupId)}
 			on:set-active={(e) => setActive(e.detail)}
 			on:set-locked={(e) => setLocked(e.detail)}
 			on:open-create={() => (openCreate = true)}

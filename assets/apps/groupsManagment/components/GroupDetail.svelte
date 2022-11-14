@@ -21,6 +21,10 @@
 	function removeMember(id) {
 		dispatch("remove-member", id);
 	}
+
+	function reload() {
+		dispatch("reload", group.userGroupId);
+	}
 </script>
 
 <div class="d-flex">
@@ -51,7 +55,13 @@ system: {group.isSystem}<br />
 {/if}
 <table class="table">
 	<thead>
-		<th />
+		<th
+			><button
+				title="Remove member"
+				class="btn btn-outline btn-sm"
+				on:click={() => reload()}><i class="fas fa-sync" /></button
+			>
+		</th>
 		<th>ID</th>
 		<th>Name</th>
 		<th>Manual</th>
