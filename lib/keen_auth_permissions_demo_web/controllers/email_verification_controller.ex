@@ -1,5 +1,4 @@
 defmodule KeenAuthPermissionsDemoWeb.EmailVerificationController do
-  alias KeenAuthPermissionsDemoWeb.Helpers.ControllerHelpers
   alias KeenAuthPermissionsDemo.Auth.AuthManager, as: Auth
   alias KeenAuthPermissions.Error.ErrorStruct
 
@@ -10,10 +9,12 @@ defmodule KeenAuthPermissionsDemoWeb.EmailVerificationController do
   def verify_email(conn, %{"token" => token}) do
     with {:ok, user_id} <- Auth.verify_email(conn, token),
          Auth.add_to_default_groups(conn, user_id, 1) do
-      ControllerHelpers.success_flash_index(
-        conn,
-        "Email validated successfully"
+      conn
+      |> put_flash(
+        :info,
+        "Email Verified, You can now log in"
       )
+      |> redirect(to: Routes.login_path(conn, :login))
     end
   end
 
