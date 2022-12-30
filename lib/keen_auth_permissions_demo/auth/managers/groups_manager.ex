@@ -37,7 +37,7 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
   end
 
   def get_group_members(conn, tenant, group) do
-    Provider.get_group_members(user(conn), num(tenant), num(group))
+    GroupsProvider.get_group_members(user(conn), num(tenant), num(group))
   end
 
   def create_group(conn, tenant, group) do
@@ -47,7 +47,7 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
     is_default = Map.get(group, :is_default, false)
 
     with {:ok, [new_group_id]} <-
-           Provider.create_group(
+           GroupsProvider.create_group(
              user(conn),
              num(tenant),
              group.title,
@@ -67,7 +67,7 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
     target_user_id = num(target_user_id)
 
     with {:ok, [member_id]} <-
-           Provider.add_group_member(user, tenant_id, group_id, target_user_id) do
+           GroupsProvider.add_group_member(user, tenant_id, group_id, target_user_id) do
       {:ok, member_id}
     end
   end
@@ -79,7 +79,7 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
     target_user_id = num(target_user_id)
 
     with {:ok, [member_id]} <-
-           Provider.remove_group_member(user, tenant_id, group_id, target_user_id) do
+           GroupsProvider.remove_group_member(user, tenant_id, group_id, target_user_id) do
       {:ok, member_id}
     end
   end

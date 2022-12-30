@@ -1,6 +1,6 @@
 defmodule KeenAuthPermissionsDemo.User.Verification do
   alias Simplificator3000.RandomHelpers
-  alias KeenAuthPermissions.Error.{ErrorParsers, ErrorStruct}
+  alias KeenAuthPermissions.Error.{ErrorStruct}
 
   @type token_type() :: :email_verification | :password_reset
 
