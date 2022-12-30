@@ -8,7 +8,8 @@ defmodule KeenAuthPermissionsDemoWeb.EmailVerificationController do
   action_fallback(KeenAuthPermissionsDemoWeb.ApiFallbackHandler)
 
   def verify_email(conn, %{"token" => token}) do
-    with :ok <- Auth.verify_email(conn, token) do
+    with {:ok, user_id} <- Auth.verify_email(conn, token),
+         Auth.add_to_default_groups(conn, user_id, 1) do
       ControllerHelpers.success_flash_index(
         conn,
         "Email validated successfully"

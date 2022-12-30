@@ -1,4 +1,6 @@
 defmodule KeenAuthPermissionsDemo.Auth.AuthManager do
+  require Logger
+
   alias KeenAuthPermissionsDemo.Mailer
   alias KeenAuthPermissionsDemoWeb.Email
 
@@ -64,7 +66,7 @@ defmodule KeenAuthPermissionsDemo.Auth.AuthManager do
   def verify_email(conn, token) do
     with {:ok, user_id} <- validate_token(conn, token, "email", :email_verification, true),
          {:ok, [_]} <- AuthProvider.activate_email(user_id) do
-      :ok
+      {:ok, user_id}
     end
   end
 
@@ -94,6 +96,7 @@ defmodule KeenAuthPermissionsDemo.Auth.AuthManager do
     end
   end
 
+  @spec send_password_reset_token(any, any, any) :: none
   def send_password_reset_token(conn, user, "email") do
     with {:ok, token} <- create_password_reset_token(conn, user.user_id, "email"),
          {:ok, _} <-
@@ -106,6 +109,12 @@ defmodule KeenAuthPermissionsDemo.Auth.AuthManager do
     with {:ok, token} <- create_password_reset_token(conn, user.user_id, "sms"),
          SMSSender.send_sms("+420 608179168", SMS.forgotten_password(conn, user, token)) do
       {:ok, token}
+    end
+  end
+
+  def add_to_default_groups(_conn, target_user_id, tenant_id) do
+    with {:ok, _} <- AuthProvider.add_to_default_groups_in_tenant(target_user_id, tenant_id) do
+      :ok
     end
   end
 end

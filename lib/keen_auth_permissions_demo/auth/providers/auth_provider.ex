@@ -98,4 +98,9 @@ defmodule KeenAuthPermissionsDemo.Auth.AuthProvider do
     DbContext.auth_enable_user_identity("system", 1, user_id, "email")
     |> ErrorParsers.parse_if_error()
   end
+
+  def add_to_default_groups_in_tenant(target_user_id, tenant_id) do
+    DbContext.auth_add_user_to_default_groups("system", 1, target_user_id, tenant_id)
+    |> ErrorParsers.parse_if_error()
+  end
 end
