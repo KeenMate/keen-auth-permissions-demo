@@ -24,11 +24,12 @@ export class BaseApiManager {
 
 			return json;
 		}
-		if (res.status === 500) {
+
+		let contentType = res.headers.get("content-type");
+		if (contentType && contentType.indexOf("application/json") !== -1) {
 			throw await res.json();
 		}
-		console.log(res);
-		throw "Error Comunication with server";
+		throw await res.text();
 	}
 
 	async Get(url) {
