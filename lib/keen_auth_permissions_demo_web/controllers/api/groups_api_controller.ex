@@ -1,5 +1,6 @@
 defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
   use KeenAuthPermissionsDemoWeb, :controller
+  alias KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers
   alias KeenAuthPermissionsDemo.Auth.GroupsManager, as: Manager
 
   action_fallback(KeenAuthPermissionsDemoWeb.ApiFallbackHandler)
@@ -86,6 +87,38 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
     with {:ok, _} <-
            Manager.remove_member_from_group(conn, tenant, group_id, target_user_id) do
       conn |> ConnHelpers.success_response(nil)
+    end
+  end
+
+  def get_user_groups_mappings(conn, %{
+        "tenant" => tenant,
+        "group_id" => group_id
+      }) do
+    with {:ok, mappings} <- Manager.get_user_group_mappings(conn, tenant, group_id) do
+      ConnHelpers.success_response(conn, mappings)
+    end
+  end
+
+  def create_user_group_mapping(conn, %{
+        "tenant" => tenant,
+        "group_id" => group_id,
+        "provider" => provider_code,
+        "mapped_object_name" => mapping_name,
+        "type" => mapping_type,
+        "mapped_value" => mapped_value
+      })
+      when mapping_type in ["role", "group"] do
+    with {:ok, mapping} <-
+           Manager.create_user_group_mapping(
+             conn,
+             tenant,
+             group_id,
+             provider_code,
+             mapping_name,
+             mapped_value,
+             mapping_type
+           ) do
+      ConnHelpers.success_response(conn, mapping)
     end
   end
 end

@@ -83,4 +83,56 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
       {:ok, member_id}
     end
   end
+
+  def get_user_group_mappings(
+        conn,
+        tenant_id,
+        group_id
+      ) do
+    user = user(conn)
+    tenant_id = num(tenant_id)
+    group_id = num(group_id)
+
+    GroupsProvider.get_user_group_mapping(
+      user,
+      tenant_id,
+      group_id
+    )
+  end
+
+  def create_user_group_mapping(
+        conn,
+        tenant_id,
+        group_id,
+        provider_code,
+        mapped_object_name,
+        mapped_target,
+        mapping_type
+      ) do
+    user = user(conn)
+    tenant_id = num(tenant_id)
+    group_id = num(group_id)
+
+    {mapped_object_id, mapped_role} =
+      case mapping_type do
+        "role" ->
+          {nil, mapped_target}
+
+        "group" ->
+          {mapped_target, nil}
+      end
+
+    with {:ok, [result]} <-
+           GroupsProvider.create_user_group_mapping(
+             user,
+             tenant_id,
+             group_id,
+             provider_code,
+             mapped_object_id,
+             mapped_object_name,
+             mapped_role
+           ) do
+      {:ok, result}
+    end
+  end
 end

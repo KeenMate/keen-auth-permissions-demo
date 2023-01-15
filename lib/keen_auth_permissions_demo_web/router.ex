@@ -87,16 +87,20 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
           put "", Api.GroupsApiController, :create_group
 
           scope "/:group_id" do
-            get "", Api.GroupsApiController, :group_info
+            get    "", Api.GroupsApiController, :group_info
             delete "", Api.GroupsApiController, :delete_group
 
-            patch "enable", Api.GroupsApiController, :enable_group
-            patch "disable", Api.GroupsApiController, :disable_group
-            patch "lock", Api.GroupsApiController, :lock_group
-            patch "unlock", Api.GroupsApiController, :unlock_group
+            patch  "enable", Api.GroupsApiController, :enable_group
+            patch  "disable", Api.GroupsApiController, :disable_group
+            patch  "lock", Api.GroupsApiController, :lock_group
+            patch  "unlock", Api.GroupsApiController, :unlock_group
             # members
-            put ":user_id", Api.GroupsApiController, :add_user_to_group
+            put    ":user_id", Api.GroupsApiController, :add_user_to_group
             delete ":user_id", Api.GroupsApiController, :remove_user_from_group
+						#mapping
+						get    "mappings", Api.GroupsApiController, :get_user_groups_mappings
+						put    "mappings", Api.GroupsApiController, :create_user_group_mapping
+						delete "mappings/:mapping_id", Api.GroupsApiController, :create_user_group_mapping
           end
         end
 

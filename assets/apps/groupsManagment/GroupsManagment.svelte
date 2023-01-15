@@ -68,6 +68,7 @@
 		try {
 			await func();
 		} catch (res) {
+			console.log(res);
 			if (res?.error) {
 				errorMessage = res?.error?.msg;
 			} else {

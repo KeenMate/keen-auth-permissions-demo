@@ -2581,6 +2581,31 @@ begin
 end;
 $$;
 
+
+create or replace function auth.get_user_group_mappings(_requested_by text, _user_id bigint, _tenant_id int, _user_group_id int)
+    returns setof user_group_mapping
+    language plpgsql
+as
+$$
+begin
+
+    perform auth.has_permission(_tenant_id, _user_id, 'system.manage_groups.get_mappings');
+
+    return query select *
+                 from user_group_mapping ugm
+                 where ugm.group_id = _user_group_id;
+
+    perform
+        add_journal_msg(_requested_by, _tenant_id, _user_id
+            , format('User: %s requested user group mappings for group: %s in tenant: %s'
+                            , _requested_by, _user_group_id, _tenant_id)
+            , 'group', _user_group_id
+            ,
+                        NULL
+            , 50230);
+end;
+$$;
+
 create function auth.create_user_group_mapping(_created_by text, _user_id bigint, _tenant_id int, _user_group_id int,
                                                _provider_code text,
                                                _mapped_object_id text default null,
@@ -5110,6 +5135,7 @@ begin
     perform unsecure.create_permission_by_path_as_system('Create member', 'system.manage_groups');
     perform unsecure.create_permission_by_path_as_system('Delete member', 'system.manage_groups');
     perform unsecure.create_permission_by_path_as_system('Get members', 'system.manage_groups');
+    perform unsecure.create_permission_by_path_as_system('Get mappings', 'system.manage_groups');
     perform unsecure.create_permission_by_path_as_system('Create mapping', 'system.manage_groups');
     perform unsecure.create_permission_by_path_as_system('Delete mapping', 'system.manage_groups');
 

@@ -126,4 +126,49 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsProvider do
     )
     |> ErrorParsers.parse_if_error()
   end
+
+  def get_user_group_mapping(
+        %KeenAuthPermissions.User{username: username, user_id: user_id},
+        tenant_id,
+        group_id
+      ) do
+    DbContext.auth_get_user_group_mappings(username, user_id, tenant_id, group_id)
+    |> ErrorParsers.parse_if_error()
+  end
+
+  def create_user_group_mapping(
+        %KeenAuthPermissions.User{username: username, user_id: user_id},
+        tenant_id,
+        user_group_id,
+        provider_code,
+        mapped_object_id,
+        mapped_object_name,
+        mapped_role
+      ) do
+    DbContext.auth_create_user_group_mapping(
+      username,
+      user_id,
+      tenant_id,
+      user_group_id,
+      provider_code,
+      mapped_object_id,
+      mapped_object_name,
+      mapped_role
+    )
+    |> ErrorParsers.parse_error()
+  end
+
+  def delete_user_group_paming(
+        %KeenAuthPermissions.User{username: username, user_id: user_id},
+        tenant_id,
+        user_group_mapping_id
+      ) do
+    DbContext.auth_delete_user_group_mapping(
+      username,
+      user_id,
+      tenant_id,
+      user_group_mapping_id
+    )
+    |> ErrorParsers.parse_error()
+  end
 end

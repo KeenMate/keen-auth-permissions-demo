@@ -7,6 +7,10 @@ defmodule KeenAuthPermissionsDemoWeb.ApiFallbackHandler do
   stays on the same page and shows error flash
   """
 
+  def call(conn, {:error, %ErrorStruct{reason: :no_permission, message: message}}) do
+    ConnHelpers.error_response(conn, reason: :no_permission, msg: message, response_code: 403)
+  end
+
   def call(conn, {:error, %ErrorStruct{reason: reason, message: message}}) do
     ConnHelpers.error_response(conn, reason: reason, msg: message)
   end
@@ -16,6 +20,6 @@ defmodule KeenAuthPermissionsDemoWeb.ApiFallbackHandler do
   end
 
   def call(conn, _er) do
-    ConnHelpers.error_response(conn, reason: "error", msg: "internal server error")
+    ConnHelpers.error_response(conn, reason: "error", msg: "Internal server error")
   end
 end
