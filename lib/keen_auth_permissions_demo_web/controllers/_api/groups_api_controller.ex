@@ -2,72 +2,104 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
   use KeenAuthPermissionsDemoWeb, :controller
   alias KeenAuthPermissionsDemo.Auth.GroupsManager, as: Manager
 
-  action_fallback(KeenAuthPermissionsDemoWeb.ApiFallbackHandler)
+  @tenant_scheme %{
+    tenant: [type: :integer, number: [min: 0], required: true]
+  }
 
-  # TODO PROTECT
-  # plug(
-  #   KeenAuth.Plug.Authorize.Groups,
-  #   [required: ["admin_tenants"]] when action == :get_groups_for_tenant
-  # )
+  @tenant_and_group_scheme %{
+    tenant: [type: :integer, number: [min: 0], required: true],
+    group_id: [type: :integer, number: [min: 0], required: true]
+  }
 
-  def get_groups_for_tenant(conn, %{"tenant" => tenant}) do
+  api_handler(:get_groups_for_tenant, @tenant_scheme,
+    permissions: ["system.manage_tenants.get_groups"]
+  )
+
+  def get_groups_for_tenant_handler(conn, %{tenant: tenant}) do
     with {:ok, groups} <- Manager.get_groups(conn, tenant) do
-      conn |> ConnHelpers.success_response(groups)
+      ok(groups)
     end
   end
 
-  def enable_group(conn, %{"group_id" => group_id, "tenant" => tenant}) do
+  api_handler(:enable_group, @tenant_and_group_scheme,
+    permissions: ["system.manage_groups.update_group"]
+  )
+
+  def enable_group_handler(conn, %{group_id: group_id, tenant: tenant}) do
     with {:ok, _} <- Manager.enable_group(conn, tenant, group_id) do
-      conn |> ConnHelpers.success_response()
+      ok(:ok)
     end
   end
 
-  def disable_group(conn, %{"group_id" => group_id, "tenant" => tenant}) do
+  api_handler(:disable_group, @tenant_and_group_scheme,
+    permissions: ["system.manage_groups.update_group"]
+  )
+
+  def disable_group_handler(conn, %{group_id: group_id, tenant: tenant}) do
     with {:ok, _} <- Manager.disable_group(conn, tenant, group_id) do
-      conn |> ConnHelpers.success_response()
+      ok(:ok)
     end
   end
 
-  def lock_group(conn, %{"group_id" => group_id, "tenant" => tenant}) do
+  api_handler(:lock_group, @tenant_and_group_scheme,
+    permissions: ["system.manage_groups.lock_group"]
+  )
+
+  def lock_group_handler(conn, %{group_id: group_id, tenant: tenant}) do
     with {:ok, _} <- Manager.lock_group(conn, tenant, group_id) do
-      conn |> ConnHelpers.success_response()
+      ok(:ok)
     end
   end
 
-  def unlock_group(conn, %{"group_id" => group_id, "tenant" => tenant}) do
+  api_handler(:unlock_group, @tenant_and_group_scheme,
+    permissions: ["system.manage_groups.update_group"]
+  )
+
+  def unlock_group_handler(conn, %{group_id: group_id, tenant: tenant}) do
     with {:ok, _} <- Manager.unlock_group(conn, tenant, group_id) do
-      conn |> ConnHelpers.success_response()
+      ok(:ok)
     end
   end
 
-  def delete_group(conn, %{"group_id" => group_id, "tenant" => tenant}) do
+  api_handler(:delete_group, @tenant_and_group_scheme,
+    permissions: ["system.manage_groups.delete_group"]
+  )
+
+  def delete_group_handler(conn, %{group_id: group_id, tenant: tenant}) do
     with {:ok, _} <- Manager.delete_group(conn, tenant, group_id) do
-      conn |> ConnHelpers.success_response()
+      ok(:ok)
     end
   end
 
-  def group_info(conn, %{"group_id" => group_id, "tenant" => tenant}) do
+  api_handler(:group_info, @tenant_and_group_scheme,
+    permissions: {["system.manage_groups.get_members", "system.manage_groups.get_group"], :and}
+  )
+
+  def group_info_handler(conn, %{group_id: group_id, tenant: tenant}) do
     with {:ok, group_info} <- Manager.group_info(conn, tenant, group_id) do
-      conn |> ConnHelpers.success_response(group_info)
+      ok(group_info)
     end
   end
 
-  def create_group(conn, %{"tenant" => tenant}) do
-    body = conn.body_params
+  @create_group_scheme %{
+    tenant: [type: :integer, number: [min: 0], required: true],
+    title: [type: :string, required: true],
+    is_assignable: [type: :boolean, required: true],
+    is_active: [type: :boolean, required: true],
+    is_external: [type: :boolean, required: true]
+  }
+  api_handler(:create_group, @create_group_scheme,
+    permissions: ["system.manage_groups.create_group"]
+  )
 
-    group = %{
-      title: body["title"],
-      is_assignable: body["isAssignable"],
-      is_active: body["isActive"],
-      is_external: body["isExternal"]
-    }
-
-    with {:ok, new_group_id} <- Manager.create_group(conn, tenant, group),
+  def create_group_handler(conn, %{tenant: tenant} = params) do
+    with {:ok, new_group_id} <- Manager.create_group(conn, tenant, params),
          {:ok, group_info} <- Manager.group_info(conn, tenant, new_group_id) do
       conn |> ConnHelpers.success_response(group_info)
     end
   end
 
+  # * Members
   def add_user_to_group(conn, %{
         "group_id" => group_id,
         "tenant" => tenant,
@@ -89,6 +121,7 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
     end
   end
 
+  # * Mappings
   def get_user_groups_mappings(conn, %{
         "tenant" => tenant,
         "group_id" => group_id

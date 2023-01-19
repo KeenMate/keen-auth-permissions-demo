@@ -73,6 +73,7 @@ config :keen_auth,
   ]
 
 config :simplificator_3000_phoenix,
+  auth_handler: &KeenAuthPermissionsDemoWeb.Auth.AuthHandler.check/2,
   api_handler: %{
     fallback_handler: &KeenAuthPermissionsDemoWeb.ApiFallbackHandler.api_fallback/3
   }

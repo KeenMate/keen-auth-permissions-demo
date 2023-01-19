@@ -68,6 +68,11 @@
 		try {
 			await func();
 		} catch (res) {
+			if (res == "Forbidden") {
+				errorMessage = "Forbidden, missing permissions";
+				return;
+			}
+
 			console.log(res);
 			if (res?.error) {
 				errorMessage = res?.error?.msg;
