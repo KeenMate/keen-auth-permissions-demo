@@ -1,6 +1,5 @@
 defmodule KeenAuthPermissionsDemoWeb.ApiFallbackHandler do
   alias KeenAuthPermissions.Error.{ErrorStruct}
-  alias KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers
   use KeenAuthPermissionsDemoWeb, :controller
 
   @doc """

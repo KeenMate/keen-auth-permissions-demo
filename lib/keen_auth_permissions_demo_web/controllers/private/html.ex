@@ -1,5 +1,5 @@
 defmodule KeenAuthPermissionsDemoWeb.PrivateHTML do
   use KeenAuthPermissionsDemoWeb, :html
 
-  embed_templates("private/*")
+  embed_templates("*")
 end

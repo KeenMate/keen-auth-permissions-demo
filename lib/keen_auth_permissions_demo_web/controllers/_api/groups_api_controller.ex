@@ -1,6 +1,5 @@
 defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
   use KeenAuthPermissionsDemoWeb, :controller
-  alias KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers
   alias KeenAuthPermissionsDemo.Auth.GroupsManager, as: Manager
 
   action_fallback(KeenAuthPermissionsDemoWeb.ApiFallbackHandler)

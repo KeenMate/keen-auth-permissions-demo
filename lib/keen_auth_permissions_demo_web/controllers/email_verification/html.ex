@@ -1,5 +1,5 @@
 defmodule KeenAuthPermissionsDemoWeb.EmailVerificationHTML do
   use KeenAuthPermissionsDemoWeb, :html
 
-  embed_templates("email_verification/*")
+  embed_templates("*")
 end

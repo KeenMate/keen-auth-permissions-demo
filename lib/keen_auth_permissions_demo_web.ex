@@ -32,7 +32,7 @@ defmodule KeenAuthPermissionsDemoWeb do
       import KeenAuthPermissionsDemoWeb.Gettext
       alias KeenAuthPermissionsDemoWeb.Router.Helpers, as: Routes
 
-      alias KeenAuthPermissionsDemoWeb.Helpers.ConnHelpers
+      alias Simplificator3000Phoenix.Conn, as: ConnHelpers
     end
   end
 
