@@ -49,7 +49,7 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
     get "/", PageController, :index
     # authorization pages
     get "/login", LoginController, :login
-    get "/register", RegistrationController, :register
+    get "/register", RegistrationController, :register_get
     get "/forgotten-password", ForgottenPasswordController, :forgotten_password_get
     get "/reset-password", PasswordResetController, :reset_password_get
     get "/sms-reset", PasswordResetController, :sms_token_reset_get

@@ -102,13 +102,16 @@ defmodule KeenAuthPermissionsDemoWeb do
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
-			use Simplificator3000Phoenix, :html
+      use Simplificator3000Phoenix, :html
 
       # Routes generation with the ~p sigil
       unquote(verified_routes())
 
       # Custom helpers
       import KeenAuthPermissionsDemoWeb.Helpers.TemplateHelpers
+
+      # Apps
+      import KeenAuthPermissionsDemoWeb.Apps, only: [embed_app: 1]
     end
   end
 
