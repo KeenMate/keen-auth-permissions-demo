@@ -1,5 +1,5 @@
-defmodule KeenAuthPermissionsDemoWeb.ErrorView do
-  use KeenAuthPermissionsDemoWeb, :view
+defmodule KeenAuthPermissionsDemoWeb.ErrorHTML do
+  use KeenAuthPermissionsDemoWeb, :html
 
   # If you want to customize a particular status code
   # for a certain format, you may uncomment below.

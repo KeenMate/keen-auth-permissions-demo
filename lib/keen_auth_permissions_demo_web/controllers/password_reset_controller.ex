@@ -13,7 +13,7 @@ defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
       conn
       |> KeenAuthPermissionsDemoWeb.Apps.include(["passwordReset"])
       |> set_title("Password reset")
-      |> render("password_reset.html", token: token, method: method)
+      |> render(:password_reset, token: token, method: method)
     else
       {:error, %ErrorStruct{} = error} ->
         ControllerHelpers.error_flash_index(conn, error.message)
@@ -34,11 +34,10 @@ defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
     end
   end
 
-  @spec sms_token_reset_get(Plug.Conn.t(), any) :: Plug.Conn.t()
   def sms_token_reset_get(conn, _params) do
     conn
     |> KeenAuthPermissionsDemoWeb.Apps.include(["smsToken"])
-    |> render("sms_token_reset.html")
+    |> render(:sms_token_reset)
   end
 
   def sms_token_reset_post(conn, %{"token" => token}) do

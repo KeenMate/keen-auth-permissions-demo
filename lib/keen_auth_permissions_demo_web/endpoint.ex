@@ -20,7 +20,9 @@ defmodule KeenAuthPermissionsDemoWeb.Endpoint do
   plug Plug.Static,
     at: "/",
     from: :keen_auth_permissions_demo,
-    gzip: true
+    gzip: true,
+    # only: ~w(assets fonts images favicon.ico robots.txt)
+    only: KeenAuthPermissionsDemoWeb.static_paths()
 
   # only: ~w(assets fonts images favicon.ico robots.txt)
 

@@ -8,7 +8,7 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
     plug :fetch_session
     plug :fetch_live_flash
     plug :fetch_flash
-    plug :put_root_layout, {KeenAuthPermissionsDemoWeb.LayoutView, :root}
+    plug :put_root_layout, {KeenAuthPermissionsDemoWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug KeenAuth.Plug.FetchUser
@@ -20,7 +20,7 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
 
   pipeline :authentication do
     plug :fetch_session
-    plug :put_root_layout, {KeenAuthPermissionsDemoWeb.LayoutView, :root}
+    plug :put_root_layout, {KeenAuthPermissionsDemoWeb.Layouts, :root}
   end
 
   pipeline :authorization do
@@ -49,7 +49,7 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
     get "/", PageController, :index
     # authorization pages
     get "/login", LoginController, :login
-    get "/register", RegistrationController, :register_get
+    get "/register", RegistrationController, :register
     get "/forgotten-password", ForgottenPasswordController, :forgotten_password_get
     get "/reset-password", PasswordResetController, :reset_password_get
     get "/sms-reset", PasswordResetController, :sms_token_reset_get
@@ -83,29 +83,29 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
       # tenant specific
       scope "/:tenant/" do
         scope "/groups" do
-          get "", Api.GroupsApiController, :get_groups_for_tenant
-          put "", Api.GroupsApiController, :create_group
+          get "/", Api.GroupsApiController, :get_groups_for_tenant
+          put "/", Api.GroupsApiController, :create_group
 
           scope "/:group_id" do
-            get    "", Api.GroupsApiController, :group_info
-            delete "", Api.GroupsApiController, :delete_group
+            get "/", Api.GroupsApiController, :group_info
+            delete "/", Api.GroupsApiController, :delete_group
 
-            patch  "enable", Api.GroupsApiController, :enable_group
-            patch  "disable", Api.GroupsApiController, :disable_group
-            patch  "lock", Api.GroupsApiController, :lock_group
-            patch  "unlock", Api.GroupsApiController, :unlock_group
+            patch "/enable", Api.GroupsApiController, :enable_group
+            patch "/disable", Api.GroupsApiController, :disable_group
+            patch "/lock", Api.GroupsApiController, :lock_group
+            patch "/unlock", Api.GroupsApiController, :unlock_group
             # members
-            put    ":user_id", Api.GroupsApiController, :add_user_to_group
-            delete ":user_id", Api.GroupsApiController, :remove_user_from_group
-						#mapping
-						get    "mappings", Api.GroupsApiController, :get_user_groups_mappings
-						put    "mappings", Api.GroupsApiController, :create_user_group_mapping
-						delete "mappings/:mapping_id", Api.GroupsApiController, :create_user_group_mapping
+            put "/:user_id", Api.GroupsApiController, :add_user_to_group
+            delete "/:user_id", Api.GroupsApiController, :remove_user_from_group
+            # mapping
+            get "/mappings", Api.GroupsApiController, :get_user_groups_mappings
+            put "/mappings", Api.GroupsApiController, :create_user_group_mapping
+            delete "/mappings/:mapping_id", Api.GroupsApiController, :create_user_group_mapping
           end
         end
 
         scope "/users" do
-          get "", Api.UsersApiController, :get_users
+          get "/", Api.UsersApiController, :get_users
         end
       end
 
@@ -113,10 +113,10 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
         # get "", Api.UsersApiController, :get_all_users
 
         scope "/:user_id" do
-          patch "enable", Api.UsersApiController, :enable_user
-          patch "disable", Api.UsersApiController, :disable_user
-          patch "lock", Api.UsersApiController, :lock_user
-          patch "unlock", Api.UsersApiController, :unlock_user
+          patch "/enable", Api.UsersApiController, :enable_user
+          patch "/disable", Api.UsersApiController, :disable_user
+          patch "/lock", Api.UsersApiController, :lock_user
+          patch "/unlock", Api.UsersApiController, :unlock_user
         end
       end
     end

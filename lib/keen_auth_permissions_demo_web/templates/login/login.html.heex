@@ -9,8 +9,8 @@
 
         <div class="row contact-bg p-5 rounded mb-5">
             <div class="col-lg-7 mb-4 mb-lg-0">
-                <form action={Routes.authentication_path(@conn, :new, :email)} method="post">
-                    <input type="hidden" name="_csrf_token" value={csrf_token_value()}>
+                <form action={~p(/auth/email/new)} method="post">
+                    <.csrf_input />
                     <input type="email" class="form-control mb-3" id="email" name="email" placeholder="Your Email" tabindex="1">
                     <input type="password" class="form-control mb-3" id="password" name="password" placeholder="Password" tabindex="2">
                     <%= if @error != nil  do %>
@@ -19,17 +19,17 @@
                         <%= if Map.has_key?(@error, :link)  do %>
                           <a href={@error.link}><%= @error.link_title%></a>
                         <% end %>
-                        
+
                         </div>
                     <% end %>
                     <div>
-                        <%= link "Reset password", to: Routes.forgotten_password_path(@conn, :forgotten_password_get), class: "d-inline mb-3 mr-2", tabindex: "5" %>
-                        <%= link "Register", to: Routes.registration_path(@conn, :register_get), class: "d-inline mb-3", tabindex: "6" %>
+												<a href={~p(/forgotten-password)}  class="d-inline mb-3 mr-2" tabindex="5"></a>
+												<a href={~p(/register)}  class="d-inline mb-3" tabindex="6"></a>
                     </div>
                     <div>
 
                     <button type="submit" value="send" class="btn btn-secondary d-inline" tabindex="3">LOG IN</button>
-                    <a class="btn btn-secondary d-inline" href={Routes.authentication_path(@conn, :new, :aad, redirect_to: @redirect_to)} role="button" tabindex="4">Azure</a>
+                    <a class="btn btn-secondary d-inline"href={~p(/auth/aad/new)}  role="button" tabindex="4">Azure</a>
                     </div>
 
 

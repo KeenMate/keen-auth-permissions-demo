@@ -1,7 +1,7 @@
 <section class="fixed-top navigation">
   <div class="container">
     <nav class="navbar navbar-expand-lg navbar-light">
-      <a class="navbar-brand" href={Routes.page_path(@conn, :index)}><img src={Routes.static_path(@conn, "/images/logo.png")} alt="logo"></a>
+      <a class="navbar-brand" href={~p"/"}><img src={~p"/images/logo.png"} alt="logo"></a>
       <button class="navbar-toggler border-0" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar"
         aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -10,24 +10,24 @@
       <div class="collapse navbar-collapse text-center" id="navbar">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item">
-            <a class="nav-link" href={Routes.page_path(@conn, :index)}>Home</a>
+            <a class="nav-link" href={~p"/"}>Home</a>
           </li>
       <%!-- authenticated routes --%>
 
-        <%= if not is_nil(@current_user) do %>
+        <%= if not is_nil(Map.get(@conn.assigns,:current_user,nil)) do %>
           <li class="nav-item">
-            <a class="nav-link" href={Routes.private_path(@conn, :private_page_get)}>Private </a>
+            <a class="nav-link" href={~p"/private"}>Private </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href={Routes.page_path(@conn, :groups)}>Groups </a>
+            <a class="nav-link" href={~p"/groups"}>Groups </a>
           </li>
         <% end %>
 
         </ul>
-        <%= if is_nil(@current_user) do %>
-        <a href={Routes.login_path(@conn, :login)} class="btn btn-primary ml-lg-3 primary-shadow">Log In</a>
+        <%= if is_nil(Map.get(@conn.assigns,:current_user,nil)) do %>
+        <a href={~p"/login"} class="btn btn-primary ml-lg-3 primary-shadow">Log In</a>
         <% else %>
-        <a href={Routes.authentication_path(@conn, :delete)} class="btn btn-primary ml-lg-3 primary-shadow">Log Out</a>
+        <a href={~p"/auth/delete"} class="btn btn-primary ml-lg-3 primary-shadow">Log Out</a>
         <% end %>
       </div>
     </nav>

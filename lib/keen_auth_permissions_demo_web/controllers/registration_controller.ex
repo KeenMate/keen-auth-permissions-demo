@@ -9,7 +9,7 @@ defmodule KeenAuthPermissionsDemoWeb.RegistrationController do
     conn
     |> KeenAuthPermissionsDemoWeb.Apps.include(["registration"])
     |> set_title("Registration")
-    |> render("register.html")
+    |> render(:register)
   end
 
   def register_post(conn, %{"email" => email, "name" => name, "password" => password}) do

@@ -6,6 +6,6 @@ defmodule KeenAuthPermissionsDemoWeb.PrivateController do
   def private_page_get(conn, _params) do
     IO.inspect(KeenAuth.current_user(conn), label: "current user")
 
-    conn |> render("private.html")
+    conn |> render(:private)
   end
 end

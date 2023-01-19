@@ -22,7 +22,7 @@ defmodule KeenAuthPermissionsDemoWeb.EmailVerificationController do
     conn
     |> set_title("Resend email verification")
     |> KeenAuthPermissionsDemoWeb.Apps.include(["resendEmail"])
-    |> render("resend_email.html")
+    |> render(:resend_email)
   end
 
   def resend_verification_post(conn, %{"email" => email}) do

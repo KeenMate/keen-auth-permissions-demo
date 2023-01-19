@@ -5,7 +5,7 @@ defmodule KeenAuthPermissionsDemoWeb.PageController do
     conn
     |> KeenAuthPermissionsDemoWeb.Apps.include(["registration"])
     |> set_title("Home")
-    |> render("index.html")
+    |> render(:index)
   end
 
   def groups(conn, _params) do
@@ -13,6 +13,13 @@ defmodule KeenAuthPermissionsDemoWeb.PageController do
     |> assign(:tenant, KeenAuthPermissions.TenantResolver.resolve_tenant(conn))
     |> KeenAuthPermissionsDemoWeb.Apps.include(["groupsManagment"])
     |> set_title("Groups")
-    |> render("groups.html")
+    |> render(:groups)
+  end
+
+  def register(conn, _params) do
+    conn
+    |> KeenAuthPermissionsDemoWeb.Apps.include(["registration"])
+    |> set_title("Registration")
+    |> render(:register)
   end
 end

@@ -10,7 +10,7 @@ defmodule KeenAuthPermissionsDemoWeb.ForgottenPasswordController do
     conn
     |> KeenAuthPermissionsDemoWeb.Apps.include(["forgottenPassword"])
     |> set_title("Forgotten password")
-    |> render("forgotten_password.html")
+    |> render(:forgotten_password)
   end
 
   def forgotten_password_post(conn, %{"email" => email, "method" => method})
