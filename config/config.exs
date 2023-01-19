@@ -72,6 +72,11 @@ config :keen_auth,
     ]
   ]
 
+config :simplificator_3000_phoenix,
+  api_handler: %{
+    fallback_handler: &KeenAuthPermissionsDemoWeb.ApiFallbackHandler.api_fallback/3
+  }
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

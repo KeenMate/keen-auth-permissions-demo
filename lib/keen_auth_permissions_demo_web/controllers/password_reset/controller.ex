@@ -24,13 +24,21 @@ defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
     ControllerHelpers.error_flash_index(conn, "Token or method missing")
   end
 
-  def reset_password_post(conn, %{
-        "token" => token,
-        "method" => method,
-        "password" => password
+  @reset_password_scheme %{
+    token: [type: :string, required: true],
+    method: [type: :string, required: true, in: ~w(sms email)],
+    password: [type: :string, required: true]
+  }
+
+  api_handler(:reset_password_post, @reset_password_scheme)
+
+  def reset_password_post_handler(conn, %{
+        token: token,
+        method: method,
+        password: password
       }) do
     with :ok <- Auth.process_password_reset(conn, token, method, password) do
-      ConnHelpers.success_response(conn, :ok)
+      ok(:ok)
     end
   end
 
@@ -40,7 +48,13 @@ defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
     |> render(:sms_token_reset)
   end
 
-  def sms_token_reset_post(conn, %{"token" => token}) do
+  @sms_token_reset_scheme %{
+    token: [type: :string, required: true]
+  }
+
+  api_handler(:sms_token_reset_post, @sms_token_reset_scheme)
+
+  def sms_token_reset_post_handler(conn, %{token: token}) do
     ConnHelpers.success_response(
       conn,
       Routes.password_reset_path(conn, :reset_password_get, method: "sms", token: token)

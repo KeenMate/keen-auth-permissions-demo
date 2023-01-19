@@ -12,9 +12,17 @@ defmodule KeenAuthPermissionsDemoWeb.RegistrationController do
     |> render(:register)
   end
 
-  def register_post(conn, %{"email" => email, "name" => name, "password" => password}) do
+  @registration_scheme %{
+    email: [type: :string, required: true],
+    name: [type: :string, required: true],
+    password: [type: :string, required: true]
+  }
+
+  api_handler(:register_post, @registration_scheme, fallback_options: [full_error: true])
+
+  def register_post_handler(conn, %{email: email, name: name, password: password}) do
     with :ok <- Auth.register_user(conn, email, password, name) do
-      ConnHelpers.success_response(conn)
+      ok(:ok)
     end
   end
 end
