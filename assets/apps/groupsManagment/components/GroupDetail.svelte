@@ -79,16 +79,16 @@
 				on:click={() => reload()}><i class="fas fa-sync" /></button
 			>
 		</th>
+		<th>Manual</th>
+		<th>Active</th>
+		<th>Locked</th>
 		<th>ID</th>
 		<th>Name</th>
-		<th>Manual</th>
-		<th>Is active</th>
-		<th>Is locked</th>
 	</thead>
 	<tbody>
 		{#each group.members as member}
 			<tr>
-				<td
+				<td class="fixed_width"
 					><button
 						title="Remove member"
 						class="btn btn-outline btn-sm"
@@ -96,17 +96,21 @@
 						><i class="fa-solid fa-user-minus" /></button
 					></td
 				>
-				<td>{member.userId}</td>
+				<td class="fixed_width">{member.manualAssignment}</td>
+				<td class="fixed_width">{member.userIsActive}</td>
+				<td class="fixed_width">{member.userIsLocked}</td>
+				<td class="fixed_width">{member.userId}</td>
 				<td>{member.userDisplayName}</td>
-				<td>{member.manualAssignment}</td>
-				<td>{member.userIsActive}</td>
-				<td>{member.userIsLocked}</td>
 			</tr>
 		{/each}
 	</tbody>
 </table>
 
 <style>
+	.fixed_width {
+		width: 1px;
+	}
+
 	.btn-sm {
 		padding: 0.25rem 0.5rem;
 		font-size: 0.875rem;

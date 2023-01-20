@@ -30,7 +30,7 @@ defmodule KeenAuthPermissionsDemoWeb.Api.UsersApiController do
 
   def enable_user_handler(conn, %{user_id: user_id}) do
     with {:ok, _} <- Manager.enable_user(conn, user_id) do
-      conn |> ConnHelpers.success_response()
+      ok(:ok)
     end
   end
 
@@ -38,7 +38,7 @@ defmodule KeenAuthPermissionsDemoWeb.Api.UsersApiController do
 
   def disable_user_handler(conn, %{user_id: user_id}) do
     with {:ok, _} <- Manager.disable_user(conn, user_id) do
-      conn |> ConnHelpers.success_response()
+      ok(:ok)
     end
   end
 
@@ -46,7 +46,7 @@ defmodule KeenAuthPermissionsDemoWeb.Api.UsersApiController do
 
   def lock_user_handler(conn, %{user_id: user_id}) do
     with {:ok, _} <- Manager.lock_user(conn, user_id) do
-      conn |> ConnHelpers.success_response()
+      ok(:ok)
     end
   end
 
@@ -54,7 +54,7 @@ defmodule KeenAuthPermissionsDemoWeb.Api.UsersApiController do
 
   def unlock_user_handler(conn, %{user_id: user_id}) do
     with {:ok, _} <- Manager.unlock_user(conn, user_id) do
-      conn |> ConnHelpers.success_response()
+      ok(:ok)
     end
   end
 end

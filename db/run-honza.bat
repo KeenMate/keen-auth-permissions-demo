@@ -13,5 +13,5 @@ psql -U postgres -d %DB_NAME% -c "\i %SCRIPT_DIR%/04_helpers.sql;
 psql -U postgres -d %DB_NAME% -c "\i %SCRIPT_DIR%/05_create_permissions.sql;
 psql -U postgres -d %DB_NAME% -c "\i %SCRIPT_DIR%/06_fix_permissions.sql;
 psql -U postgres -d %DB_NAME% -c "\i %SCRIPT_DIR%/07_demo_specific.sql;
-
+psql -U postgres -d %DB_NAME% -c "\i %SCRIPT_DIR%/99_fix_permissions.sql;
 pause

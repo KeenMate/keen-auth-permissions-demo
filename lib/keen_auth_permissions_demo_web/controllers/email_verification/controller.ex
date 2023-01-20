@@ -25,15 +25,21 @@ defmodule KeenAuthPermissionsDemoWeb.EmailVerificationController do
     |> render(:resend_email)
   end
 
-  def resend_verification_post(conn, %{"email" => email}) do
+  @scheme %{
+    email: [type: :string, required: true]
+  }
+
+  api_handler(:resend_verification_post, @scheme)
+
+  def resend_verification_post_handler(conn, %{email: email}) do
     with :ok <- Auth.resend_verification_email(conn, email) do
-      ConnHelpers.success_response(conn, :ok)
+      ok(:ok)
     else
       {:error,
        %ErrorStruct{
          reason: :user_doesnt_exist
        }} ->
-        ConnHelpers.success_response(conn, :ok)
+        ok(:ok)
 
       err ->
         err
