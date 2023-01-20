@@ -135,4 +135,12 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
       {:ok, result}
     end
   end
+
+  def delete_user_group_mapping(conn, tenant_id, group_mapping_id) do
+    user = user(conn)
+    tenant_id = num(tenant_id)
+    group_mapping_id = num(group_mapping_id)
+
+    GroupsProvider.delete_user_group_mapping(user, tenant_id, group_mapping_id)
+  end
 end

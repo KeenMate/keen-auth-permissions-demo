@@ -95,51 +95,79 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
   def create_group_handler(conn, %{tenant: tenant} = params) do
     with {:ok, new_group_id} <- Manager.create_group(conn, tenant, params),
          {:ok, group_info} <- Manager.group_info(conn, tenant, new_group_id) do
-      conn |> ConnHelpers.success_response(group_info)
+      ok(group_info)
     end
   end
 
   # * Members
-  def add_user_to_group(conn, %{
-        "group_id" => group_id,
-        "tenant" => tenant,
-        "user_id" => target_user_id
+  @group_member_scheme %{
+    tenant: [type: :integer, number: [min: 0], required: true],
+    title: [type: :string, required: true],
+    user_id: [type: :integer, number: [min: 0], required: true]
+  }
+
+  api_handler(:add_user_to_group, @group_member_scheme,
+    permissions: ["system.manage_groups.create_member"]
+  )
+
+  def add_user_to_group_handler(conn, %{
+        group_id: group_id,
+        tenant: tenant,
+        user_id: target_user_id
       }) do
     with {:ok, member_id} <- Manager.add_member_to_group(conn, tenant, group_id, target_user_id) do
-      conn |> ConnHelpers.success_response(member_id)
+      ok(%{member_id: member_id})
     end
   end
 
-  def remove_user_from_group(conn, %{
-        "group_id" => group_id,
-        "tenant" => tenant,
-        "user_id" => target_user_id
+  api_handler(:remove_user_from_group, @group_member_scheme,
+    permissions: ["system.manage_groups.delete_member"]
+  )
+
+  def remove_user_from_group_handler(conn, %{
+        group_id: group_id,
+        tenant: tenant,
+        user_id: target_user_id
       }) do
     with {:ok, _} <-
            Manager.remove_member_from_group(conn, tenant, group_id, target_user_id) do
-      conn |> ConnHelpers.success_response(nil)
+      ok(:ok)
     end
   end
 
-  # * Mappings
-  def get_user_groups_mappings(conn, %{
-        "tenant" => tenant,
-        "group_id" => group_id
-      }) do
+  # * USER GROUP MAPINGS
+  # *
+
+  api_handler(:get_user_groups_mappings, @tenant_and_group_scheme,
+    permissions: ["system.manage_groups.get_mappings"]
+  )
+
+  def get_user_groups_mappings_handler(conn, %{group_id: group_id, tenant: tenant}) do
     with {:ok, mappings} <- Manager.get_user_group_mappings(conn, tenant, group_id) do
-      ConnHelpers.success_response(conn, mappings)
+      ok(mappings)
     end
   end
 
-  def create_user_group_mapping(conn, %{
-        "tenant" => tenant,
-        "group_id" => group_id,
-        "provider" => provider_code,
-        "mapped_object_name" => mapping_name,
-        "type" => mapping_type,
-        "mapped_value" => mapped_value
-      })
-      when mapping_type in ["role", "group"] do
+  @create_user_group_mapping_scheme %{
+    tenant: [type: :integer, number: [min: 0], required: true],
+    group_id: [type: :integer, number: [min: 0], required: true],
+    provider: [type: :string, required: true],
+    mapped_object_name: [type: :string, required: true],
+    type: [type: :string, required: true, in: ~w(role group)],
+    mapped_value: [type: :string, required: true]
+  }
+  api_handler(:create_user_group_mapping, @create_user_group_mapping_scheme,
+    permissions: ["system.manage_groups.create_mapping"]
+  )
+
+  def create_user_group_mapping_handler(conn, %{
+        tenant: tenant,
+        group_id: group_id,
+        provider: provider_code,
+        mapped_object_name: mapping_name,
+        type: mapping_type,
+        mapped_value: mapped_value
+      }) do
     with {:ok, mapping} <-
            Manager.create_user_group_mapping(
              conn,
@@ -150,7 +178,29 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
              mapped_value,
              mapping_type
            ) do
-      ConnHelpers.success_response(conn, mapping)
+      ok(mapping)
+    end
+  end
+
+  @mapping_scheme %{
+    tenant: [type: :integer, number: [min: 0], required: true],
+    mapping_id: [type: :integer, number: [min: 0], required: true]
+  }
+  api_handler(:delete_user_group_mapping, @mapping_scheme,
+    permissions: ["system.manage_groups.delete_mapping"]
+  )
+
+  def delete_user_group_mapping_handler(conn, %{
+        tenant: tenant,
+        mapping_id: mapping_id
+      }) do
+    with {:ok, _} <-
+           Manager.delete_user_group_mapping(
+             conn,
+             tenant,
+             mapping_id
+           ) do
+      ok(:ok)
     end
   end
 end

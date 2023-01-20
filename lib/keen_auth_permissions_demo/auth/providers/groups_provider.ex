@@ -155,10 +155,10 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsProvider do
       mapped_object_name,
       mapped_role
     )
-    |> ErrorParsers.parse_error()
+    |> ErrorParsers.parse_if_error()
   end
 
-  def delete_user_group_paming(
+  def delete_user_group_mapping(
         %KeenAuthPermissions.User{username: username, user_id: user_id},
         tenant_id,
         user_group_mapping_id
@@ -169,6 +169,6 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsProvider do
       tenant_id,
       user_group_mapping_id
     )
-    |> ErrorParsers.parse_error()
+    |> ErrorParsers.parse_if_error()
   end
 end
