@@ -1,5 +1,6 @@
 defmodule KeenAuthPermissionsDemo.Auth.UsersManager do
   alias KeenAuthPermissionsDemo.Auth.UsersProvider
+  alias KeenAuthPermissions.Database.Models.AuthGetTenantUsersItem, as: TenantUser
 
   import KeenAuthPermissionsDemo.Auth.ManagerHelpers
 
@@ -9,8 +10,18 @@ defmodule KeenAuthPermissionsDemo.Auth.UsersManager do
     tenant_id = num(tenant_id)
 
     with {:ok, users} <- UsersProvider.get_all_users(user, tenant_id) do
-      {:ok, users}
+      with_decoded_groups =
+        users
+        |> Enum.map(&parse_user_group_json!/1)
+
+      {:ok, with_decoded_groups}
     end
+  end
+
+  defp parse_user_group_json!(%TenantUser{user_groups: groups} = user) do
+    decoded_groups = Enum.map(groups, &Jason.decode!/1)
+    IO.inspect(decoded_groups, label: "decoded")
+    %{user | user_groups: decoded_groups}
   end
 
   def enable_user(conn, target_user_id) do

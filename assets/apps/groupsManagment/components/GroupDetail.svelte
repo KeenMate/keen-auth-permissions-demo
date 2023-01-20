@@ -34,20 +34,37 @@
 </div>
 <h1>#{group.userGroupId} {group.title}</h1>
 <h4>({group.code})</h4>
-active: {group.isActive} <br />
-assignable: {group.isAssignable}<br />
-default: {group.isDefault}<br />
-external: {group.isExternal}<br />
-system: {group.isSystem}<br />
+
+<table class="table">
+	<tbody>
+		<tr>
+			<td>active</td>
+			<td>assignable</td>
+			<td>default</td>
+			<td>external</td>
+			<td>system</td>
+		</tr>
+		<tr>
+			<td>{group.isActive}</td>
+			<td>{group.isAssignable}</td>
+			<td>{group.isDefault}</td>
+			<td>{group.isExternal}</td>
+			<td>{group.isSystem}</td>
+		</tr>
+	</tbody>
+</table>
 <h3>Members</h3>
 
-<input
-	type="number"
-	bind:value={userId}
-	placeholder="user_id"
-	class="form-control"
-/>
-<button on:click={addMember} class="btn"> Add new member</button>
+<div class="input-group">
+	<input
+		type="number"
+		bind:value={userId}
+		placeholder="user_id"
+		class="form-control"
+	/>
+	<button on:click={addMember} class="btn btn-sm"> Add new member</button>
+</div>
+
 {#if errorMessage}
 	<div class="alert alert-danger" role="alert">
 		{errorMessage}
