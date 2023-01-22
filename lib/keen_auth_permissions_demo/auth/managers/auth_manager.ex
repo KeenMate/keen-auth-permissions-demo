@@ -12,7 +12,7 @@ defmodule KeenAuthPermissionsDemo.Auth.AuthManager do
 
   def create_email_verification_token(conn, user) do
     with token <- Verification.generate_token(conn, :email_verification, user.user_id),
-         {:ok, [event_id]} <- AuthProvider.create_auth_event(user.user_id, "email_verification"),
+         {:ok, [event_id]} <- create_self_auth_event(user, "email_verification"),
          {:ok, [_]} <- AuthProvider.create_email_verification_token(user.user_id, event_id, token) do
       {:ok, token}
     end
@@ -52,13 +52,13 @@ defmodule KeenAuthPermissionsDemo.Auth.AuthManager do
 
   def validate_token(conn, token, "email", type, invalidate) do
     with {:ok, %{user_id: user_id}} <- Verification.verify_token(conn, type, token),
-         {:ok, _} <- AuthProvider.validate_token(user_id, token, invalidate) do
+         {:ok, _} <- AuthProvider.validate_token(user_id, token, Atom.to_string(type), invalidate) do
       {:ok, user_id}
     end
   end
 
-  def validate_token(_conn, token, "sms", _type, invalidate) do
-    with {:ok, token} <- AuthProvider.validate_token(nil, token, invalidate) do
+  def validate_token(_conn, token, "sms", type, invalidate) do
+    with {:ok, token} <- AuthProvider.validate_token(nil, token, Atom.to_string(type), invalidate) do
       {:ok, token.user_id}
     end
   end
@@ -77,28 +77,29 @@ defmodule KeenAuthPermissionsDemo.Auth.AuthManager do
     end
   end
 
-  def create_password_reset_token(conn, user_id, "email") do
-    token = Verification.generate_token(conn, :password_reset, user_id)
+  def create_password_reset_token(conn, user, "email") do
+    token = Verification.generate_token(conn, :password_reset, user.user_id)
 
-    with {:ok, [event_id]} <- AuthProvider.create_auth_event(user_id, "email_verification"),
-         {:ok, [_]} <- AuthProvider.create_password_reset_token("email", user_id, event_id, token) do
+    with {:ok, [event_id]} <- create_self_auth_event(user, "email_verification"),
+         {:ok, [_]} <-
+           AuthProvider.create_password_reset_token("email", user.user_id, event_id, token) do
       {:ok, token}
     end
   end
 
-  def create_password_reset_token(_conn, user_id, "sms") do
+  def create_password_reset_token(_conn, user, "sms") do
     token = KeenAuthPermissionsDemo.Helpers.get_random_triplet()
 
-    with {:ok, [event_id]} <- AuthProvider.create_auth_event(user_id, "email_verification"),
+    with {:ok, [event_id]} <- create_self_auth_event(user, "email_verification"),
          {:ok, [_]} <-
-           AuthProvider.create_password_reset_token("mobile_phone", user_id, event_id, token) do
+           AuthProvider.create_password_reset_token("mobile_phone", user.user_id, event_id, token) do
       {:ok, token}
     end
   end
 
   @spec send_password_reset_token(any, any, any) :: none
   def send_password_reset_token(conn, user, "email") do
-    with {:ok, token} <- create_password_reset_token(conn, user.user_id, "email"),
+    with {:ok, token} <- create_password_reset_token(conn, user, "email"),
          {:ok, _} <-
            Mailer.deliver(Email.forgotten_password(conn, user, token)) do
       {:ok, token}
@@ -106,7 +107,7 @@ defmodule KeenAuthPermissionsDemo.Auth.AuthManager do
   end
 
   def send_password_reset_token(conn, user, "sms") do
-    with {:ok, token} <- create_password_reset_token(conn, user.user_id, "sms"),
+    with {:ok, token} <- create_password_reset_token(conn, user, "sms"),
          SMSSender.send_sms("+420 608179168", SMS.forgotten_password(conn, user, token)) do
       {:ok, token}
     end
@@ -116,5 +117,13 @@ defmodule KeenAuthPermissionsDemo.Auth.AuthManager do
     with {:ok, _} <- AuthProvider.add_to_default_groups_in_tenant(target_user_id, tenant_id) do
       :ok
     end
+  end
+
+  defp create_self_auth_event(
+         %{user_id: user_id, username: username},
+         event_code,
+         payload \\ %{}
+       ) do
+    AuthProvider.create_auth_event(username, user_id, event_code, user_id, payload)
   end
 end

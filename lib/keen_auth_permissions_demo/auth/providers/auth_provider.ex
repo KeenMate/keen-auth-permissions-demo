@@ -4,13 +4,16 @@ defmodule KeenAuthPermissionsDemo.Auth.AuthProvider do
 
   import KeenAuthPermissionsDemo.User.Password
 
-  def create_auth_event(user_id, event_code) do
-    DbContext.auth_create_auth_event(
-      "system",
-      1,
-      event_code,
+  def create_auth_event(created_by, user_id, event_type, target_user_id, payload_map) do
+    DbContext.auth_create_user_event(
+      created_by,
       user_id,
+      event_type,
+      target_user_id,
       nil,
+      nil,
+      nil,
+      Jason.encode!(payload_map),
       nil,
       nil
     )
@@ -33,8 +36,19 @@ defmodule KeenAuthPermissionsDemo.Auth.AuthProvider do
     end
   end
 
-  def validate_token(user_id, token, invalidate \\ false) do
-    case DbContext.auth_validate_token("system", 1, user_id, token, nil, nil, nil, invalidate) do
+  def validate_token(user_id, token, token_type, invalidate \\ false) do
+    case DbContext.auth_validate_token(
+           "system",
+           1,
+           user_id,
+           nil,
+           token,
+           token_type,
+           nil,
+           nil,
+           nil,
+           invalidate
+         ) do
       {:ok, [token | _]} -> {:ok, token}
       {:error, err} -> {:error, ErrorParsers.parse_error(err)}
     end
@@ -71,10 +85,12 @@ defmodule KeenAuthPermissionsDemo.Auth.AuthProvider do
       "system",
       1,
       user_id,
+      nil,
       auth_event_id,
       "email_verification",
       "email",
       token,
+      nil,
       nil
     )
     |> ErrorParsers.parse_if_error()
@@ -85,10 +101,12 @@ defmodule KeenAuthPermissionsDemo.Auth.AuthProvider do
       "system",
       1,
       user_id,
+      nil,
       auth_event_id,
       "password_reset",
       method,
       token,
+      nil,
       nil
     )
     |> ErrorParsers.parse_if_error()
