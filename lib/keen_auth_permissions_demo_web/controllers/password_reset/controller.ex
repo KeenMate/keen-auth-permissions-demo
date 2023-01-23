@@ -9,7 +9,7 @@ defmodule KeenAuthPermissionsDemoWeb.PasswordResetController do
 
   def reset_password_get(conn, %{"token" => token, "method" => method})
       when method in ["sms", "email"] do
-    with {:ok, _} <- Auth.validate_token(conn, token, method, :password_reset) do
+    with {:ok, _} <- Auth.validate_user_token(conn, token, method, :password_reset) do
       conn
       |> KeenAuthPermissionsDemoWeb.Apps.include(["passwordReset"])
       |> set_title("Password reset")

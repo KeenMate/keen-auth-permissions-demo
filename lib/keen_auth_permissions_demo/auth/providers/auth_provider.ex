@@ -36,7 +36,7 @@ defmodule KeenAuthPermissionsDemo.Auth.AuthProvider do
     end
   end
 
-  def validate_token(user_id, token, token_type, invalidate \\ false) do
+  def validate_user_token(user_id, token, token_type, invalidate \\ false) do
     case DbContext.auth_validate_token(
            "system",
            1,

@@ -42,29 +42,29 @@ defmodule KeenAuthPermissionsDemo.Auth.AuthManager do
   end
 
   def process_password_reset(conn, token, method, password) do
-    with {:ok, user_id} <- validate_token(conn, token, method, :password_reset, true),
+    with {:ok, user_id} <- validate_user_token(conn, token, method, :password_reset, true),
          {:ok, _} <- AuthProvider.update_password(user_id, password) do
       :ok
     end
   end
 
-  def validate_token(conn, token, method, type, invalidate \\ false)
+  def validate_user_token(conn, token, method, type, invalidate \\ false)
 
-  def validate_token(conn, token, "email", type, invalidate) do
+  def validate_user_token(conn, token, "email", type, invalidate) do
     with {:ok, %{user_id: user_id}} <- Verification.verify_token(conn, type, token),
-         {:ok, _} <- AuthProvider.validate_token(user_id, token, Atom.to_string(type), invalidate) do
+         {:ok, _} <- AuthProvider.validate_user_token(user_id, token, Atom.to_string(type), invalidate) do
       {:ok, user_id}
     end
   end
 
-  def validate_token(_conn, token, "sms", type, invalidate) do
-    with {:ok, token} <- AuthProvider.validate_token(nil, token, Atom.to_string(type), invalidate) do
+  def validate_user_token(_conn, token, "sms", type, invalidate) do
+    with {:ok, token} <- AuthProvider.validate_user_token(nil, token, Atom.to_string(type), invalidate) do
       {:ok, token.user_id}
     end
   end
 
   def verify_email(conn, token) do
-    with {:ok, user_id} <- validate_token(conn, token, "email", :email_verification, true),
+    with {:ok, user_id} <- validate_user_token(conn, token, "email", :email_verification, true),
          {:ok, [_]} <- AuthProvider.activate_email(user_id) do
       {:ok, user_id}
     end
