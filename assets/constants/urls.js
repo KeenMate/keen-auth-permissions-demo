@@ -21,5 +21,9 @@ export const GroupsEndpoint = (tenant) => {
 		unlock: (groupId) => `${base}/${groupId}/unlock`,
 		addMember: (groupId, userId) => `${base}/${groupId}/${userId}`,
 		removeMember: (groupId, userId) => `${base}/${groupId}/${userId}`,
+		createMapping: (groupId) => `${base}/${groupId}/mappings`,
+		removeMapping: (groupId, mappingsId) =>
+			`${base}/${groupId}/mappings/${mappingsId}`,
+		getMappings: (groupId) => `${base}/${groupId}/mappings`,
 	};
 };

@@ -57,4 +57,27 @@ export class GroupsManager extends BaseApiManager {
 		let res = await this.Delete(this.endpoint.removeMember(groupId, UserId));
 		return res.data;
 	}
+
+	async createMapping(groupId, name, value, provider, type) {
+		const res = await this.Put(this.endpoint.createMapping(groupId), {
+			name,
+			value,
+			provider,
+			type,
+		});
+
+		return res.data;
+	}
+	async removeMapping(groupId, mappingId) {
+		const res = await this.Delete(
+			this.endpoint.removeMapping(groupId, mappingId)
+		);
+
+		return res.data;
+	}
+	async getMappings(groupId) {
+		const res = await this.Get(this.endpoint.getMappings(groupId, mappingId));
+
+		return res.data;
+	}
 }

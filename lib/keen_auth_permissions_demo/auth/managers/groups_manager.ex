@@ -1,4 +1,6 @@
 defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
+  require Logger
+
   alias KeenAuthPermissionsDemo.Auth.GroupsProvider
 
   import KeenAuthPermissionsDemo.Auth.ManagerHelpers
@@ -30,8 +32,11 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
   def group_info(conn, tenant, group_id) do
     with {:ok, [group_info]} <- GroupsProvider.group_info(user(conn), num(tenant), num(group_id)),
          {:ok, members} <-
-           GroupsProvider.get_group_members(user(conn), num(tenant), num(group_id)) do
+           GroupsProvider.get_group_members(user(conn), num(tenant), num(group_id)),
+         {:ok, mappings} <-
+           get_user_group_mappings(conn, num(tenant), num(group_id)) do
       group_info = Map.put(group_info, :members, members)
+      group_info = Map.put(group_info, :mappings, mappings)
       {:ok, group_info}
     end
   end
@@ -93,11 +98,40 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
     tenant_id = num(tenant_id)
     group_id = num(group_id)
 
-    GroupsProvider.get_user_group_mapping(
-      user,
-      tenant_id,
-      group_id
-    )
+    case GroupsProvider.get_user_group_mapping(
+           user,
+           tenant_id,
+           group_id
+         ) do
+      {:ok, data} ->
+        data = Enum.map(data, &transform_group_maping(&1))
+        {:ok, data}
+
+      {:error, reason} ->
+        Logger.error("Could not get mappings for group",
+          reason: inspect(reason),
+          detail: %{user: user, tenant_id: tenant_id, group_id: group_id}
+        )
+
+        {:error, reason}
+    end
+  end
+
+  defp transform_group_maping(mapping) do
+    # add value and type fields matching values you send when creating new mapping
+
+    type = if mapping.mapped_role != nil, do: :role, else: :group
+
+    value =
+      case type do
+        :role -> Map.get(mapping, :mapped_role)
+        :group -> Map.get(mapping, :mapped_object_id)
+      end
+
+    mapping
+    |> Map.put(:type, type)
+    |> Map.put(:mapped_value, value)
+    |> Map.put(:name, mapping.mapped_object_name)
   end
 
   def create_user_group_mapping(

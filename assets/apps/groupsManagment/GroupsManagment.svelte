@@ -64,6 +64,26 @@
 		load();
 	});
 
+	async function createMappings(val) {
+		callApi(async () => {
+			await manager.createMapping(
+				group.userGroupId,
+				val.name,
+				val.value,
+				val.provider,
+				val.type
+			);
+			await showDetail(group.userGroupId);
+		});
+	}
+
+	async function removeMapping(mappingId) {
+		callApi(async () => {
+			await manager.removeMapping(group.userGroupId, mappingId);
+			await showDetail(group.userGroupId);
+		});
+	}
+
 	async function callApi(func, shouldLoad = true) {
 		try {
 			await func();
@@ -104,6 +124,8 @@
 			on:add-member={(e) => addMember(group.userGroupId, e.detail)}
 			on:remove-member={(e) => removeMember(group.userGroupId, e.detail)}
 			on:reload={(e) => showDetail(e.detail)}
+			on:create-mappings={(e) => createMappings(e.detail)}
+			on:remove-mapping={(e) => removeMapping(e.detail)}
 		/>
 	{:else}
 		<GroupsList
