@@ -16,7 +16,8 @@ defmodule KeenAuthPermissionsDemoWeb do
   below. Instead, define any helper function in modules
   and import those modules here.
   """
-  def static_paths, do: ~w( assets fonts images favicon.ico robots.txt apps js plugins css)
+  def static_paths,
+    do: ~w( assets fonts images favicon.ico robots.txt apps js plugins css template)
 
   def controller do
     quote do

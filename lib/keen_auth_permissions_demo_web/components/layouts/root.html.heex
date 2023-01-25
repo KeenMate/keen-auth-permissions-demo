@@ -19,19 +19,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <!-- ** Plugins Needed for the Project ** -->
-  <!-- Bootstrap -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha256-L/W5Wfqfa0sdBNIKN9cG6QA5F2qx4qICmU2VgLruv9Y=" crossorigin="anonymous">
-  <!-- themefy-icon -->
-  <link rel="stylesheet" href={~p"/plugins/themify-icons/themify-icons.css"}>
-  <!-- slick slider -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" integrity="sha256-3h45mwconzsKjTUULjY+EoEkoRhXcOIU4l5YAw2tSOU=" crossorigin="anonymous">
-  <!-- venobox popup -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/venobox@1.8.3/venobox/venobox.css" integrity="sha256-QGl1WGdhfVW34xvGimoMVNcWUkCcBY2HaGjGaMBc948=" crossorigin="anonymous">
-  <!-- aos -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" integrity="sha256-GqiEX9BuR1rv5zPU5Vs2qS/NSHl1BJyBcjQYJ6ycwD4=" crossorigin="anonymous">
-	<!-- fant awesome -->
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<%!-- TEMPLATE STUFF --%>
+	<!-- CSS only -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"  crossorigin="anonymous">
+
+	<!-- Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
+
+	<!-- Icons -->
+	<link href="template/css/nucleo-icons.css" rel="stylesheet">
+
+	<!-- Theme CSS -->
+	<link type="text/css" href="template/css/material-kit.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
 
   <!--Favicon-->
   <link rel="shortcut icon" href={~p"/images/favicon.ico"} type="image/x-icon">
@@ -45,60 +47,20 @@
     <%= render_existing(@conn, template_function_name(@conn) <> "_styles") %>
 </head>
 
-<body>
+<body class="bg-gray-200">
+
+	<%= @inner_content %>
+	<%!-- TEMPLATE STUFF --%>
+	<!-- Core -->
+	<script src="template/js/core/popper.min.js"></script>
+	<script src="template/js/core/bootstrap.min.js"></script>
+
+	<!-- Theme JS -->
+	<script src="template/js/material-kit.min.js" type="text/javascript"></script>
 
 
-<!-- navigation -->
-<._navigation conn={@conn}/>
-<!-- /navigation -->
 
-<div class="flash-container">
-  <%= if Phoenix.Flash.get(@flash, :info) do %>
-  <div class="shadow alert alert-info alert-dismissible fade show" role="alert">
-    <b><%= Phoenix.Flash.get(@flash, :info) %></b>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <% end %>
-
-  <%= if Phoenix.Flash.get(@flash, :success) do %>
-  <div class="shadow alert alert-success alert-dismissible fade show" role="alert">
-    <b><%= Phoenix.Flash.get(@flash, :success) %></b>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <% end %>
-
-  <%= if Phoenix.Flash.get(@flash, :error) do %>
-  <div class="shadow alert alert-danger alert-dismissible fade show" role="alert">
-    <b><%= Phoenix.Flash.get(@flash, :error) %></b>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <% end %>
-</div>
-
-<%= @inner_content %>
-
-<!-- footer -->
-<._footer conn={@conn}/>
-<!-- /footer -->
-
-<!-- jQuery -->
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha256-WqU1JavFxSAMcLP2WIOI+GB2zWmShMI82mTpLDcqFUg=" crossorigin="anonymous"></script>
-<!-- slick slider -->
-<script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js" integrity="sha256-DHF4zGyjT7GOMPBwpeehwoey18z8uiz98G4PRu2lV0A=" crossorigin="anonymous"></script>
-<!-- venobox -->
-<script src="https://cdn.jsdelivr.net/npm/venobox@1.8.3/venobox/venobox.min.js" integrity="sha256-vD6deUu3WkP35ZI4Cw5cBRFo787G6/UNCDsnQJ1+aFk=" crossorigin="anonymous"></script>
-<!-- aos -->
-<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js" integrity="sha256-pQBbLkFHcP1cy0C8IhoSdxlm0CtcH5yJ2ki9jjgR03c=" crossorigin="anonymous"></script>
-<!-- Main Script -->
-<script src={~p"/js/script.js"}></script>
+		<!-- Main Script -->
     <.app_scripts conn={@conn} />
     <%= render_existing(@conn, template_function_name(@conn) <> "_scripts") %>
 </body>

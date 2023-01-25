@@ -1,35 +1,60 @@
-<section class="fixed-top navigation">
+<nav
+  class="navbar navbar-expand-lg k z-index-3 py-3">  <!-- navbar-dark bg-gradient-dar-->
   <div class="container">
-    <nav class="navbar navbar-expand-lg navbar-light">
-      <a class="navbar-brand" href={~p"/"}><img src={~p"/images/logo.png"} alt="logo"></a>
-      <button class="navbar-toggler border-0" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar"
-        aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <!-- navbar -->
-      <div class="collapse navbar-collapse text-center" id="navbar">
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
-            <a class="nav-link" href={~p"/"}>Home</a>
-          </li>
-      <%!-- authenticated routes --%>
+    <a class="navbar-brand" rel="tooltip"  data-placement="bottom" href="/">
+      Keen auth permissions demo
+    </a>
+    <button class="navbar-toggler shadow-none ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navigation" aria-controls="navigation" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon mt-2">
+        <span class="navbar-toggler-bar bar1"></span>
+        <span class="navbar-toggler-bar bar2"></span>
+        <span class="navbar-toggler-bar bar3"></span>
+      </span>
+    </button>
+    <div class="collapse navbar-collapse w-100 pt-3 pb-2 py-lg-0" id="navigation">
+      <ul class="navbar-nav navbar-nav-hover mx-auto">
+        <li class="nav-item mx-2">
+          <a class="nav-link ps-2 d-flex justify-content-between cursor-pointer align-items-center" role="button"  href={~p"/"}>
+            Home
+          </a>
+        </li>
 
-        <%= if not is_nil(Map.get(@conn.assigns,:current_user,nil)) do %>
+				<%= if not is_nil(Map.get(@conn.assigns,:current_user,nil)) do %>
           <li class="nav-item">
-            <a class="nav-link" href={~p"/private"}>Private </a>
+            <a class="nav-link ps-2 d-flex justify-content-between cursor-pointer align-items-center" href={~p"/private"}>Private </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href={~p"/groups"}>Groups </a>
+            <a class="nav-link ps-2 d-flex justify-content-between cursor-pointer align-items-center" href={~p"/groups"}>Groups </a>
           </li>
         <% end %>
+      </ul>
 
-        </ul>
-        <%= if is_nil(Map.get(@conn.assigns,:current_user,nil)) do %>
-        <a href={~p"/login"} class="btn btn-primary ml-lg-3 primary-shadow">Log In</a>
-        <% else %>
-        <a href={~p"/auth/delete"} class="btn btn-primary ml-lg-3 primary-shadow">Log Out</a>
-        <% end %>
-      </div>
-    </nav>
+			<ul class="navbar-nav">
+				<li class="nav-item ms-lg-auto">
+					<a
+						class="nav-link nav-link-icon me-2"
+						href="https://github.com/creativetimofficial/soft-ui-design-system"
+						target="_blank"
+					>
+						<i class="fa-brands fa-github me-1" aria-hidden="true"></i>
+						<p
+							class="d-inline text-sm z-index-1 font-weight-bold"
+							data-bs-toggle="tooltip"
+							data-bs-placement="bottom"
+						>
+							Github
+						</p>
+					</a>
+				</li>
+
+        <li class="nav-item">
+				 	<%= if is_nil(Map.get(@conn.assigns,:current_user,nil)) do %>
+        		<a href={~p"/login"} class="btn btn  bg-gradient-primary  mb-0 me-1">Log In</a>
+        	<% else %>
+        		<a href={~p"/auth/delete"} class="btn btn-login  bg-gradient-primary  mb-0 me-1">Log Out</a>
+        	<% end %>
+        </li>
+      </ul>
+    </div>
   </div>
-</section>
+</nav>

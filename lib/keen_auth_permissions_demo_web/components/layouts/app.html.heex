@@ -1,1 +1,39 @@
+<div class="bg-gray-200">
+<._navigation conn={@conn}/>
+<!-- /navigation -->
+
+<div class="flash-container">
+  <%= if Phoenix.Flash.get(@flash, :info) do %>
+  <div class="shadow alert alert-info alert-dismissible fade show" role="alert">
+    <b><%= Phoenix.Flash.get(@flash, :info) %></b>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <% end %>
+
+  <%= if Phoenix.Flash.get(@flash, :success) do %>
+  <div class="shadow alert alert-success alert-dismissible fade show" role="alert">
+    <b><%= Phoenix.Flash.get(@flash, :success) %></b>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <% end %>
+
+  <%= if Phoenix.Flash.get(@flash, :error) do %>
+  <div class="shadow alert alert-danger alert-dismissible fade show" role="alert">
+    <b><%= Phoenix.Flash.get(@flash, :error) %></b>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <% end %>
+</div>
+
 <%= @inner_content %>
+<%= if Map.get(assigns,:footer,true) do %>
+<!-- footer -->
+<._footer conn={@conn}/>
+<% end %>
+</div>
