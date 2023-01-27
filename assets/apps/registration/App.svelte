@@ -1,5 +1,5 @@
 <script>
-  import Loader from "../../components/Loader.svelte";
+  import WithLazyLoader from "../../components/WithLazyLoader.svelte";
   import { redirect } from "../../helpers/helpers";
   import { isEmpty, isValidEmail } from "../../helpers/validationHelpers";
   import Manager from "../../managers/ApiManager";
@@ -56,7 +56,7 @@
   }
 </script>
 
-<Loader bind:loading>
+<WithLazyLoader bind:loading>
   {#if !complete}
     <RegistrationForm
       bind:name
@@ -71,4 +71,4 @@
       account.
     </div>
   {/if}
-</Loader>
+</WithLazyLoader>

@@ -1,5 +1,5 @@
 <script>
-  import Loader from "../../components/Loader.svelte";
+  import WithLazyLoader from "../../components/WithLazyLoader.svelte";
   import ApiManager from "../../managers/ApiManager";
   import { redirect } from "../../helpers/helpers";
   import { isEmpty } from "../../helpers/validationHelpers";
@@ -47,7 +47,7 @@
   }
 </script>
 
-<Loader bind:loading>
+<WithLazyLoader bind:loading>
   {#if !complete}
     <input
       class="form-control mb-3"
@@ -73,4 +73,4 @@
       Redirecting to password reset page
     </div>
   {/if}
-</Loader>
+</WithLazyLoader>

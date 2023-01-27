@@ -17,8 +17,9 @@
 			<i class="fa-solid fa-play" />
 		{/if}
 	</button>
+
 	<button
-		class="btn btn-sm btn-outline-primary"
+		class="btn btn-sm btn-outline-primary min-w"
 		on:click={() => dispatch("set-lock")}
 		title={group.isAssignable
 			? "Lock group (you want be able to add more mebers)"
@@ -33,20 +34,14 @@
 	<button
 		class="btn btn-sm btn-outline-danger"
 		on:click={() => dispatch("delete")}
-		title="Delete group"><i class="fa-solid fa-trash" /></button
+		title="Delete group"
 	>
-	<button
-		on:click={() => dispatch("show")}
-		title="Show detail"
-		class="btn btn-sm btn-outline"><i class="fa-solid fa-eye" /></button
-	>
+		<i class="fa-solid fa-trash" />
+	</button>
 </td>
 
 <style>
-	.btn-sm {
-		padding: 0.25rem 0.5rem;
-		font-size: 0.875rem;
-		line-height: 1.5;
-		border-radius: 0.2rem;
+	.min-w {
+		min-width: 9px;
 	}
 </style>

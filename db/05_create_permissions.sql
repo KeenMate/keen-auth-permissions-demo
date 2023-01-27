@@ -3280,8 +3280,8 @@ begin
 
     return query
         select ugs.user_group_id,
-               ugs.group_title,
                ugs.group_code,
+               ugs.group_title,
                ugs.is_external,
                ugs.is_assignable,
                ugs.is_active,

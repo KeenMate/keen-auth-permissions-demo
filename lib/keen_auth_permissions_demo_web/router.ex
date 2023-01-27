@@ -62,6 +62,7 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
       get "/private", PrivateController, :private_page_get
 
       get "/groups", PageController, :groups
+      get "/admin", PageController, :admin
     end
   end
 

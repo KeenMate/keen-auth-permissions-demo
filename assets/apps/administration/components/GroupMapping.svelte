@@ -49,16 +49,23 @@
 				/>
 			</div>
 		</div>
-		<input
-			class="form-control"
-			type="text"
-			bind:value={name}
-			placeholder="name"
-		/>
-		<input class="form-control" type="text" bind:value placeholder="value" />
+		<div class="input-group input-group-static">
+			<input
+				class="form-control"
+				type="text"
+				bind:value={name}
+				placeholder="name"
+			/>
+		</div>
+		<div class="input-group input-group-static">
+			<input class="form-control" type="text" bind:value placeholder="value" />
+		</div>
+
 		<br />
 
-		<button class="btn btn-success" on:click={beforeCreate}> Create new mappings</button>
+		<button class="btn btn-success" on:click={beforeCreate}>
+			Create new mappings</button
+		>
 	</div>
 	<br />
 	<br />

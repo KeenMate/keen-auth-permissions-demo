@@ -1,14 +1,12 @@
 <script>
-	import GroupsList from "./components/GroupsList.svelte";
-	import GroupDetail from "./components/GroupDetail.svelte";
+	import GroupsList from "../administration/components/GroupsList.svelte";
+	import GroupDetail from "../administration/components/GroupDetail.svelte";
 	import { GroupsManager } from "../../managers/GroupsManager";
 	import { onMount } from "svelte";
 	import Modal from "../../components/Modal.svelte";
-	import CreateGroupForm from "./components/CreateGroupForm.svelte";
+	import CreateGroupForm from "../administration/pages/CreateGroupForm.svelte";
+	import { tenant } from "../../auth/auth-store";
 
-	export let tenant;
-
-	let manager = new GroupsManager(tenant);
 	let groups = [];
 	let group;
 	let errorMessage;
@@ -24,48 +22,22 @@
 		openCreate = false;
 	}
 
-	async function setActive({ setTo, groupId }) {
-		callApi(async () => await manager.setEnable(groupId, setTo));
-	}
-	async function setLocked({ setTo, groupId }) {
-		callApi(async () => await manager.setLocked(groupId, setTo));
-	}
+	async function setActive({ setTo, groupId }) {}
+	async function setLocked({ setTo, groupId }) {}
 
 	async function createGroup(group) {
 		callApi(async () => {
+			errorMessage = null;
 			await manager.createGroup(group);
 			openCreate = false;
 		});
 	}
 
-	async function deleteGroup(group) {
-		callApi(async () => await manager.deleteGroup(group.userGroupId));
-	}
-
-	async function addMember(groupId, userId) {
-		await callApi(async () => {
-			await manager.addMember(groupId, userId);
-			await showDetail(group.userGroupId);
-		});
-	}
-	async function removeMember(groupId, userId) {
-		callApi(async () => {
-			await manager.removeMember(groupId, userId);
-			await showDetail(group.userGroupId);
-		});
-	}
-
-	async function load() {
-		console.log("load");
-		callApi(async () => (groups = (await manager.getGroups()) ?? []), false);
-	}
-
-	onMount(async () => {
-		load();
-	});
+	async function deleteGroup(group) {}
 
 	async function createMappings(val) {
 		callApi(async () => {
+			errorMessage = null;
 			await manager.createMapping(
 				group.userGroupId,
 				val.name,
@@ -79,6 +51,7 @@
 
 	async function removeMapping(mappingId) {
 		callApi(async () => {
+			errorMessage = null;
 			await manager.removeMapping(group.userGroupId, mappingId);
 			await showDetail(group.userGroupId);
 		});
@@ -104,12 +77,12 @@
 		if (shouldLoad) {
 			load();
 		}
-
-		errorMessage = null;
 	}
 </script>
 
 <Modal>
+	<h1>Groups</h1>
+
 	{#if openCreate}
 		<CreateGroupForm
 			on:create={(e) => createGroup(e.detail)}

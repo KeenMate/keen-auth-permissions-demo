@@ -33,4 +33,15 @@ defmodule KeenAuthPermissionsDemoWeb.CoreComponents do
     <% end %>
     """
   end
+
+  attr(:name, :string, required: true)
+  attr(:value, :any, required: true)
+
+  def create_js_variable(assigns) do
+    ~H"""
+    <script>
+    	window.<%= Simplificator3000.StringHelpers.camelize(@name,:lower) %> = <%= Phoenix.HTML.raw Jason.encode!(Map.from_struct(@value)) %>
+    </script>
+    """
+  end
 end

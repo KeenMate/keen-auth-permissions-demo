@@ -21,6 +21,8 @@ defmodule KeenAuthPermissionsDemoWeb.Apps do
   end
 
   def include(conn, apps) when is_list(apps) do
+    IO.inspect(apps, label: "")
+
     conn
     |> Plug.Conn.assign(:additional_scripts, collect_scripts(apps))
     |> Plug.Conn.assign(:additional_styles, collect_styles(apps))
@@ -30,6 +32,18 @@ defmodule KeenAuthPermissionsDemoWeb.Apps do
     map
     |> MapHelpers.camel_cased_map_keys()
     |> MapHelpers.add_prefix("data-")
+
+		# TODO fix encoding not properly escaping "" and double "
+    # |> Enum.map(&encode_param_value(&1))
+    # |> Phoenix.HTML.attributes_escape()
+  end
+
+  def encode_param_value({key, val}) when is_struct(val) do
+    encode_param_value({key, Map.from_struct(val)})
+  end
+
+  def encode_param_value({key, value}) do
+    {key, Jason.encode!(value)}
   end
 
   attr(:app, :string, required: true)
@@ -40,7 +54,7 @@ defmodule KeenAuthPermissionsDemoWeb.Apps do
     assigns = %{prepared_params: params}
 
     ~H"""
-    <div {@prepared_params}></div>
+    <div {@prepared_params}  ></div>
     """
   end
 

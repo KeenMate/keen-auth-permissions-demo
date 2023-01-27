@@ -40,11 +40,11 @@ defmodule KeenAuthPermissionsDemoWeb.Apps.AppsMacro do
       end),
       quote do
         def app_style(app_name) do
-          # raise "Style for application: #{app_name} not available"
+          raise "Style for application: #{app_name} not available"
         end
 
         def app_script(app_name) do
-          # raise "Script for application: #{app_name} not available"
+          raise "Script for application: #{app_name} not available"
         end
       end
     ]

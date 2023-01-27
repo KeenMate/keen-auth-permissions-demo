@@ -7,7 +7,7 @@
 </script>
 
 <div class="input-group input-group-static mb-4">
-	<label for="password">Display name</label>
+	<label for="name"> Display name</label>
 	<input
 		type="text"
 		class="form-control mb-3"
@@ -18,7 +18,7 @@
 	/>
 </div>
 <div class="input-group input-group-static mb-4">
-	<label for="password">Email</label>
+	<label for="email">Email</label>
 	<input
 		type="email"
 		class="form-control mb-3"

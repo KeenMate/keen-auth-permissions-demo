@@ -1,5 +1,5 @@
 <script>
-	import Loader from "../../components/Loader.svelte";
+	import WithLazyLoader from "../../components/WithLazyLoader.svelte";
 	import ApiManager from "../../managers/ApiManager";
 	import { redirect } from "../../helpers/helpers";
 
@@ -46,7 +46,7 @@
 	}
 </script>
 
-<Loader bind:loading>
+<WithLazyLoader bind:loading>
 	{#if !complete}
 		<div class="input-group input-group-static mb-4">
 			<label for="password">Password</label>
@@ -88,4 +88,4 @@
 			Password reseted successfully. You can now login with you new password.
 		</div>
 	{/if}
-</Loader>
+</WithLazyLoader>

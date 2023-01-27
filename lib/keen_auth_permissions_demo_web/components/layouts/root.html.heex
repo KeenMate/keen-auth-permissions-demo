@@ -41,10 +41,15 @@
 
 
   <script defer type="text/javascript"  type="module" src={~p"/js/main.mjs"}></script>
-    <._component_scripts additional_scripts={Map.get(assigns, :additional_scripts, [])} />
-    <.app_styles conn={@conn} />
-    <._component_styles additional_styles={Map.get(assigns, :additional_styles, [])} />
-    <%= render_existing(@conn, template_function_name(@conn) <> "_styles") %>
+	<._component_scripts additional_scripts={Map.get(assigns, :additional_scripts, [])} />
+	<.app_styles conn={@conn} />
+	<._component_styles additional_styles={Map.get(assigns, :additional_styles, [])} />
+	<%= render_existing(@conn, template_function_name(@conn) <> "_styles") %>
+
+	<%= if @current_user != nil do %>
+		<.create_js_variable name={:current_user} value={@current_user} />
+	<% end %>
+
 </head>
 
 <body class="bg-gray-200">

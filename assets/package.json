@@ -15,6 +15,7 @@
 		"phoenix_live_view": "^0.18.2",
 		"svelte-multiselect": "github:KeenMate/svelte-multiselect",
 		"svelte-simple-modal": "^1.5.0",
+		"svelte-spa-router": "^3.3.0",
 		"tailwindcss": "^3.1.8",
 		"yargs": "^17.6.0"
 	},

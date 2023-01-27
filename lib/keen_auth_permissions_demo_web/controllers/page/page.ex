@@ -22,4 +22,12 @@ defmodule KeenAuthPermissionsDemoWeb.PageController do
     |> set_title("Registration")
     |> render(:register)
   end
+
+  def admin(conn, _params) do
+    conn
+    |> assign(:tenant, KeenAuthPermissions.TenantResolver.resolve_tenant(conn))
+    |> KeenAuthPermissionsDemoWeb.Apps.include(["administration"])
+    |> set_title("Admin")
+    |> render(:admin)
+  end
 end

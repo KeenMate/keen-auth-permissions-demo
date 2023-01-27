@@ -1,5 +1,5 @@
 <script>
-	import Loader from "../../components/Loader.svelte";
+	import WithLazyLoader from "../../components/WithLazyLoader.svelte";
 	import ApiManager from "../../managers/ApiManager";
 	import { redirect } from "../../helpers/helpers";
 	import { isEmpty, isValidEmail } from "../../helpers/validationHelpers";
@@ -50,7 +50,7 @@
 	}
 </script>
 
-<Loader bind:loading>
+<WithLazyLoader bind:loading>
 	{#if !complete}
 		<div class="input-group input-group-static mb-4">
 			<input
@@ -93,4 +93,4 @@
 			{/if}
 		</div>
 	{/if}
-</Loader>
+</WithLazyLoader>
