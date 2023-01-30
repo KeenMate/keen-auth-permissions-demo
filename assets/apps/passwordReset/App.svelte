@@ -1,6 +1,6 @@
 <script>
 	import WithLazyLoader from "../../components/WithLazyLoader.svelte";
-	import ApiManager from "../../managers/ApiManager";
+	import ApiManager from "../../providers/auth-provider";
 	import { redirect } from "../../helpers/helpers";
 
 	export let token, type;

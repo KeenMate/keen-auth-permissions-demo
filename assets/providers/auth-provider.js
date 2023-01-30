@@ -5,7 +5,7 @@ import {
 	smsTokenReset,
 	resendVerification,
 } from "../constants/urls";
-import { BaseApiManager } from "./BaseApiProvider";
+import { BaseApiManager } from "./base-api-provider";
 
 class ApiManager extends BaseApiManager {
 	constructor() {

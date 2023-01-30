@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from "svelte";
 	import { tenant } from "../../../auth/auth-store";
-	import { GroupsManager } from "../../../managers/GroupsManager";
+	import { GroupsManager } from "../../../providers/groups-provider";
 	import GroupActions from "../components/GroupActions.svelte";
 	import Notifications from "../../../providers/notifications-provider";
 	let groups = [];

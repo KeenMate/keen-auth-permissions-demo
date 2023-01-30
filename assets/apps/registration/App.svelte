@@ -2,7 +2,7 @@
   import WithLazyLoader from "../../components/WithLazyLoader.svelte";
   import { redirect } from "../../helpers/helpers";
   import { isEmpty, isValidEmail } from "../../helpers/validationHelpers";
-  import Manager from "../../managers/ApiManager";
+  import Manager from "../../providers/auth-provider";
   import RegistrationForm from "./RegistrationForm.svelte";
 
   let name, password, email;

@@ -1,7 +1,7 @@
 <script>
 	import { push } from "svelte-spa-router";
 	import { tenant } from "../../../auth/auth-store";
-	import { GroupsManager } from "../../../managers/GroupsManager";
+	import { GroupsManager } from "../../../providers/groups-provider";
 
 	let title,
 		isActive = true,

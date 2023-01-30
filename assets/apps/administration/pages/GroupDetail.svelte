@@ -4,11 +4,11 @@
 	import { tenant } from "../../../auth/auth-store";
 	import WithLazyLoader from "../../../components/WithLazyLoader.svelte";
 	import { emptyPromise } from "../../../helpers/promise-helpers";
-	import { GroupsManager } from "../../../managers/GroupsManager";
+	import { GroupsManager } from "../../../providers/groups-provider";
 	import GroupMapping from "../components/GroupMapping.svelte";
 
 	export let params;
-	$: groupId = params.group;
+
 	let manager = new GroupsManager($tenant);
 
 	let group;
@@ -79,6 +79,7 @@
 
 		return loadTask;
 	}
+
 	loadGroup();
 	// onMount(() => loadGroup());
 

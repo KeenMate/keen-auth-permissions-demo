@@ -1,5 +1,5 @@
 import { GroupsEndpoint } from "../constants/urls";
-import { BaseApiManager } from "./BaseApiProvider";
+import { BaseApiManager } from "./base-api-provider"
 
 export class GroupsManager extends BaseApiManager {
 	constructor(tenant) {
