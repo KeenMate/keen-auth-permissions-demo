@@ -56,12 +56,12 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
     get "/verify-email", EmailVerificationController, :verify_email
     get "/resend-verification", EmailVerificationController, :resend_verification
 
+		#for registered only
     scope "/" do
       pipe_through :require_authenticated
 
       get "/private", PrivateController, :private_page_get
 
-      get "/groups", PageController, :groups
       get "/admin", PageController, :admin
     end
   end

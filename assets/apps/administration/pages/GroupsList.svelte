@@ -1,66 +1,66 @@
 <script>
 	import { onMount } from "svelte";
-	import { push } from "svelte-spa-router";
 	import { tenant } from "../../../auth/auth-store";
 	import { GroupsManager } from "../../../managers/GroupsManager";
 	import GroupActions from "../components/GroupActions.svelte";
+	import Notifications from "../../../providers/notifications-provider";
 	let groups = [];
-	export let errorMessage;
 	let manager = new GroupsManager($tenant);
 
-	function openDetail(group) {
-		// redirect
-		push("#/groups/" + group.userGroupId);
-	}
-
-	function setActive(group, setTo) {
-		callApi(async () => await manager.setEnable(group.userGroupId, setTo));
-	}
-	function setLocked(group, setTo) {
-		callApi(async () => await manager.setLocked(group.userGroupId, setTo));
-	}
-	function deleteGroup(group) {
-		callApi(async () => await manager.deleteGroup(group.userGroupId));
-	}
-
-	async function load() {
-		callApi(async () => (groups = (await manager.getGroups()) ?? []), false);
-	}
-
-	onMount(async () => {
-		load();
-	});
-
-	async function callApi(func, shouldLoad = true) {
+	async function setActiveAsync(group, setTo) {
 		try {
-			await func();
+			await manager.setEnableAsync(group.userGroupId, setTo);
+			Notifications.success(`Group ${setTo ? "enabled" : "disabled"}`);
+
+			await loadAsync();
 		} catch (res) {
-			if (res == "Forbidden") {
-				errorMessage = "Forbidden, missing permissions";
-				return;
-			}
-
 			console.log(res);
-			if (res?.error) {
-				errorMessage = res?.error?.msg;
-			} else {
-				errorMessage = "Server error try again later";
-			}
-			return;
-		}
-		if (shouldLoad) {
-			load();
-		}
 
-		errorMessage = null;
+			Notifications.error(manager.getErrorMsg(res));
+		}
 	}
-</script>
+	async function setLockedAsync(group, setTo) {
+		try {
+			await manager.setLockedAsync(group.userGroupId, setTo);
+			Notifications.success(`Group ${setTo ? "locked" : "unlocked"}`);
 
-{#if errorMessage}
-	<div class="alert alert-danger" role="alert">
-		{errorMessage}
-	</div>
-{/if}
+			await loadAsync();
+		} catch (res) {
+			console.log(res);
+
+			Notifications.error(
+				manager.getErrorMsg(res),
+				`Error ${setTo ? "locking" : "unlocking"} group`
+			);
+		}
+	}
+	async function deleteGroupAsync(group) {
+		try {
+			await manager.deleteGroupAsync(group.userGroupId);
+			Notifications.success("Group active set");
+
+			await loadAsync();
+		} catch (res) {
+			console.log(res);
+
+			Notifications.error(manager.getErrorMsg(res), "Error deleting group");
+		}
+	}
+
+	async function loadAsync() {
+		try {
+			groups = (await manager.getGroupsAsync()) ?? [];
+			Notifications.success("Groups loaded");
+		} catch (res) {
+			console.log(res);
+			Notifications.error(manager.getErrorMsg(res), "Error loading group");
+		}
+	}
+
+	onMount(() => {
+		loadAsync();
+	});
+</script>
 
 <div class="mb-2" />
 
@@ -91,9 +91,9 @@
 						<tr>
 							<GroupActions
 								{group}
-								on:set-active={() => setActive(group, !group.isActive)}
-								on:set-lock={() => setLocked(group, group.isAssignable)}
-								on:delete={() => deleteGroup(group)}
+								on:set-active={() => setActiveAsync(group, !group.isActive)}
+								on:set-lock={() => setLockedAsync(group, group.isAssignable)}
+								on:delete={() => deleteGroupAsync(group)}
 							/>
 							<th scope="row">{group.userGroupId}</th>
 							<td class="text-start">

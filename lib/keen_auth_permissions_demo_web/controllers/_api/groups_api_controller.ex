@@ -27,7 +27,9 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
     end
   end
 
-  api_handler(:disable_group, @tenant_and_group_scheme, permissions: ["system.groups.update_group"])
+  api_handler(:disable_group, @tenant_and_group_scheme,
+    permissions: ["system.groups.update_group"]
+  )
 
   def disable_group_handler(conn, %{group_id: group_id, tenant: tenant}) do
     with {:ok, _} <- Manager.disable_group(conn, tenant, group_id) do
@@ -59,7 +61,9 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
     end
   end
 
-  api_handler(:group_info, @tenant_and_group_scheme, permissions: {["system.groups.get_members", "system.groups.get_group"], :and})
+  api_handler(:group_info, @tenant_and_group_scheme,
+    permissions: {["system.groups.get_members", "system.groups.get_group"], :and}
+  )
 
   def group_info_handler(conn, %{group_id: group_id, tenant: tenant}) do
     with {:ok, group_info} <- Manager.group_info(conn, tenant, group_id) do
@@ -90,7 +94,9 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
     user_id: [type: :integer, number: [min: 0], required: true]
   }
 
-  api_handler(:add_user_to_group, @group_member_scheme, permissions: ["system.groups.create_member"])
+  api_handler(:add_user_to_group, @group_member_scheme,
+    permissions: ["system.groups.create_member"]
+  )
 
   def add_user_to_group_handler(conn, %{
         group_id: group_id,
@@ -102,7 +108,9 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
     end
   end
 
-  api_handler(:remove_user_from_group, @group_member_scheme, permissions: ["system.groups.delete_member"])
+  api_handler(:remove_user_from_group, @group_member_scheme,
+    permissions: ["system.groups.delete_member"]
+  )
 
   def remove_user_from_group_handler(conn, %{
         group_id: group_id,
@@ -118,7 +126,9 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
   # * USER GROUP MAPINGS
   # *
 
-  api_handler(:get_user_groups_mappings, @tenant_and_group_scheme, permissions: ["system.groups.get_mappings"])
+  api_handler(:get_user_groups_mappings, @tenant_and_group_scheme,
+    permissions: ["system.groups.get_mappings"]
+  )
 
   def get_user_groups_mappings_handler(conn, %{group_id: group_id, tenant: tenant}) do
     with {:ok, mappings} <- Manager.get_user_group_mappings(conn, tenant, group_id) do
@@ -134,7 +144,9 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
     type: [type: :string, required: true, in: ~w(role group)],
     value: [type: :string, required: true]
   }
-  api_handler(:create_user_group_mapping, @create_user_group_mapping_scheme, permissions: ["system.groups.create_mapping"])
+  api_handler(:create_user_group_mapping, @create_user_group_mapping_scheme,
+    permissions: ["system.groups.create_mapping"]
+  )
 
   def create_user_group_mapping_handler(conn, %{
         tenant: tenant,
@@ -162,7 +174,9 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
     tenant: [type: :integer, number: [min: 0], required: true],
     mapping_id: [type: :integer, number: [min: 0], required: true]
   }
-  api_handler(:delete_user_group_mapping, @mapping_scheme, permissions: ["system.groups.delete_mapping"])
+  api_handler(:delete_user_group_mapping, @mapping_scheme,
+    permissions: ["system.groups.delete_mapping"]
+  )
 
   def delete_user_group_mapping_handler(conn, %{
         tenant: tenant,

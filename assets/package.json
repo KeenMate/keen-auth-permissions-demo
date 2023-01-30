@@ -10,6 +10,7 @@
 	"dependencies": {
 		"@fortawesome/fontawesome-free": "^6.2.0",
 		"CBuffer": "^2.2.0",
+		"luxon": "^3.2.1",
 		"phoenix": "file:../deps/phoenix",
 		"phoenix_html": "file:../deps/phoenix_html",
 		"phoenix_live_view": "^0.18.2",
@@ -17,6 +18,7 @@
 		"svelte-simple-modal": "^1.5.0",
 		"svelte-spa-router": "^3.3.0",
 		"tailwindcss": "^3.1.8",
+		"toastr": "^2.1.4",
 		"yargs": "^17.6.0"
 	},
 	"devDependencies": {

@@ -8,7 +8,7 @@ export class GroupsManager extends BaseApiManager {
 		this.endpoint = GroupsEndpoint(tenant);
 	}
 
-	async getGroups() {
+	async getGroupsAsync() {
 		let res = await this.Get(this.endpoint.getAll);
 		return res.data;
 	}
@@ -27,7 +27,7 @@ export class GroupsManager extends BaseApiManager {
 		let res = await this.Delete(this.endpoint.delete(groupId));
 		return res.data;
 	}
-	async setEnable(groupId, setTo) {
+	async setEnableAsync(groupId, setTo) {
 		let res;
 		if (setTo === true) {
 			res = await this.Patch(this.endpoint.enable(groupId));
@@ -38,7 +38,7 @@ export class GroupsManager extends BaseApiManager {
 		return res.data;
 	}
 
-	async setLocked(groupId, setTo) {
+	async setLockedAsync(groupId, setTo) {
 		let res;
 		if (setTo === true) {
 			res = await this.Patch(this.endpoint.lock(groupId));

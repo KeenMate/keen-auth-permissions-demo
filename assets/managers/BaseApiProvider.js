@@ -49,4 +49,22 @@ export class BaseApiManager {
 	async Delete(url, body) {
 		return await this.FetchWithToken(url, body, "DELETE");
 	}
+
+	/**
+	 * extract error msg from server response
+	 * @param {*} error
+	 * @returns
+	 */
+	getErrorMsg(response) {
+		if (response == "Forbidden") {
+			return "Forbidden, missing permissions";
+		}
+
+		if (response?.error) {
+			const error = response.error;
+			return error?.msg ?? error?.code;
+		}
+
+		return "Server or connection error";
+	}
 }

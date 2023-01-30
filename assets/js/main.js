@@ -1,4 +1,4 @@
-import "./app.js";
+import "./phoeni-app.js";
 // import phoenix html helpers (optional)
 // import 'phoenix_html'
 
@@ -7,4 +7,4 @@ import "tailwindcss/tailwind.css";
 // any css we import will be bundled in app.css
 import "../css/global.scss";
 
-import "./AppsManager";
+import "./apps-manager.js";
