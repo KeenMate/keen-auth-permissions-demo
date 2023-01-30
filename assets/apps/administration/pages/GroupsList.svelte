@@ -62,9 +62,7 @@
 	});
 </script>
 
-<div class="mb-2" />
-
-<div class="card">
+<div class="card mb-5">
 	<div class="card-header d-flex">
 		<h2>Groups</h2>
 		<a href="#/groups/create" class="ms-auto">
