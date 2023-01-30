@@ -9,7 +9,6 @@ export default function lazyLoader(resourceTask, showLoader, hideLoader) {
 
 	let loaderShowed = false;
 
-	//! THIS IS CHANGED
 	// show loader instantly to prevent template beiing rendered with async data
 	showLoader();
 

@@ -1,19 +1,18 @@
 <script>
-	import { createEventDispatcher, getContext, onMount } from "svelte";
+	import { getContext } from "svelte";
 	import { push } from "svelte-spa-router";
 	import { tenant } from "../../../auth/auth-store";
 	import WithLazyLoader from "../../../components/WithLazyLoader.svelte";
 	import { emptyPromise } from "../../../helpers/promise-helpers";
 	import { GroupsManager } from "../../../providers/groups-provider";
 	import GroupMapping from "../components/GroupMapping.svelte";
-
+	import Notifications from "../../../providers/notifications-provider";
 	export let params;
 
 	let manager = new GroupsManager($tenant);
 
 	let group;
-	let errorMessage;
-	const dispatch = createEventDispatcher();
+	let userId;
 
 	const { open, close: closeModal } = getContext("simple-modal");
 
@@ -21,11 +20,11 @@
 		open(GroupMapping, {
 			mappings: group.mappings,
 			create: async (newMapping) => {
-				await createMappings(newMapping);
+				await createMappingAsync(newMapping);
 				closeModal();
 			},
 			remove: async (value) => {
-				await removeMapping(value);
+				await removeMappingAsync(value);
 				closeModal();
 			},
 		});
@@ -34,80 +33,90 @@
 		push("#/groups");
 	}
 
-	let userId;
+	async function addMemberAsync() {
+		try {
+			await manager.addMemberAsync(group.userGroupId, userId);
 
-	async function addMember() {
-		await callApi(async () => {
-			errorMessage = null;
-			await manager.addMember(group.userGroupId, userId);
-		});
+			Notifications.success("Member added");
+
+			loadGroupAsync();
+		} catch (res) {
+			console.log(res);
+			Notifications.error(manager.getErrorMsg(res), "Error adding member");
+		}
 	}
-	async function removeMember(targetUserId) {
-		await callApi(async () => {
-			errorMessage = null;
-			await manager.removeMember(group.userGroupId, targetUserId);
-		});
+	async function removeMemberAsync(targetUserId) {
+		try {
+			await manager.removeMemberAsync(group.userGroupId, targetUserId);
+
+			Notifications.success("Member removed");
+
+			loadGroupAsync();
+		} catch (res) {
+			console.log(res);
+			Notifications.error(manager.getErrorMsg(res), "Error removing member");
+		}
 	}
-	async function createMappings(val) {
-		callApi(async () => {
-			errorMessage = null;
-			await manager.createMapping(
+	async function createMappingAsync(val) {
+		try {
+			await manager.createMappingAsync(
 				group.userGroupId,
 				val.name,
 				val.value,
 				val.provider,
 				val.type
 			);
-		});
-	}
 
-	async function removeMapping(mappingId) {
-		callApi(async () => {
-			errorMessage = null;
+			Notifications.success("Mapping created");
 
-			await manager.removeMapping(group.userGroupId, mappingId);
-		});
-	}
-
-	let loadTask = emptyPromise;
-	function loadGroup() {
-		loadTask = callApi(async () => {
-			group = await manager.getGroup(params.group);
-			console.log("got group", group);
-			return group;
-		}, false);
-
-		return loadTask;
-	}
-
-	loadGroup();
-	// onMount(() => loadGroup());
-
-	async function callApi(func, shouldLoad = true) {
-		try {
-			await func();
-			if (shouldLoad) {
-				await loadGroup();
-			}
+			loadGroupAsync();
 		} catch (res) {
-			if (res == "Forbidden") {
-				errorMessage = "Forbidden, missing permissions";
-				return;
-			}
-
 			console.log(res);
-			if (res?.error) {
-				errorMessage = res?.error?.msg;
-			} else {
-				errorMessage = "Server error try again later";
-			}
+			Notifications.error(manager.getErrorMsg(res), "Error creating mapping");
 		}
 	}
 
-	$: console.log(errorMessage);
+	async function removeMappingAsync(mappingId) {
+		try {
+			await manager.removeMappingAsync(group.userGroupId, mappingId);
+
+			Notifications.success("Mapping removed");
+
+			loadGroupAsync();
+		} catch (res) {
+			console.log(res);
+			Notifications.error(manager.getErrorMsg(res), "Error removing mapping");
+		}
+	}
+
+	let task = emptyPromise;
+
+	function load() {
+		showLoaderAsync(() => loadGroupAsync());
+		task = loadGroupAsync();
+	}
+
+	async function showLoaderAsync(func, ...args) {
+		task = func(...args);
+		return await task;
+	}
+
+	async function loadGroupAsync() {
+		try {
+			group = await manager.getGroupAsync(params.group);
+			Notifications.success("Group loaded");
+		} catch (res) {
+			console.log(res);
+			Notifications.error(manager.getErrorMsg(res), "Error loading group");
+		}
+	}
+
+	load();
+
+	$: console.log("group", group);
 </script>
 
-<WithLazyLoader task={loadTask}>
+<WithLazyLoader {task}>
 	<div class="d-flex mt-5">
 		<div class="text-start">
 			<h2 class="mb-0">{group.title}</h2>
@@ -155,18 +164,14 @@
 						/>
 					</div>
 				</div>
-				<button on:click={addMember} class=" col-4 btn btn-sm btn-success ">
+				<button
+					on:click={addMemberAsync}
+					class=" col-4 btn btn-sm btn-success "
+				>
 					Add new member</button
 				>
 			</div>
 		</div>
-		{#if errorMessage}
-			<hr class="m-0" />
-
-			<div class="alert alert-danger" role="alert">
-				{errorMessage}
-			</div>
-		{/if}
 		<hr class="m-0" />
 		<div class="card-body">
 			<table class="table">
@@ -185,7 +190,7 @@
 								><button
 									title="Remove member"
 									class="btn btn-outline btn-sm"
-									on:click={() => removeMember(member.userId)}
+									on:click={() => removeMemberAsync(member.userId)}
 									><i class="fa-solid fa-user-minus" /></button
 								></td
 							>
@@ -199,8 +204,8 @@
 				</tbody>
 			</table>
 		</div>
-	</div></WithLazyLoader
->
+	</div>
+</WithLazyLoader>
 
 <style>
 	.fixed_width {

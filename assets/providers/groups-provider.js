@@ -1,5 +1,5 @@
 import { GroupsEndpoint } from "../constants/urls";
-import { BaseApiManager } from "./base-api-provider"
+import { BaseApiManager } from "./base-api-provider";
 
 export class GroupsManager extends BaseApiManager {
 	constructor(tenant) {
@@ -18,12 +18,12 @@ export class GroupsManager extends BaseApiManager {
 		return res.data;
 	}
 
-	async getGroup(groupId) {
+	async getGroupAsync(groupId) {
 		let res = await this.Get(this.endpoint.get(groupId));
 		return res.data;
 	}
 
-	async deleteGroup(groupId) {
+	async deleteGroupAsync(groupId) {
 		let res = await this.Delete(this.endpoint.delete(groupId));
 		return res.data;
 	}
@@ -49,16 +49,16 @@ export class GroupsManager extends BaseApiManager {
 		return res.data;
 	}
 
-	async addMember(groupId, UserId) {
+	async addMemberAsync(groupId, UserId) {
 		let res = await this.Put(this.endpoint.addMember(groupId, UserId));
 		return res.data;
 	}
-	async removeMember(groupId, UserId) {
+	async removeMemberAsync(groupId, UserId) {
 		let res = await this.Delete(this.endpoint.removeMember(groupId, UserId));
 		return res.data;
 	}
 
-	async createMapping(groupId, name, value, provider, type) {
+	async createMappingAsync(groupId, name, value, provider, type) {
 		const res = await this.Put(this.endpoint.createMapping(groupId), {
 			name,
 			value,
@@ -68,7 +68,7 @@ export class GroupsManager extends BaseApiManager {
 
 		return res.data;
 	}
-	async removeMapping(groupId, mappingId) {
+	async removeMappingAsync(groupId, mappingId) {
 		const res = await this.Delete(
 			this.endpoint.removeMapping(groupId, mappingId)
 		);
