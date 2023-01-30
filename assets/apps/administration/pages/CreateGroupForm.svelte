@@ -2,26 +2,38 @@
 	import { push } from "svelte-spa-router";
 	import { tenant } from "../../../auth/auth-store";
 	import { GroupsManager } from "../../../providers/groups-provider";
+	import Notifications from "../../../providers/notifications-provider";
 
 	let title,
 		isActive = true,
 		isAssignable = true,
 		isExternal = false;
 	let manager = new GroupsManager($tenant);
-	let errorMessage;
 
-	function dispatchCreate() {
+	async function createAsync() {
 		if (!valid()) {
 			return;
 		}
-		callApi(async () => {
-			await manager.createGroup({ title, isActive, isAssignable, isExternal });
-		});
+		try {
+			await manager.createGroupAsync({
+				title,
+				isActive,
+				isAssignable,
+				isExternal,
+			});
+
+			Notifications.success(`Group  ${title} created`);
+
+			close();
+		} catch (res) {
+			console.log(res);
+			Notifications.error(manager.getErrorMsg(res), "Error creating group");
+		}
 	}
 
 	function valid() {
 		if (!title) {
-			errorMessage = "Title cant be empty";
+			Notifications.error("Title cant be empty");
 			return false;
 		}
 
@@ -30,27 +42,6 @@
 
 	function close() {
 		push("#/groups");
-	}
-
-	async function callApi(func, shouldLoad = true) {
-		try {
-			await func();
-		} catch (res) {
-			if (res == "Forbidden") {
-				errorMessage = "Forbidden, missing permissions";
-				return;
-			}
-
-			console.log(res);
-			if (res?.error) {
-				errorMessage = res?.error?.msg;
-			} else {
-				errorMessage = "Server error try again later";
-			}
-			return;
-		}
-
-		close();
 	}
 </script>
 
@@ -118,17 +109,11 @@
 					</div>
 				</div>
 			</div>
-
-			{#if errorMessage}
-				<div class="alert alert-danger" role="alert">
-					{errorMessage}
-				</div>
-			{/if}
 			<button
 				type="submit"
 				value="send"
 				class="btn btn-success mb-1"
-				on:click={dispatchCreate}
+				on:click={createAsync}
 			>
 				CREATE
 			</button>

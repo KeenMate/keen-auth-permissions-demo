@@ -13,7 +13,7 @@ export class GroupsManager extends BaseApiManager {
 		return res.data;
 	}
 
-	async createGroup(group) {
+	async createGroupAsync(group) {
 		let res = await this.Put(this.endpoint.create, group);
 		return res.data;
 	}
@@ -75,7 +75,7 @@ export class GroupsManager extends BaseApiManager {
 
 		return res.data;
 	}
-	async getMappings(groupId) {
+	async getMappingsAsync(groupId) {
 		const res = await this.Get(this.endpoint.getMappings(groupId, mappingId));
 
 		return res.data;
