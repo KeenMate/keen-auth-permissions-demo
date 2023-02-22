@@ -52,7 +52,7 @@ create or replace function helpers.is_empty_string(_text text)
     language sql
     immutable
     parallel safe
-    cost 2
+    cost 1
 as
 $$
 select _text is null or _text = '';
@@ -63,7 +63,7 @@ create or replace function helpers.is_not_empty_string(_text text)
     language sql
     immutable
     parallel safe
-    cost 2
+    cost 1
 as
 $$
 select not helpers.is_empty_string(_text);
@@ -80,8 +80,9 @@ $$;
 
 create function helpers.get_code(_text text, _separator text default '_')
     returns text
-    stable returns null on null input
+    immutable
     parallel safe
+    cost 1
     language sql
 as
 $$
@@ -103,7 +104,9 @@ $$;
 
 create function helpers.get_slug(_text text)
     returns text
-    stable returns null on null input
+    immutable
+    parallel safe
+    cost 1
     language sql
 as
 $$
@@ -111,13 +114,13 @@ select helpers.get_code(_text, '-');
 $$;
 
 create function helpers.unaccent_text(_text text, _lower_text bool default true) returns text
-    language plpgsql
+    language sql
     immutable
+    parallel safe
+    cost 1
 as
 $$
-begin
-    return case when _lower_text then lower(ext.unaccent(_text)) else ext.unaccent(_text) end;
-end
+select case when _lower_text then lower(ext.unaccent(_text)) else ext.unaccent(_text) end;
 $$;
 
 /***
@@ -132,7 +135,9 @@ $$;
 
 create function helpers.compare_jsonb_objects(_first jsonb, _second jsonb)
     returns jsonb
-    stable
+    immutable
+    parallel safe
+    cost 1
     language sql
 as
 $$
@@ -154,12 +159,13 @@ $$;
  */
 
 create function helpers.ltree_parent(path ext.ltree, levels integer default 1) returns ext.ltree
-    language plpgsql
+    language sql
+    immutable
+    parallel safe
+    cost 1
 as
 $$
-begin
-    return ext.subpath(path, 0, ext.nlevel(path) - levels);
-end
+    select ext.subpath(path, 0, ext.nlevel(path) - levels);
 $$;
 
 select *
