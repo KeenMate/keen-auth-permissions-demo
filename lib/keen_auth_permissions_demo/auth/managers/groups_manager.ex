@@ -5,47 +5,47 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
 
   import KeenAuthPermissionsDemo.Auth.ManagerHelpers
 
-  def get_groups(conn, tenant) do
+  def get_groups(conn, tenant \\ 1) do
     GroupsProvider.get_groups(user(conn), num(tenant))
   end
 
-  def enable_group(conn, tenant, group) do
-    GroupsProvider.enable_group(user(conn), num(tenant), num(group))
+  def enable_group(conn, group_id, tenant \\ 1) do
+    GroupsProvider.enable_group(user(conn), num(group_id), num(tenant))
   end
 
-  def disable_group(conn, tenant, group) do
-    GroupsProvider.disable_group(user(conn), num(tenant), num(group))
+  def disable_group(conn, group_id, tenant \\ 1) do
+    GroupsProvider.disable_group(user(conn), num(group_id), num(tenant))
   end
 
-  def lock_group(conn, tenant, group) do
-    GroupsProvider.lock_group(user(conn), num(tenant), num(group))
+  def lock_group(conn, group_id, tenant \\ 1) do
+    GroupsProvider.lock_group(user(conn), num(group_id), num(tenant))
   end
 
-  def unlock_group(conn, tenant, group) do
-    GroupsProvider.unlock_group(user(conn), num(tenant), num(group))
+  def unlock_group(conn, group_id, tenant \\ 1) do
+    GroupsProvider.unlock_group(user(conn), num(group_id), num(tenant))
   end
 
-  def delete_group(conn, tenant, group) do
-    GroupsProvider.delete_group(user(conn), num(tenant), num(group))
+  def delete_group(conn, group_id, tenant \\ 1) do
+    GroupsProvider.delete_group(user(conn), num(group_id), num(tenant))
   end
 
-  def group_info(conn, tenant, group_id) do
-    with {:ok, [group_info]} <- GroupsProvider.group_info(user(conn), num(tenant), num(group_id)),
+  def group_info(conn, group_id, tenant \\ 1) do
+    with {:ok, [group_info]} <- GroupsProvider.group_info(user(conn), num(group_id), num(tenant)),
          {:ok, members} <-
-           GroupsProvider.get_group_members(user(conn), num(tenant), num(group_id)),
+           GroupsProvider.get_group_members(user(conn), num(group_id), num(tenant)),
          {:ok, mappings} <-
-           get_user_group_mappings(conn, num(tenant), num(group_id)) do
+           get_user_group_mappings(conn, num(group_id), num(tenant)) do
       group_info = Map.put(group_info, :members, members)
       group_info = Map.put(group_info, :mappings, mappings)
       {:ok, group_info}
     end
   end
 
-  def get_group_members(conn, tenant, group) do
-    GroupsProvider.get_group_members(user(conn), num(tenant), num(group))
+  def get_group_members(conn, group, tenant \\ 1) do
+    GroupsProvider.get_group_members(user(conn), num(group), num(tenant))
   end
 
-  def create_group(conn, tenant, group) do
+  def create_group(conn, group, tenant \\ 1) do
     is_assignable = Map.get(group, :is_assignable, true)
     is_active = Map.get(group, :is_active, true)
     is_external = Map.get(group, :is_external, false)
@@ -54,54 +54,54 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
     with {:ok, [new_group_id]} <-
            GroupsProvider.create_group(
              user(conn),
-             num(tenant),
              group.title,
              is_assignable,
              is_active,
              is_external,
-             is_default
+             is_default,
+             num(tenant)
            ) do
       {:ok, new_group_id}
     end
   end
 
-  def add_member_to_group(conn, tenant_id, group_id, target_user_id) do
+  def add_member_to_group(conn, group_id, target_user_id, tenant \\ 1) do
     user = user(conn)
-    tenant_id = num(tenant_id)
+    tenant = num(tenant)
     group_id = num(group_id)
     target_user_id = num(target_user_id)
 
     with {:ok, [member_id]} <-
-           GroupsProvider.add_group_member(user, tenant_id, group_id, target_user_id) do
+           GroupsProvider.add_group_member(user, group_id, target_user_id, tenant) do
       {:ok, member_id}
     end
   end
 
-  def remove_member_from_group(conn, tenant_id, group_id, target_user_id) do
+  def remove_member_from_group(conn, group_id, target_user_id, tenant \\ 1) do
     user = user(conn)
-    tenant_id = num(tenant_id)
+    tenant = num(tenant)
     group_id = num(group_id)
     target_user_id = num(target_user_id)
 
     with {:ok, [member_id]} <-
-           GroupsProvider.remove_group_member(user, tenant_id, group_id, target_user_id) do
+           GroupsProvider.remove_group_member(user, group_id, target_user_id, tenant) do
       {:ok, member_id}
     end
   end
 
   def get_user_group_mappings(
         conn,
-        tenant_id,
-        group_id
+        group_id,
+        tenant
       ) do
     user = user(conn)
-    tenant_id = num(tenant_id)
+    tenant = num(tenant)
     group_id = num(group_id)
 
     case GroupsProvider.get_user_group_mapping(
            user,
-           tenant_id,
-           group_id
+           group_id,
+           tenant
          ) do
       {:ok, data} ->
         data = Enum.map(data, &transform_group_maping(&1))
@@ -110,7 +110,7 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
       {:error, reason} ->
         Logger.error("Could not get mappings for group",
           reason: inspect(reason),
-          detail: %{user: user, tenant_id: tenant_id, group_id: group_id}
+          detail: %{user: user, tenant: tenant, group_id: group_id}
         )
 
         {:error, reason}
@@ -136,15 +136,15 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
 
   def create_user_group_mapping(
         conn,
-        tenant_id,
         group_id,
         provider_code,
         mapped_object_name,
         mapped_target,
-        mapping_type
+        mapping_type,
+        tenant \\ 1
       ) do
     user = user(conn)
-    tenant_id = num(tenant_id)
+    tenant = num(tenant)
     group_id = num(group_id)
 
     {mapped_object_id, mapped_role} =
@@ -159,22 +159,22 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
     with {:ok, [result]} <-
            GroupsProvider.create_user_group_mapping(
              user,
-             tenant_id,
              group_id,
              provider_code,
              mapped_object_id,
              mapped_object_name,
-             mapped_role
+             mapped_role,
+             tenant
            ) do
       {:ok, result}
     end
   end
 
-  def delete_user_group_mapping(conn, tenant_id, group_mapping_id) do
+  def delete_user_group_mapping(conn, group_mapping_id, tenant \\ 1) do
     user = user(conn)
-    tenant_id = num(tenant_id)
+    tenant = num(tenant)
     group_mapping_id = num(group_mapping_id)
 
-    GroupsProvider.delete_user_group_mapping(user, tenant_id, group_mapping_id)
+    GroupsProvider.delete_user_group_mapping(user, group_mapping_id, tenant)
   end
 end

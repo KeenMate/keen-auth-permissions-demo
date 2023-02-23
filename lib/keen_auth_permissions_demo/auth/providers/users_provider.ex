@@ -4,7 +4,7 @@ defmodule KeenAuthPermissionsDemo.Auth.UsersProvider do
 
   def get_all_users(
         %KeenAuthPermissions.User{username: username, user_id: user_id},
-        tenant_id
+        tenant_id \\ 1
       ) do
     DbContext.auth_get_tenant_users(username, user_id, tenant_id)
     |> ErrorParsers.parse_if_error()

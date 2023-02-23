@@ -26,7 +26,6 @@ config :keen_auth_permissions_demo, KeenAuthPermissionsDemoWeb.Endpoint,
   secret_key_base: "/Ll9y5rQkE17wioyXXQHG+6i43jkxDTDJM0mtxlJ5Z7TQw5sqKGXNBiKTHMwgZnp",
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
-    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
   ]
 
 # ## SSL Support

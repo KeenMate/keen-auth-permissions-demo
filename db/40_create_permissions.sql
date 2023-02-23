@@ -1521,7 +1521,7 @@ begin
             , _event_id := 50003);
 
         perform
-            auth.throw_no_permission(_tenant_id, _target_user_id, _perm_codes);
+            auth.throw_no_permission(_target_user_id, _perm_codes, _tenant_id);
     end if;
 
     return false;
@@ -2321,21 +2321,23 @@ end ;
 $$;
 
 create function unsecure.create_user_group_as_system(_title text
-, _is_system bool default false, _is_assignable bool default true, _is_default bool default false,_tenant_id int default 1)
+, _is_system bool default false, _is_assignable bool default true, _is_default bool default false
+, _tenant_id int default 1)
     returns setof auth.user_group
     language sql
     rows 1
 as
 $$
 select ug.*
-from unsecure.create_user_group('system', 1, _title, _is_assignable, true, false, _is_system,_is_default, _tenant_id) g
+from unsecure.create_user_group('system', 1, _title, _is_assignable, true, false, _is_system, _is_default, _tenant_id) g
          inner join auth.user_group ug on ug.user_group_id = g.__user_group_id;
 
 $$;
 
-create function auth.create_user_group(_created_by text, _user_id bigint, _title text, _tenant_id int default 1,
+create function auth.create_user_group(_created_by text, _user_id bigint, _title text,
                                        _is_assignable bool default true, _is_active bool default true,
-                                       _is_external bool default false, _is_default bool default false)
+                                       _is_external bool default false, _is_default bool default false,
+                                       _tenant_id int default 1)
     returns table
             (
                 __user_group_id int
@@ -2836,16 +2838,16 @@ as
 $$
 begin
 
-    perform auth.has_permission(_user_id, 'system.groups.get_mappings', _tenant_id);
+    perform auth.has_permission(_user_id, 'system.groups.get_mapping', _tenant_id);
 
     return query select *
                  from auth.user_group_mapping ugm
                  where ugm.group_id = _user_group_id;
 
     perform
-        add_journal_msg(_requested_by, _tenant_id, _user_id
+        add_journal_msg(_requested_by, _user_id
             , format('User: %s requested user group mappings for group: %s in tenant: %s'
-                            , _requested_by, _user_group_id, _tenant_id)
+                            , _requested_by, _user_group_id, _tenant_id), _tenant_id
             , 'group', _user_group_id
             ,
                         NULL

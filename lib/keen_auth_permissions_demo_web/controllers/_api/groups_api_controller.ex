@@ -3,11 +3,11 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
   alias KeenAuthPermissionsDemo.Auth.GroupsManager, as: Manager
 
   @tenant_scheme %{
-    tenant: [type: :integer, number: [min: 0], required: true]
+    tenant: [type: :integer, number: [min: 0], default: 1]
   }
 
   @tenant_and_group_scheme %{
-    tenant: [type: :integer, number: [min: 0], required: true],
+    tenant: [type: :integer, number: [min: 0], default: 1],
     group_id: [type: :integer, number: [min: 0], required: true]
   }
 
@@ -22,7 +22,7 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
   api_handler(:enable_group, @tenant_and_group_scheme, permissions: ["system.groups.update_group"])
 
   def enable_group_handler(conn, %{group_id: group_id, tenant: tenant}) do
-    with {:ok, _} <- Manager.enable_group(conn, tenant, group_id) do
+    with {:ok, _} <- Manager.enable_group(conn, group_id, tenant) do
       ok(:ok)
     end
   end
@@ -32,7 +32,7 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
   )
 
   def disable_group_handler(conn, %{group_id: group_id, tenant: tenant}) do
-    with {:ok, _} <- Manager.disable_group(conn, tenant, group_id) do
+    with {:ok, _} <- Manager.disable_group(conn, group_id, tenant) do
       ok(:ok)
     end
   end
@@ -40,7 +40,7 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
   api_handler(:lock_group, @tenant_and_group_scheme, permissions: ["system.groups.lock_group"])
 
   def lock_group_handler(conn, %{group_id: group_id, tenant: tenant}) do
-    with {:ok, _} <- Manager.lock_group(conn, tenant, group_id) do
+    with {:ok, _} <- Manager.lock_group(conn, group_id, tenant) do
       ok(:ok)
     end
   end
@@ -48,7 +48,7 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
   api_handler(:unlock_group, @tenant_and_group_scheme, permissions: ["system.groups.update_group"])
 
   def unlock_group_handler(conn, %{group_id: group_id, tenant: tenant}) do
-    with {:ok, _} <- Manager.unlock_group(conn, tenant, group_id) do
+    with {:ok, _} <- Manager.unlock_group(conn, group_id, tenant) do
       ok(:ok)
     end
   end
@@ -56,7 +56,7 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
   api_handler(:delete_group, @tenant_and_group_scheme, permissions: ["system.groups.delete_group"])
 
   def delete_group_handler(conn, %{group_id: group_id, tenant: tenant}) do
-    with {:ok, _} <- Manager.delete_group(conn, tenant, group_id) do
+    with {:ok, _} <- Manager.delete_group(conn, group_id, tenant) do
       ok(:ok)
     end
   end
@@ -66,13 +66,13 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
   )
 
   def group_info_handler(conn, %{group_id: group_id, tenant: tenant}) do
-    with {:ok, group_info} <- Manager.group_info(conn, tenant, group_id) do
+    with {:ok, group_info} <- Manager.group_info(conn, group_id, tenant) do
       ok(group_info)
     end
   end
 
   @create_group_scheme %{
-    tenant: [type: :integer, number: [min: 0], required: true],
+    tenant: [type: :integer, number: [min: 0], default: 1],
     title: [type: :string, required: true],
     is_assignable: [type: :boolean, required: true],
     is_active: [type: :boolean, required: true],
@@ -81,15 +81,15 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
   api_handler(:create_group, @create_group_scheme, permissions: ["system.groups.create_group"])
 
   def create_group_handler(conn, %{tenant: tenant} = params) do
-    with {:ok, new_group_id} <- Manager.create_group(conn, tenant, params),
-         {:ok, group_info} <- Manager.group_info(conn, tenant, new_group_id) do
+    with {:ok, new_group_id} <- Manager.create_group(conn, params, tenant),
+         {:ok, group_info} <- Manager.group_info(conn, new_group_id, tenant) do
       ok(group_info)
     end
   end
 
   # * Members
   @group_member_scheme %{
-    tenant: [type: :integer, number: [min: 0], required: true],
+    tenant: [type: :integer, number: [min: 0], default: 1],
     group_id: [type: :integer, number: [min: 0], required: true],
     user_id: [type: :integer, number: [min: 0], required: true]
   }
@@ -103,7 +103,7 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
         tenant: tenant,
         user_id: target_user_id
       }) do
-    with {:ok, member_id} <- Manager.add_member_to_group(conn, tenant, group_id, target_user_id) do
+    with {:ok, member_id} <- Manager.add_member_to_group(conn, group_id, target_user_id, tenant) do
       ok(%{member_id: member_id})
     end
   end
@@ -118,7 +118,7 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
         user_id: target_user_id
       }) do
     with {:ok, _} <-
-           Manager.remove_member_from_group(conn, tenant, group_id, target_user_id) do
+           Manager.remove_member_from_group(conn, group_id, target_user_id, tenant) do
       ok(:ok)
     end
   end
@@ -127,17 +127,17 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
   # *
 
   api_handler(:get_user_groups_mappings, @tenant_and_group_scheme,
-    permissions: ["system.groups.get_mappings"]
+    permissions: ["system.groups.get_mapping"]
   )
 
   def get_user_groups_mappings_handler(conn, %{group_id: group_id, tenant: tenant}) do
-    with {:ok, mappings} <- Manager.get_user_group_mappings(conn, tenant, group_id) do
+    with {:ok, mappings} <- Manager.get_user_group_mappings(conn, group_id, tenant) do
       ok(mappings)
     end
   end
 
   @create_user_group_mapping_scheme %{
-    tenant: [type: :integer, number: [min: 0], required: true],
+    tenant: [type: :integer, number: [min: 0], default: 1],
     group_id: [type: :integer, number: [min: 0], required: true],
     provider: [type: :string, required: true],
     name: [type: :string, required: true],
@@ -159,19 +159,19 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
     with {:ok, mapping} <-
            Manager.create_user_group_mapping(
              conn,
-             tenant,
              group_id,
              provider_code,
              mapping_name,
              mapped_value,
-             mapping_type
+             mapping_type,
+             tenant
            ) do
       ok(mapping)
     end
   end
 
   @mapping_scheme %{
-    tenant: [type: :integer, number: [min: 0], required: true],
+    tenant: [type: :integer, number: [min: 0], default: 1],
     mapping_id: [type: :integer, number: [min: 0], required: true]
   }
   api_handler(:delete_user_group_mapping, @mapping_scheme,
@@ -185,8 +185,8 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
     with {:ok, _} <-
            Manager.delete_user_group_mapping(
              conn,
-             tenant,
-             mapping_id
+             mapping_id,
+             tenant
            ) do
       ok(:ok)
     end
