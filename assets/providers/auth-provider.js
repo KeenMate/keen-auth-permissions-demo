@@ -13,7 +13,7 @@ class ApiManager extends BaseApiManager {
 	}
 
 	async Register(name, email, password) {
-		return await this.Post(registrationUrl, {
+		return await this.PostAsync(registrationUrl, {
 			name,
 			email,
 			password,
@@ -21,7 +21,7 @@ class ApiManager extends BaseApiManager {
 	}
 
 	async ForgottenPassword(email, method) {
-		return await this.Post(forgottenPasswordUrl, {
+		return await this.PostAsync(forgottenPasswordUrl, {
 			method,
 			email,
 		});
@@ -30,19 +30,19 @@ class ApiManager extends BaseApiManager {
 	async PasswordReset(token, method, password) {
 		let url = resetPasswrodUrl(token, method);
 
-		return await this.Post(url, {
+		return await this.PostAsync(url, {
 			password,
 		});
 	}
 
 	async SmsToken(token) {
-		return await this.Post(smsTokenReset, {
+		return await this.PostAsync(smsTokenReset, {
 			token,
 		});
 	}
 
 	async ResendVerification(email) {
-		return await this.Post(resendVerification, {
+		return await this.PostAsync(resendVerification, {
 			email,
 		});
 	}

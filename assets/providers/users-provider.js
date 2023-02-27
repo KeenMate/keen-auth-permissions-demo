@@ -9,7 +9,7 @@ export class UserManager extends BaseApiManager {
 	}
 
 	async getTenantUsersAsync() {
-		const response = await this.Get(this.endpoint.getTenantMembers);
+		const response = await this.GetAsync(this.endpoint.getTenantMembers);
 		return response.data;
 	}
 }

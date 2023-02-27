@@ -9,30 +9,30 @@ export class GroupsManager extends BaseApiManager {
 	}
 
 	async getGroupsAsync() {
-		let res = await this.Get(this.endpoint.getAll);
+		let res = await this.GetAsync(this.endpoint.getAll);
 		return res.data;
 	}
 
 	async createGroupAsync(group) {
-		let res = await this.Put(this.endpoint.create, group);
+		let res = await this.PutAsync(this.endpoint.create, group);
 		return res.data;
 	}
 
 	async getGroupAsync(groupId) {
-		let res = await this.Get(this.endpoint.get(groupId));
+		let res = await this.GetAsync(this.endpoint.get(groupId));
 		return res.data;
 	}
 
 	async deleteGroupAsync(groupId) {
-		let res = await this.Delete(this.endpoint.delete(groupId));
+		let res = await this.DeleteAsync(this.endpoint.delete(groupId));
 		return res.data;
 	}
 	async setEnableAsync(groupId, setTo) {
 		let res;
 		if (setTo === true) {
-			res = await this.Patch(this.endpoint.enable(groupId));
+			res = await this.PatchAsync(this.endpoint.enable(groupId));
 		} else {
-			res = await this.Patch(this.endpoint.disable(groupId));
+			res = await this.PatchAsync(this.endpoint.disable(groupId));
 		}
 
 		return res.data;
@@ -41,25 +41,25 @@ export class GroupsManager extends BaseApiManager {
 	async setLockedAsync(groupId, setTo) {
 		let res;
 		if (setTo === true) {
-			res = await this.Patch(this.endpoint.lock(groupId));
+			res = await this.PatchAsync(this.endpoint.lock(groupId));
 		} else {
-			res = await this.Patch(this.endpoint.unlock(groupId));
+			res = await this.PatchAsync(this.endpoint.unlock(groupId));
 		}
 
 		return res.data;
 	}
 
 	async addMemberAsync(groupId, UserId) {
-		let res = await this.Put(this.endpoint.addMember(groupId, UserId));
+		let res = await this.PutAsync(this.endpoint.addMember(groupId, UserId));
 		return res.data;
 	}
 	async removeMemberAsync(groupId, UserId) {
-		let res = await this.Delete(this.endpoint.removeMember(groupId, UserId));
+		let res = await this.DeleteAsync(this.endpoint.removeMember(groupId, UserId));
 		return res.data;
 	}
 
 	async createMappingAsync(groupId, name, value, provider, type) {
-		const res = await this.Put(this.endpoint.createMapping(groupId), {
+		const res = await this.PutAsync(this.endpoint.createMapping(groupId), {
 			name,
 			value,
 			provider,
@@ -69,14 +69,14 @@ export class GroupsManager extends BaseApiManager {
 		return res.data;
 	}
 	async removeMappingAsync(groupId, mappingId) {
-		const res = await this.Delete(
+		const res = await this.DeleteAsync(
 			this.endpoint.removeMapping(groupId, mappingId)
 		);
 
 		return res.data;
 	}
 	async getMappingsAsync(groupId) {
-		const res = await this.Get(this.endpoint.getMappings(groupId, mappingId));
+		const res = await this.GetAsync(this.endpoint.getMappings(groupId, mappingId));
 
 		return res.data;
 	}
