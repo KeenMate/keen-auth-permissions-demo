@@ -7,12 +7,13 @@
 	import { GroupsManager } from "../../../providers/groups-provider";
 	import GroupMapping from "../components/GroupMapping.svelte";
 	import Notifications from "../../../providers/notifications-provider";
+	import GroupBadges from "../components/GroupBadges.svelte";
+	import NewMemberForm from "../components/NewMemberForm.svelte";
 	export let params;
 
 	let manager = new GroupsManager($tenant);
 
 	let group;
-	let userId;
 
 	const { open, close: closeModal } = getContext("simple-modal");
 
@@ -33,9 +34,9 @@
 		push("#/groups");
 	}
 
-	async function addMemberAsync() {
+	async function addMemberAsync(user) {
 		try {
-			await manager.addMemberAsync(group.userGroupId, userId);
+			await manager.addMemberAsync(group.userGroupId, user.userId);
 
 			Notifications.success("Member added");
 
@@ -111,9 +112,8 @@
 		}
 	}
 
-	load();
-
-	$: console.log("group", group);
+	//params parameter is only used for reactivity
+	$: load(params);
 </script>
 
 <WithLazyLoader {task}>
@@ -121,21 +121,7 @@
 		<div class="text-start">
 			<h2 class="mb-0">{group.title}</h2>
 			<p class="text-muted mb-0">#{group.userGroupId} ({group.code})</p>
-			{#if !group.isActive}
-				<span class="badge bg-danger"> Disabled </span>
-			{/if}
-			{#if !group.isAssignable}
-				<span class="badge bg-warning"> Locked </span>
-			{/if}
-			{#if group.isDefault}
-				<span class="badge bg-info"> Default </span>
-			{/if}
-			{#if group.isExternal}
-				<span class="badge bg-info"> External </span>
-			{/if}
-			{#if group.isSystem}
-				<span class="badge bg-info"> System </span>
-			{/if}
+			<GroupBadges {group} />
 		</div>
 		<div class=" ms-auto align-self-start">
 			<button on:click={close} class="btn btn-muted">
@@ -153,23 +139,10 @@
 				>
 			</div>
 			<div class="row">
-				<div class="col-8">
-					<div class=" input-group input-group-static ">
-						<input
-							type="number"
-							bind:value={userId}
-							placeholder="user_id"
-							class="form-control"
-							id="userId"
-						/>
-					</div>
-				</div>
-				<button
-					on:click={addMemberAsync}
-					class=" col-4 btn btn-sm btn-success "
-				>
-					Add new member</button
-				>
+				<NewMemberForm
+					on:add={({ detail }) => addMemberAsync(detail)}
+					groupMembers={group.members}
+				/>
 			</div>
 		</div>
 		<hr class="m-0" />

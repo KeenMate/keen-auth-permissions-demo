@@ -37,6 +37,7 @@ begin
     into _user_id;
 
     perform auth.enable_user_identity('system',1,_user_id,'email');
+    perform auth.enable_user('system',1,_user_id);
 
     perform unsecure.create_user_group_member_as_system('jan.rada@keenmate.com','System admins');
 

@@ -27,3 +27,12 @@ export const GroupsEndpoint = (tenant) => {
 		getMappings: (groupId) => `${base}/${groupId}/mappings`,
 	};
 };
+
+export const UsersEndpoint = (tenant) => {
+	let globalBase = `${baseApiUrl}/users`;
+	let tenantBase = `${baseApiUrl}/${tenant}`;
+	return {
+		base: globalBase,
+		getTenantMembers: `${tenantBase}/users`,
+	};
+};

@@ -32,22 +32,22 @@ export class BaseApiManager {
 		throw await res.text();
 	}
 
-	async Get(url) {
-		return await this.FetchWithToken(url, undefined, "GET");
+	Get(url) {
+		return this.FetchWithToken(url, undefined, "GET");
 	}
 
-	async Post(url, body) {
-		return await this.FetchWithToken(url, body, "POST");
+	Post(url, body) {
+		return this.FetchWithToken(url, body, "POST");
 	}
 
-	async Put(url, body) {
-		return await this.FetchWithToken(url, body, "PUT");
+	Put(url, body) {
+		return this.FetchWithToken(url, body, "PUT");
 	}
-	async Patch(url, body) {
-		return await this.FetchWithToken(url, body, "PATCH");
+	Patch(url, body) {
+		return this.FetchWithToken(url, body, "PATCH");
 	}
-	async Delete(url, body) {
-		return await this.FetchWithToken(url, body, "DELETE");
+	Delete(url, body) {
+		return this.FetchWithToken(url, body, "DELETE");
 	}
 
 	/**
