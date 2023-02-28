@@ -104,6 +104,9 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
             # members
             put "/:user_id", Api.GroupsApiController, :add_user_to_group
             delete "/:user_id", Api.GroupsApiController, :remove_user_from_group
+
+						# permissions
+						get "/permissions/assigned", Api.GroupsApiController, :get_assigned_permissions
           end
         end
 

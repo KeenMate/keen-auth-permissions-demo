@@ -185,4 +185,17 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsProvider do
     )
     |> ErrorParsers.parse_if_error()
   end
+
+  def get_assigned_permissions(
+        %KeenAuthPermissions.User{username: username, user_id: user_id},
+        group_id,
+        tenant_id
+      ) do
+    KeenAuthPermissionsDemo.DbContext.auth_get_assigned_group_permissions(
+      username,
+      user_id,
+      group_id,
+      tenant_id
+    )
+  end
 end

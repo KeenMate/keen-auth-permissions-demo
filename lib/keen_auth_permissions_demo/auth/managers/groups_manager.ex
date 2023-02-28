@@ -34,9 +34,12 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
          {:ok, members} <-
            GroupsProvider.get_group_members(user(conn), num(group_id), num(tenant)),
          {:ok, mappings} <-
-           get_user_group_mappings(conn, num(group_id), num(tenant)) do
+           get_user_group_mappings(conn, num(group_id), num(tenant)),
+         {:ok, permissions} <-
+           get_assigned_permissions(conn, num(group_id), num(tenant)) do
       group_info = Map.put(group_info, :members, members)
       group_info = Map.put(group_info, :mappings, mappings)
+      group_info = Map.put(group_info, :assigned_permissions, permissions)
       {:ok, group_info}
     end
   end
@@ -176,5 +179,13 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
     group_mapping_id = num(group_mapping_id)
 
     GroupsProvider.delete_user_group_mapping(user, group_mapping_id, tenant)
+  end
+
+  def get_assigned_permissions(conn, group, tenant \\ 1) do
+    user = user(conn)
+    tenant = num(tenant)
+    group = num(group)
+
+    GroupsProvider.get_assigned_permissions(user, group, tenant)
   end
 end

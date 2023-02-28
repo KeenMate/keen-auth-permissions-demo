@@ -191,4 +191,22 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
       ok(:ok)
     end
   end
+
+  api_handler(:get_assigned_permissions, @tenant_and_group_scheme,
+    permissions: ["system.groups.get_permissions"]
+  )
+
+  def get_assigned_permissions_handler(conn, %{
+        tenant: tenant,
+        group_id: group_id
+      }) do
+    with {:ok, permissions} <-
+           Manager.get_assigned_permissions(
+             conn,
+             group_id,
+             tenant
+           ) do
+      ok(permissions)
+    end
+  end
 end

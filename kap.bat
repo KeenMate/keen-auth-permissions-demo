@@ -1,0 +1,1 @@
+mix deps.update keen_auth_permissions
