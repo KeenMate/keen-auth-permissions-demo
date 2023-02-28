@@ -54,7 +54,9 @@ export class GroupsManager extends BaseApiManager {
 		return res.data;
 	}
 	async removeMemberAsync(groupId, UserId) {
-		let res = await this.DeleteAsync(this.endpoint.removeMember(groupId, UserId));
+		let res = await this.DeleteAsync(
+			this.endpoint.removeMember(groupId, UserId)
+		);
 		return res.data;
 	}
 
@@ -76,7 +78,17 @@ export class GroupsManager extends BaseApiManager {
 		return res.data;
 	}
 	async getMappingsAsync(groupId) {
-		const res = await this.GetAsync(this.endpoint.getMappings(groupId, mappingId));
+		const res = await this.GetAsync(
+			this.endpoint.getMappings(groupId, mappingId)
+		);
+
+		return res.data;
+	}
+
+	async getAssignedPermissionsAsync(groupId) {
+		const res = await this.GetAsync(
+			this.endpoint.getAssignedPermissions(groupId)
+		);
 
 		return res.data;
 	}

@@ -8,7 +8,11 @@
 	import GroupMapping from "../components/GroupMapping.svelte";
 	import Notifications from "../../../providers/notifications-provider";
 	import GroupBadges from "../components/GroupBadges.svelte";
-	import NewMemberForm from "../components/NewMemberForm.svelte";
+	import TabsContainer from "../../../components/TabsContainer.svelte";
+	import Tab from "../../../components/Tab.svelte";
+	import GroupMembers from "../components/GroupMembers.svelte";
+	import { groupDetailTabs as tabs } from "../../../constants/tabs";
+
 	export let params;
 
 	let manager = new GroupsManager($tenant);
@@ -58,14 +62,15 @@
 			Notifications.error(manager.getErrorMsg(res), "Error removing member");
 		}
 	}
-	async function createMappingAsync(val) {
+	async function createMappingAsync(mapping) {
 		try {
+			console.log(mapping);
 			await manager.createMappingAsync(
 				group.userGroupId,
-				val.name,
-				val.value,
-				val.provider,
-				val.type
+				mapping.name,
+				mapping.value,
+				mapping.provider,
+				mapping.type
 			);
 
 			Notifications.success("Mapping created");
@@ -112,6 +117,8 @@
 		}
 	}
 
+	let selectedTab = tabs.members;
+
 	//params parameter is only used for reactivity
 	$: load(params);
 </script>
@@ -130,69 +137,28 @@
 		</div>
 	</div>
 
-	<div class="card my-3">
-		<div class="card-header">
-			<div class=" d-flex">
-				<h4 class="m-0">Members</h4>
-				<button class="btn btn-primary btn-sm ms-auto" on:click={showModal}>
-					Mappings</button
-				>
-			</div>
-			<div class="row">
-				<NewMemberForm
-					on:add={({ detail }) => addMemberAsync(detail)}
-					groupMembers={group.members}
-				/>
-			</div>
-		</div>
-		<hr class="m-0" />
-		<div class="card-body">
-			<table class="table">
-				<thead>
-					<th />
-					<th>Manual</th>
-					<th>Active</th>
-					<th>Locked</th>
-					<th>ID</th>
-					<th>Name</th>
-				</thead>
-				<tbody>
-					{#each group.members as member}
-						<tr>
-							<td class="fixed_width"
-								><button
-									title="Remove member"
-									class="btn btn-outline btn-sm"
-									on:click={() => removeMemberAsync(member.userId)}
-									><i class="fa-solid fa-user-minus" /></button
-								></td
-							>
-							<td class="fixed_width">{member.manualAssignment}</td>
-							<td class="fixed_width">{member.userIsActive}</td>
-							<td class="fixed_width">{member.userIsLocked}</td>
-							<td class="fixed_width">{member.userId}</td>
-							<td>{member.userDisplayName}</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
-	</div>
+	<TabsContainer>
+		<Tab bind:selectedTab name={tabs.members} />
+		<Tab bind:selectedTab name={tabs.mappings} />
+		<Tab bind:selectedTab name={tabs.permissions} />
+	</TabsContainer>
+	{#if selectedTab == tabs.members}
+		<GroupMembers
+			{group}
+			on:add={({ detail: member }) => addMemberAsync(member)}
+			on:remove={({ detail: member }) => removeMemberAsync(member.userId)}
+		/>
+	{/if}
+
+	{#if selectedTab == tabs.mappings}
+		<GroupMapping
+			mappings={group.mappings}
+			on:create={({ detail: mapping }) => createMappingAsync(mapping)}
+			on:remove={({ detail: mappingId }) => removeMappingAsync(mappingId)}
+		/>
+	{/if}
+
+	{#if selectedTab == tabs.permissions}
+		Permissions
+	{/if}
 </WithLazyLoader>
-
-<style>
-	.fixed_width {
-		width: 1px;
-	}
-
-	.btn-sm {
-		padding: 0.25rem 0.5rem;
-		font-size: 0.875rem;
-		line-height: 1.5;
-		border-radius: 0.2rem;
-	}
-
-	.form-control {
-		height: calc(1.5em + 0.75rem + 2px);
-	}
-</style>

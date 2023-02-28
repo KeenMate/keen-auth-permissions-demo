@@ -1,11 +1,12 @@
 <script>
+	import { createEventDispatcher } from "svelte";
 	import { Multiselect } from "svelte-multiselect";
 	const types = ["role", "group"],
 		providers = ["aad"];
 
+	const dispatch = createEventDispatcher();
+
 	export let mappings;
-	export let create;
-	export let remove;
 	let type = "group";
 	let provider = "aad";
 	let name;
@@ -15,16 +16,13 @@
 		if (!type || !provider || !name || !value) {
 			return;
 		}
-		const val = { type, provider, name, value };
-		create(val);
+		const mappingObject = { type, provider, name, value };
+		dispatch("create", mappingObject);
 	}
 </script>
 
-<div style="height: 80vh;">
-	<h3>Mappings</h3>
-
-	<!-- create form -->
-	<div>
+<div class="card my-3">
+	<div class="card-header mb-0 pb-0">
 		<div class="row">
 			<div class="col-6">
 				<Multiselect
@@ -35,6 +33,7 @@
 					showLabels={false}
 					placeholder="Select type"
 					class="mb-3"
+					small
 				/>
 			</div>
 			<div class="col-6">
@@ -46,56 +45,67 @@
 					showLabels={false}
 					placeholder="Select type"
 					class="mb-3"
+					small
 				/>
 			</div>
 		</div>
-		<div class="input-group input-group-static">
-			<input
-				class="form-control"
-				type="text"
-				bind:value={name}
-				placeholder="name"
-			/>
-		</div>
-		<div class="input-group input-group-static">
-			<input class="form-control" type="text" bind:value placeholder="value" />
+		<div class="row">
+			<div class="col-6">
+				<div class="input-group input-group-static">
+					<input
+						class="form-control"
+						type="text"
+						bind:value
+						placeholder="value"
+					/>
+				</div>
+			</div>
+			<div class="col-6">
+				<div class="input-group input-group-static">
+					<input
+						class="form-control"
+						type="text"
+						bind:value={name}
+						placeholder="name"
+					/>
+				</div>
+			</div>
 		</div>
 
-		<br />
-
-		<button class="btn btn-success" on:click={beforeCreate}>
+		<button class="btn btn-success mt-3" on:click={beforeCreate}>
 			Create new mappings</button
 		>
 	</div>
-	<br />
-	<br />
-	<table class="table">
-		<thead>
-			<tr>
-				<th style="width: 1px;" />
-				<th style="width: 1px;">Type</th>
-				<th>Name</th>
-				<th>Value</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each mappings as mapping}
+	<hr class="m-0" />
+	<div class="card-body mt-1">
+		<table class="table">
+			<thead>
 				<tr>
-					<td style="width: 1px;">
-						<button
-							class="btn btn-outline btn-sm"
-							on:click={() => remove(mapping.ugMappingId)}
-						>
-							<i class="fa-sharp fa-solid fa-xmark" />
-						</button>
-					</td>
-					<td style="width: 1px;">{mapping.type}</td>
-					<td>{mapping.mappedValue}</td>
-					<td>{mapping.name}</td>
+					<th style="width: 1px;" />
+					<th style="width: 1px;">Type</th>
+					<th>Name</th>
+					<th>Value</th>
 				</tr>
-			{/each}
-		</tbody>
-	</table>
+			</thead>
+			<tbody>
+				{#each mappings as mapping}
+					<tr>
+						<td style="width: 1px;">
+							<button
+								class="btn btn-outline btn-sm"
+								on:click={() => dispatch("remove", mapping.ugMappingId)}
+							>
+								<i class="fa-sharp fa-solid fa-xmark" />
+							</button>
+						</td>
+						<td style="width: 1px;">{mapping.type}</td>
+						<td>{mapping.mappedValue}</td>
+						<td>{mapping.name}</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
 </div>
 
 <style>

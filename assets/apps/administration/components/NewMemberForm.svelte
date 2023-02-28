@@ -51,6 +51,6 @@
 		placeholder="Add new member"
 	/>
 </div>
-<button on:click={addMember} class=" col-4 btn btn-sm btn-success ">
+<button on:click={addMember} class=" col-4 btn btn-sm btn-success mb-0">
 	Add</button
 >

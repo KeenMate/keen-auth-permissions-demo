@@ -34,12 +34,9 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
          {:ok, members} <-
            GroupsProvider.get_group_members(user(conn), num(group_id), num(tenant)),
          {:ok, mappings} <-
-           get_user_group_mappings(conn, num(group_id), num(tenant)),
-         {:ok, permissions} <-
-           get_assigned_permissions(conn, num(group_id), num(tenant)) do
+           get_user_group_mappings(conn, num(group_id), num(tenant)) do
       group_info = Map.put(group_info, :members, members)
       group_info = Map.put(group_info, :mappings, mappings)
-      group_info = Map.put(group_info, :assigned_permissions, permissions)
       {:ok, group_info}
     end
   end
