@@ -1,6 +1,6 @@
 <script>
-	import Router from "svelte-spa-router";
-	import routes from "./routes";
+	import Router, { link } from "svelte-spa-router";
+	import routes, { Pages } from "./routes";
 	import { currentUser, tenant } from "../../auth/auth-store";
 	import Modal from "../../components/Modal.svelte";
 
