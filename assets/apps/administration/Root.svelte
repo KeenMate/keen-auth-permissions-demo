@@ -6,7 +6,6 @@
 
 	$: console.log($currentUser);
 	$: console.log($tenant);
-	console.log($currentUser);
 </script>
 
 <Modal>

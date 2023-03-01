@@ -1,17 +1,18 @@
 <script>
-	import { push } from "svelte-spa-router";
-	import { tenant } from "../../../auth/auth-store";
+	import GroupDetailTabs from "../components/GroupDetailTabs.svelte";
+	import GroupInfo from "../components/GroupInfo.svelte";
 	import WithLazyLoader from "../../../components/WithLazyLoader.svelte";
+	import GroupPermissions from "../components/GroupPermissions.svelte";
+	import GroupMembers from "../components/GroupMembers.svelte";
+	import GroupMapping from "../components/GroupMapping.svelte";
+
+	import { push, querystring } from "svelte-spa-router";
+	import { tenant } from "../../../auth/auth-store";
 	import { emptyPromise } from "../../../helpers/promise-helpers";
 	import { GroupsManager } from "../../../providers/groups-provider";
-	import GroupMapping from "../components/GroupMapping.svelte";
 	import Notifications from "../../../providers/notifications-provider";
-	import GroupBadges from "../components/GroupBadges.svelte";
-	import TabsContainer from "../../../components/TabsContainer.svelte";
-	import Tab from "../../../components/Tab.svelte";
-	import GroupMembers from "../components/GroupMembers.svelte";
 	import { groupDetailTabs as tabs } from "../../../constants/tabs";
-	import GroupPermissions from "../components/GroupPermissions.svelte";
+	import { parse } from "qs";
 
 	export let params;
 
@@ -31,7 +32,7 @@
 
 			loadGroupAsync();
 		} catch (res) {
-			console.log(res);
+			console.error(res);
 			Notifications.error(manager.getErrorMsg(res), "Error adding member");
 		}
 	}
@@ -43,14 +44,14 @@
 
 			loadGroupAsync();
 		} catch (res) {
-			console.log(res);
+			console.error(res);
 			Notifications.error(manager.getErrorMsg(res), "Error removing member");
 		}
 	}
 
 	async function createMappingAsync(mapping) {
 		try {
-			console.log(mapping);
+			console.error(mapping);
 			await manager.createMappingAsync(
 				group.userGroupId,
 				mapping.name,
@@ -63,7 +64,7 @@
 
 			loadGroupAsync();
 		} catch (res) {
-			console.log(res);
+			console.error(res);
 			Notifications.error(manager.getErrorMsg(res), "Error creating mapping");
 		}
 	}
@@ -75,7 +76,7 @@
 
 			loadGroupAsync();
 		} catch (res) {
-			console.log(res);
+			console.error(res);
 			Notifications.error(manager.getErrorMsg(res), "Error removing mapping");
 		}
 	}
@@ -85,16 +86,18 @@
 			group = await manager.getGroupAsync(params.group);
 			Notifications.success("Group loaded");
 		} catch (res) {
-			console.log(res);
+			console.error(res);
 			Notifications.error(manager.getErrorMsg(res), "Error loading group");
 		}
 	}
 
 	let task = emptyPromise;
 
-	function load() {
-		showLoaderAsync(() => loadGroupAsync());
-		task = loadGroupAsync();
+	function paramsChanged() {
+		//only load group if group id in url changed
+		if (params.group != group?.userGroupId) {
+			showLoaderAsync(() => loadGroupAsync());
+		}
 	}
 
 	async function showLoaderAsync(func, ...args) {
@@ -102,31 +105,18 @@
 		return await task;
 	}
 
-	let selectedTab = tabs.members;
+	$: query = parse($querystring);
+	$: selectedTab = query.tab ?? tabs.members;
 
 	//params parameter is only used for reactivity
-	$: load(params);
+	$: paramsChanged(params);
 </script>
 
 <WithLazyLoader {task}>
-	<div class="d-flex mt-5">
-		<div class="text-start">
-			<h2 class="mb-0">{group.title}</h2>
-			<p class="text-muted mb-0">#{group.userGroupId} ({group.code})</p>
-			<GroupBadges {group} />
-		</div>
-		<div class=" ms-auto align-self-start">
-			<button on:click={close} class="btn btn-muted">
-				<i class="fa-solid fa-xmark text-3xl" />
-			</button>
-		</div>
-	</div>
+	<GroupInfo {group} />
 
-	<TabsContainer>
-		<Tab bind:selectedTab name={tabs.members} />
-		<Tab bind:selectedTab name={tabs.mappings} />
-		<Tab bind:selectedTab name={tabs.permissions} />
-	</TabsContainer>
+	<GroupDetailTabs {selectedTab} />
+
 	{#if selectedTab == tabs.members}
 		<GroupMembers
 			{group}

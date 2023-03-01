@@ -1,6 +1,8 @@
 <script>
-	import { createEventDispatcher } from "svelte";
 	import NewMemberForm from "./NewMemberForm.svelte";
+
+	import { createEventDispatcher } from "svelte";
+
 	const dispatch = createEventDispatcher();
 	export let group;
 </script>

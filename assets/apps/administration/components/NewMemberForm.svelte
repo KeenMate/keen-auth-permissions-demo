@@ -14,10 +14,7 @@
 
 	async function loadUsers() {
 		try {
-			console.log(groupMembers);
-
 			const loadedUsers = await manager.getTenantUsersAsync();
-			console.log(loadedUsers);
 
 			const groupMemberIds = groupMembers.map((member) => member.userId);
 
@@ -36,7 +33,6 @@
 		dispatch("add", selectedUser);
 		selectedUser = null;
 	}
-	$: console.log(selectedUser);
 
 	$: loadUsers(groupMembers);
 </script>

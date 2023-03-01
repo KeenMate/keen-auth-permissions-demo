@@ -1,11 +1,14 @@
 <script>
-	export let selectedTab;
-	export let name;
+	import { createEventDispatcher } from "svelte";
+	const dispatch = createEventDispatcher();
 
-	$: active = selectedTab == name;
+	export let selectedTab;
+	export let code;
+	$: active = selectedTab == code;
 
 	function changeTab() {
-		selectedTab = name;
+		selectedTab = code;
+		dispatch("click", code);
 	}
 </script>
 
@@ -19,7 +22,7 @@
 		aria-selected={active ? "true" : "false"}
 		on:click={changeTab}
 	>
-		<slot>{name}</slot>
+		<slot>{code}</slot>
 	</span>
 </li>
 

@@ -14,7 +14,7 @@
 
 			await loadAsync();
 		} catch (res) {
-			console.log(res);
+			console.error(res);
 
 			Notifications.error(manager.getErrorMsg(res));
 		}
@@ -26,7 +26,7 @@
 
 			await loadAsync();
 		} catch (res) {
-			console.log(res);
+			console.error(res);
 
 			Notifications.error(
 				manager.getErrorMsg(res),
@@ -41,7 +41,7 @@
 
 			await loadAsync();
 		} catch (res) {
-			console.log(res);
+			console.error(res);
 
 			Notifications.error(manager.getErrorMsg(res), "Error deleting group");
 		}
@@ -52,7 +52,7 @@
 			groups = (await manager.getGroupsAsync()) ?? [];
 			Notifications.success("Groups loaded");
 		} catch (res) {
-			console.log(res);
+			console.error(res);
 			Notifications.error(manager.getErrorMsg(res), "Error loading group");
 		}
 	}
