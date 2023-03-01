@@ -19,7 +19,6 @@
 	$: lazyTask?.then((x) => {
 		oldData = x;
 	});
-	console.log(lazyTask);
 
 	function showLoader() {
 		setLoading(true);

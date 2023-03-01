@@ -44,6 +44,14 @@
 			<table class="table table-striped">
 				<thead>
 					<tr>
+						<th class="fixed_width">
+							<button
+								class="btn btn-xsm btn-outline-success m-0"
+								title="Unassign permission set"
+							>
+								<i class="fa-solid fa-plus" />
+							</button>
+						</th>
 						<th class="fixed_width"> Title </th>
 						<th> Permissions </th>
 					</tr>
@@ -51,6 +59,15 @@
 				<tbody>
 					{#each permSets as permSet}
 						<tr>
+							<td>
+								<button
+									class="btn btn-xsm btn-outline-danger m-0"
+									title="Unassign permission set"
+								>
+									<i class="fa-solid fa-minus" />
+								</button>
+							</td>
+
 							<td class="fixed_width">
 								{permSet.permSetTitle}
 							</td>
@@ -62,17 +79,29 @@
 								</div>
 							</td>
 						</tr>
+					{:else}
+						<tr>
+							<td colspan="2">No permission sets are assigned</td>
+						</tr>
 					{/each}
 				</tbody>
 			</table>
 		</WithLazyLoader>
 		<hr />
-		<h3>Direct assigned</h3>
+		<h3>Direcly assigned</h3>
 
 		<WithLazyLoader {task}>
 			<table class="table table-striped">
 				<thead>
 					<tr>
+						<th class="fixed_width">
+							<button
+								class="btn btn-xsm btn-outline-success m-0"
+								title="Unassign permission set"
+							>
+								<i class="fa-solid fa-plus" />
+							</button>
+						</th>
 						<th class="fixed_width"> Title </th>
 						<th> Permissions </th>
 					</tr>
@@ -81,12 +110,25 @@
 					{#each directlyAssigned as assigment}
 						{@const permission = assigment.permissions[0]}
 						<tr>
+							<td>
+								<button
+									class="btn btn-xsm btn-outline-danger m-0"
+									title="Unassign permission set"
+								>
+									<i class="fa-solid fa-minus" />
+								</button>
+							</td>
+
 							<td class="fixed_width">
 								{permission.title}
 							</td>
 							<td>
 								{permission.code}
 							</td>
+						</tr>
+					{:else}
+						<tr>
+							<td colspan="2">No permissions are direcly assigned</td>
 						</tr>
 					{/each}
 				</tbody>

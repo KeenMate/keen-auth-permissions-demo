@@ -11,3 +11,8 @@
   background-color: var(--bs-nav-pills-link-active-bg);
   color: #fff;
 }
+
+.btn-xsm {
+  --bs-btn-padding-y: 0.1rem;
+  --bs-btn-padding-x: 0.4rem;
+}

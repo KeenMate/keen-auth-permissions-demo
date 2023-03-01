@@ -39,7 +39,6 @@ class NotificationProvider {
 	}
 
 	#saveMessage(type, message, title) {
-		console.log({ type, message, title });
 		this.buffer.push({ type, message, title, timestamp: DateTime.now() });
 		this.messages.set(this.buffer.toArray());
 	}

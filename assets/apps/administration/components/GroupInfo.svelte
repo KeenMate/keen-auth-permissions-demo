@@ -1,7 +1,13 @@
 <script>
 	import GroupBadges from "./GroupBadges.svelte";
 
+	import { push } from "svelte-spa-router";
+
 	export let group;
+
+	function close() {
+		push("#/groups");
+	}
 </script>
 
 <div class="d-flex mt-5">

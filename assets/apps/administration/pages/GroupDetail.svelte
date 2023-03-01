@@ -6,7 +6,7 @@
 	import GroupMembers from "../components/GroupMembers.svelte";
 	import GroupMapping from "../components/GroupMapping.svelte";
 
-	import { push, querystring } from "svelte-spa-router";
+	import { querystring } from "svelte-spa-router";
 	import { tenant } from "../../../auth/auth-store";
 	import { emptyPromise } from "../../../helpers/promise-helpers";
 	import { GroupsManager } from "../../../providers/groups-provider";
@@ -19,10 +19,6 @@
 	let manager = new GroupsManager($tenant);
 
 	let group;
-
-	function close() {
-		push("#/groups");
-	}
 
 	async function addMemberAsync(user) {
 		try {
