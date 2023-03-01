@@ -1,0 +1,95 @@
+<script>
+	import { tenant } from "../../../auth/auth-store";
+	import { GroupsManager } from "../../../providers/groups-provider";
+	import Notifications from "../../../providers/notifications-provider";
+
+	const manager = new GroupsManager($tenant);
+
+	export let group;
+
+	let assigments = [];
+	async function getAssignedPermissionsAsync() {
+		try {
+			assigments = await manager.getAssignedPermissionsAsync(group.userGroupId);
+
+			filterAssigments(assigments);
+			Notifications.success("Permissions loaded");
+		} catch (res) {
+			console.log(res);
+			Notifications.error(
+				manager.getErrorMsg(res),
+				"Error loading permissions"
+			);
+		}
+	}
+
+	let permSets = [];
+	let directlyAssigned = [];
+	function filterAssigments(assigments) {
+		permSets = assigments.filter((a) => a.permSetId);
+		directlyAssigned = assigments.filter((a) => !a.permSetId) ?? [];
+		console.log(permSets, directlyAssigned);
+	}
+
+	$: getAssignedPermissionsAsync(group);
+</script>
+
+<div class="card my-3">
+	<div class="card-body">
+		<h3>Permission sets</h3>
+
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th class="fixed_width"> Title </th>
+					<th> Permissions </th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each permSets as permSet}
+					<tr>
+						<td class="fixed_width">
+							{permSet.permSetTitle}
+						</td>
+						<td>
+							<div class="d-flex flex-wrap">
+								{#each permSet.permissions as permission}
+									<span class="ms-2">{permission.code}</span>
+								{/each}
+							</div>
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+		<hr />
+		<h3>Direct assigned</h3>
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th class="fixed_width"> Title </th>
+					<th> Permissions </th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each directlyAssigned as assigment}
+					{@const permission = assigment.permissions[0]}
+					<tr>
+						<td class="fixed_width">
+							{permission.title}
+						</td>
+						<td>
+							{permission.code}
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<style>
+	.fixed_width {
+		width: 1px;
+	}
+</style>

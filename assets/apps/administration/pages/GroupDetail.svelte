@@ -1,5 +1,4 @@
 <script>
-	import { getContext } from "svelte";
 	import { push } from "svelte-spa-router";
 	import { tenant } from "../../../auth/auth-store";
 	import WithLazyLoader from "../../../components/WithLazyLoader.svelte";
@@ -12,27 +11,13 @@
 	import Tab from "../../../components/Tab.svelte";
 	import GroupMembers from "../components/GroupMembers.svelte";
 	import { groupDetailTabs as tabs } from "../../../constants/tabs";
+	import GroupPermissions from "../components/GroupPermissions.svelte";
 
 	export let params;
 
 	let manager = new GroupsManager($tenant);
 
 	let group;
-
-	const { open, close: closeModal } = getContext("simple-modal");
-
-	const showModal = () =>
-		open(GroupMapping, {
-			mappings: group.mappings,
-			create: async (newMapping) => {
-				await createMappingAsync(newMapping);
-				closeModal();
-			},
-			remove: async (value) => {
-				await removeMappingAsync(value);
-				closeModal();
-			},
-		});
 
 	function close() {
 		push("#/groups");
@@ -62,6 +47,7 @@
 			Notifications.error(manager.getErrorMsg(res), "Error removing member");
 		}
 	}
+
 	async function createMappingAsync(mapping) {
 		try {
 			console.log(mapping);
@@ -81,7 +67,6 @@
 			Notifications.error(manager.getErrorMsg(res), "Error creating mapping");
 		}
 	}
-
 	async function removeMappingAsync(mappingId) {
 		try {
 			await manager.removeMappingAsync(group.userGroupId, mappingId);
@@ -95,6 +80,16 @@
 		}
 	}
 
+	async function loadGroupAsync() {
+		try {
+			group = await manager.getGroupAsync(params.group);
+			Notifications.success("Group loaded");
+		} catch (res) {
+			console.log(res);
+			Notifications.error(manager.getErrorMsg(res), "Error loading group");
+		}
+	}
+
 	let task = emptyPromise;
 
 	function load() {
@@ -105,16 +100,6 @@
 	async function showLoaderAsync(func, ...args) {
 		task = func(...args);
 		return await task;
-	}
-
-	async function loadGroupAsync() {
-		try {
-			group = await manager.getGroupAsync(params.group);
-			Notifications.success("Group loaded");
-		} catch (res) {
-			console.log(res);
-			Notifications.error(manager.getErrorMsg(res), "Error loading group");
-		}
 	}
 
 	let selectedTab = tabs.members;
@@ -159,6 +144,6 @@
 	{/if}
 
 	{#if selectedTab == tabs.permissions}
-		Permissions
+		<GroupPermissions {group} />
 	{/if}
 </WithLazyLoader>
