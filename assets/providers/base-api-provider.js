@@ -5,7 +5,7 @@ export class BaseApiManager {
 			.getAttribute("content");
 	}
 
-	async FetchWithToken(url, bodyObject, method = "post") {
+	async FetchWithTokenAsync(url, bodyObject, method = "post") {
 		let res = await fetch(url, {
 			method: method,
 			headers: {
@@ -33,21 +33,21 @@ export class BaseApiManager {
 	}
 
 	GetAsync(url) {
-		return this.FetchWithToken(url, undefined, "GET");
+		return this.FetchWithTokenAsync(url, undefined, "GET");
 	}
 
 	PostAsync(url, body) {
-		return this.FetchWithToken(url, body, "POST");
+		return this.FetchWithTokenAsync(url, body, "POST");
 	}
 
 	PutAsync(url, body) {
-		return this.FetchWithToken(url, body, "PUT");
+		return this.FetchWithTokenAsync(url, body, "PUT");
 	}
 	PatchAsync(url, body) {
-		return this.FetchWithToken(url, body, "PATCH");
+		return this.FetchWithTokenAsync(url, body, "PATCH");
 	}
 	DeleteAsync(url, body) {
-		return this.FetchWithToken(url, body, "DELETE");
+		return this.FetchWithTokenAsync(url, body, "DELETE");
 	}
 
 	/**

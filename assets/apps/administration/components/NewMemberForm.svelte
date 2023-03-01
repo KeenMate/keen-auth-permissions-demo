@@ -12,7 +12,7 @@
 	let users = [];
 	export let groupMembers = [];
 
-	async function loadUsers() {
+	async function loadUsersAsync() {
 		try {
 			const loadedUsers = await manager.getTenantUsersAsync();
 
@@ -34,7 +34,7 @@
 		selectedUser = null;
 	}
 
-	$: loadUsers(groupMembers);
+	$: loadUsersAsync(groupMembers);
 </script>
 
 <div class="col-8">
