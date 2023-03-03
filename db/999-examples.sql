@@ -254,8 +254,11 @@ from unsecure.get_assigned_group_permissions(2);
 
 
 select *
-from assign_permission_as_system(_user_group_id := 2, _target_user_id := null, _perm_set_code := null,
+from assign_permission_as_system(_user_group_id := null, _target_user_id := 1000, _perm_set_code := null,
                                  _perm_code := 'system.tenants');
 select *
-from assign_permission_as_system(_user_group_id := 2, _target_user_id := null, _perm_set_code := null,
+from assign_permission_as_system(_user_group_id := null, _target_user_id := 1000, _perm_set_code := null,
                                  _perm_code := 'system.groups.get_groups');
+select *
+from assign_permission_as_system(_user_group_id := null, _target_user_id := 1000, _perm_set_code := 'tenant_creator',
+                                 _perm_code := null);

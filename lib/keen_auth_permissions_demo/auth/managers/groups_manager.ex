@@ -2,6 +2,7 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
   require Logger
 
   alias KeenAuthPermissionsDemo.Auth.GroupsProvider
+  alias KeenAuthPermissionsDemo.Auth.PermissionsProvider
 
   import KeenAuthPermissionsDemo.Auth.ManagerHelpers
 
@@ -184,5 +185,35 @@ defmodule KeenAuthPermissionsDemo.Auth.GroupsManager do
     group = num(group)
 
     GroupsProvider.get_assigned_permissions(user, group, tenant)
+  end
+
+  def assign_permission(conn, group_id, perm_code, perm_set_code, tenant \\ 1) do
+    user = user(conn)
+    group_id = num(group_id)
+
+    cond do
+      perm_code == nil and perm_set_code == nil ->
+        {:error, :both_cant_be_null}
+
+      perm_code != nil and perm_set_code != nil ->
+        {:error, :cannot_use_both}
+
+      true ->
+        PermissionsProvider.assign_permission(
+          user,
+          group_id,
+          nil,
+          perm_set_code,
+          perm_code,
+          tenant
+        )
+    end
+  end
+
+  def unassign_permission(conn, assignment_id, tenant \\ 1) do
+    user = user(conn)
+    assignment_id = num(assignment_id)
+
+    PermissionsProvider.unassign_permission(user, assignment_id, tenant)
   end
 end

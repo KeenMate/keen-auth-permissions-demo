@@ -209,4 +209,59 @@ defmodule KeenAuthPermissionsDemoWeb.Api.GroupsApiController do
       ok(permissions)
     end
   end
+
+  @assign_permission %{
+    tenant: [type: :integer, number: [min: 0], default: 1],
+    group_id: [type: :integer, number: [min: 0], required: true],
+    perm_code: [type: :string],
+    perm_set_code: [type: :string]
+  }
+
+  api_handler(:assign_permissions, @assign_permission,
+    permissions: ["system.permissions.assign_permission"]
+  )
+
+  def assign_permissions_handler(conn, %{
+        tenant: tenant,
+        group_id: group_id,
+        perm_code: perm_code,
+        perm_set_code: perm_set_code
+      }) do
+    case Manager.assign_permission(
+           conn,
+           group_id,
+           perm_code,
+           perm_set_code,
+           tenant
+         ) do
+      {:ok, [assigment]} ->
+        ok(assigment)
+
+      {:error, reason} when reason in [:both_cant_be_null, :cannot_use_both] ->
+        error(reason: reason, msg: "Only set perm_code XOR perm_set_code", response_code: 400)
+
+      err ->
+        err
+    end
+  end
+
+  @unassign_permission %{
+    tenant: [type: :integer, number: [min: 0], default: 1],
+    group_id: [type: :integer, number: [min: 0], required: true],
+    assignment_id: [type: :integer, number: [min: 0], required: true]
+  }
+
+  api_handler(:unassign_permissions, @unassign_permission,
+    permissions: ["system.permissions.unassign_permission"]
+  )
+
+  def unassign_permissions_handler(conn, %{
+        tenant: tenant,
+        group_id: group_id,
+        assignment_id: assignment_id
+      }) do
+    with {:ok, _} <- Manager.unassign_permission(conn, assignment_id, tenant) do
+      ok(nil)
+    end
+  end
 end

@@ -56,7 +56,7 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
     get "/verify-email", EmailVerificationController, :verify_email
     get "/resend-verification", EmailVerificationController, :resend_verification
 
-		#for registered only
+    # for registered only
     scope "/" do
       pipe_through :require_authenticated
 
@@ -102,11 +102,13 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
             delete "/mappings/:mapping_id", Api.GroupsApiController, :delete_user_group_mapping
 
             # members
-            put "/:user_id", Api.GroupsApiController, :add_user_to_group
-            delete "/:user_id", Api.GroupsApiController, :remove_user_from_group
+            put "/members/:user_id", Api.GroupsApiController, :add_user_to_group
+            delete "/members/:user_id", Api.GroupsApiController, :remove_user_from_group
 
-						# permissions
-						get "/permissions/assigned", Api.GroupsApiController, :get_assigned_permissions
+            # permissions
+            get "/permissions/assigned", Api.GroupsApiController, :get_assigned_permissions
+            put "/permissions", Api.GroupsApiController, :assign_permissions
+            delete "/permissions/:assignment_id", Api.GroupsApiController, :unassign_permissions
           end
         end
 

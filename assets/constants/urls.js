@@ -19,13 +19,14 @@ export const GroupsEndpoint = (tenant) => {
 		disable: (groupId) => `${base}/${groupId}/disable`,
 		lock: (groupId) => `${base}/${groupId}/lock`,
 		unlock: (groupId) => `${base}/${groupId}/unlock`,
-		addMember: (groupId, userId) => `${base}/${groupId}/${userId}`,
-		removeMember: (groupId, userId) => `${base}/${groupId}/${userId}`,
+		addMember: (groupId, userId) => `${base}/${groupId}/members/${userId}`,
+		removeMember: (groupId, userId) => `${base}/${groupId}/members/${userId}`,
 		createMapping: (groupId) => `${base}/${groupId}/mappings`,
 		removeMapping: (groupId, mappingsId) =>
 			`${base}/${groupId}/mappings/${mappingsId}`,
 		getMappings: (groupId) => `${base}/${groupId}/mappings`,
-		getAssignedPermissions: (groupId) => `${base}/${groupId}/permissions/assigned`,
+		getAssignedPermissions: (groupId) =>
+			`${base}/${groupId}/permissions/assigned`,
 	};
 };
 
