@@ -4,9 +4,12 @@
 	import { tenant } from "../../../auth/auth-store";
 	import { GroupsManager } from "../../../providers/groups-provider";
 	import Notifications from "../../../providers/notifications-provider";
+	import { assigmentTypes } from "../../../constants/keys";
+	import AssignPermissionForm from "./AssignPermissionForm.svelte";
+	import { getContext } from "svelte";
 
 	const manager = new GroupsManager($tenant);
-
+	const { open } = getContext("simple-modal");
 	export let group;
 
 	let task;
@@ -44,6 +47,14 @@
 		}
 	}
 
+	function showAssignModal(type) {
+		open(AssignPermissionForm, {
+			type,
+			assignCallback: () => loadAsync(),
+			groupId: group.userGroupId,
+		});
+	}
+
 	let permSets = [];
 	let directlyAssigned = [];
 	function filterAssigments(assigments) {
@@ -65,6 +76,7 @@
 							<button
 								class="btn btn-xsm btn-outline-success m-0"
 								title="Unassign permission set"
+								on:click={() => showAssignModal(assigmentTypes.permSet)}
 							>
 								<i class="fa-solid fa-plus" />
 							</button>
@@ -116,6 +128,7 @@
 							<button
 								class="btn btn-xsm btn-outline-success m-0"
 								title="Unassign permission set"
+								on:click={() => showAssignModal(assigmentTypes.perm)}
 							>
 								<i class="fa-solid fa-plus" />
 							</button>
