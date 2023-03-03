@@ -92,4 +92,32 @@ export class GroupsManager extends BaseApiManager {
 
 		return res.data;
 	}
+
+	async assignPermissionsAsync(groupId, permCode, permSetCode) {
+		if (
+			(permCode && permSetCode) ||
+			(permCode === null && permSetCode === null)
+		)
+			throw "set permCode XOR perSetCode";
+
+		const body = {
+			permCode,
+			permSetCode,
+		};
+
+		const res = await this.PutAsync(
+			this.endpoint.assignPermission(groupId),
+			body
+		);
+
+		return res.data;
+	}
+
+	async unassignPermissionsAsync(groupId, assignmentId) {
+		const res = await this.DeleteAsync(
+			this.endpoint.unassignPermission(groupId, assignmentId)
+		);
+
+		return res.data;
+	}
 }

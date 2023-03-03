@@ -27,6 +27,9 @@ export const GroupsEndpoint = (tenant) => {
 		getMappings: (groupId) => `${base}/${groupId}/mappings`,
 		getAssignedPermissions: (groupId) =>
 			`${base}/${groupId}/permissions/assigned`,
+		assignPermission: (groupId) => `${base}/${groupId}/permissions`,
+		unassignPermission: (groupId, assignmentId) =>
+			`${base}/${groupId}/permissions/${assignmentId}`,
 	};
 };
 

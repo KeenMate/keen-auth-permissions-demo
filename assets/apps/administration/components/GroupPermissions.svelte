@@ -12,7 +12,7 @@
 	let task;
 
 	let assigments = [];
-	async function getAssignedPermissionsAsync() {
+	async function loadAsync() {
 		try {
 			assigments = await (task = manager.getAssignedPermissionsAsync(
 				group.userGroupId
@@ -27,6 +27,23 @@
 		}
 	}
 
+	async function unassignPermissionAsync(assigmentId) {
+		try {
+			await (task = manager.unassignPermissionsAsync(
+				group.userGroupId,
+				assigmentId
+			));
+			Notifications.success("Permission unassigned");
+
+			loadAsync();
+		} catch (res) {
+			Notifications.error(
+				manager.getErrorMsg(res),
+				"Error Unassigning permissions"
+			);
+		}
+	}
+
 	let permSets = [];
 	let directlyAssigned = [];
 	function filterAssigments(assigments) {
@@ -34,7 +51,7 @@
 		directlyAssigned = assigments.filter((a) => !a.permSetId) ?? [];
 	}
 
-	$: getAssignedPermissionsAsync(group);
+	$: loadAsync(group);
 </script>
 
 <div class="card my-3">
@@ -63,6 +80,7 @@
 								<button
 									class="btn btn-xsm btn-outline-danger m-0"
 									title="Unassign permission set"
+									on:click={() => unassignPermissionAsync(permSet.assignmentId)}
 								>
 									<i class="fa-solid fa-minus" />
 								</button>
@@ -114,6 +132,8 @@
 								<button
 									class="btn btn-xsm btn-outline-danger m-0"
 									title="Unassign permission set"
+									on:click={() =>
+										unassignPermissionAsync(assigment.assignmentId)}
 								>
 									<i class="fa-solid fa-minus" />
 								</button>

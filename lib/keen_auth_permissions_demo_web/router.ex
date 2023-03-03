@@ -96,19 +96,23 @@ defmodule KeenAuthPermissionsDemoWeb.Router do
             patch "/lock", Api.GroupsApiController, :lock_group
             patch "/unlock", Api.GroupsApiController, :unlock_group
 
-            # mapping
-            get "/mappings", Api.GroupsApiController, :get_user_groups_mappings
-            put "/mappings", Api.GroupsApiController, :create_user_group_mapping
-            delete "/mappings/:mapping_id", Api.GroupsApiController, :delete_user_group_mapping
+						scope "/mappings" do
+							get "/", Api.GroupsApiController, :get_user_groups_mappings
+							put "/", Api.GroupsApiController, :create_user_group_mapping
+							delete "/:mapping_id", Api.GroupsApiController, :delete_user_group_mapping
 
-            # members
-            put "/members/:user_id", Api.GroupsApiController, :add_user_to_group
-            delete "/members/:user_id", Api.GroupsApiController, :remove_user_from_group
+						end
 
-            # permissions
-            get "/permissions/assigned", Api.GroupsApiController, :get_assigned_permissions
-            put "/permissions", Api.GroupsApiController, :assign_permissions
-            delete "/permissions/:assignment_id", Api.GroupsApiController, :unassign_permissions
+						scope "/members" do
+							put "/:user_id", Api.GroupsApiController, :add_user_to_group
+							delete "/:user_id", Api.GroupsApiController, :remove_user_from_group
+						end
+
+						scope "/permissions" do
+							get "/assigned", Api.GroupsApiController, :get_assigned_permissions
+							put "/", Api.GroupsApiController, :assign_permissions
+							delete "/:assignment_id", Api.GroupsApiController, :unassign_permissions
+						end
           end
         end
 
