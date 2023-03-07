@@ -111,7 +111,7 @@
 						</tr>
 					{:else}
 						<tr>
-							<td colspan="2">No permission sets are assigned</td>
+							<td colspan="3"><b>No permission sets are assigned</b></td>
 						</tr>
 					{/each}
 				</tbody>
@@ -161,7 +161,7 @@
 						</tr>
 					{:else}
 						<tr>
-							<td colspan="2">No permissions are direcly assigned</td>
+							<td colspan="3"><b>No permissions are direcly assigned</b></td>
 						</tr>
 					{/each}
 				</tbody>

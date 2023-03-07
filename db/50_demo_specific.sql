@@ -25,8 +25,8 @@ begin
 
 
     perform unsecure.create_perm_set_as_system('Primary tenant member', false, true,
-                                               array ['system.manage_tenants.get_groups'
-                                                   , 'system.manage_tenants.get_users']);
+                                               array ['manage_tenants.get_groups'
+                                                   , 'manage_tenants.get_users']);
     perform unsecure.create_user_group('initial_script', 1, 'Default primary tenant members');
     perform unsecure.assign_permission_as_system(1, null, 'primary_tenant_member');
 
@@ -36,8 +36,8 @@ begin
                             _password_hash := '$pbkdf2-sha512$160000$1KMvsgmM4aycW/QMWGSnjQ$fArLPtg5d6vDhbzT13wiTnuRjWSafV58QY8nQdgQKgKdgDiv.qeaicfzxK..0aIwPm6ZA1BxlZh8d4h/Ps46gw',
                             _display_name := 'Jan Rada')
     into _user_id;
-    perform unsecure.assign_permission_as_system(null, _user_id, null, 'system.permissions.assign_permission');
-    perform unsecure.assign_permission_as_system(null, _user_id, null, 'system.permissions.unassign_permission');
+    perform unsecure.assign_permission_as_system(null, _user_id, null, 'permissions.assign_permission');
+    perform unsecure.assign_permission_as_system(null, _user_id, null, 'permissions.unassign_permission');
 
     perform auth.enable_user_identity('system',1,_user_id,'email');
     perform auth.enable_user('system',1,_user_id);

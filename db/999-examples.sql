@@ -249,3 +249,7 @@ from auth.user_group_members;
 
 select *
 from auth.delete_user_group_member('system', 2, 1, 10, 2)
+
+select * from create_user_group_member('system',1,3,1003)
+
+select * from get_tenant_members('system',1,1)
