@@ -710,7 +710,7 @@ create table auth.permission
 ) inherits (_template_timestamps);
 
 create unique index uq_permission_full_code on auth.permission (full_code);
-create index ix_permission_node_path on auth.permission using GIST (node_path);
+create index ix_permission_node_path on auth.permission using gist (node_path);
 
 create table auth.perm_set
 (
@@ -779,7 +779,7 @@ create table auth.user_group_member
 	manual_assignment bool                                not null default false
 ) inherits (_template_created);
 
-create unique index uq_user_group_member ON auth.user_group_member (group_id, user_id, coalesce(mapping_id, 0));
+create unique index uq_user_group_member on auth.user_group_member (group_id, user_id, coalesce(mapping_id, 0));
 
 create table auth.owner
 (
@@ -799,11 +799,11 @@ create table auth.permission_assignment
 	user_id       bigint references auth.user_info (user_id),
 	perm_set_id   int references auth.perm_set (perm_set_id),
 	permission_id int references auth.permission (permission_id),
-	CONSTRAINT pa_either_object CHECK (group_id is not null or user_id is not null),
-	CONSTRAINT pa_either_perm CHECK (perm_set_id is not null or permission_id is not null)
+	constraint pa_either_object check (group_id is not null or user_id is not null),
+	constraint pa_either_perm check (perm_set_id is not null or permission_id is not null)
 ) inherits (_template_created);
 
-create unique index uq_permission_assignment ON auth.permission_assignment (group_id, coalesce(user_id, 0),
+create unique index uq_permission_assignment on auth.permission_assignment (group_id, coalesce(user_id, 0),
 																																						coalesce(perm_set_id, 0),
 																																						coalesce(permission_id, 0));
 
@@ -865,12 +865,14 @@ create index ix_journal on journal (tenant_id, data_group, coalesce(data_object_
 
 create table auth.api_key
 (
-	api_key_id  int   not null primary key generated always as identity,
-	tenant_id   int   not null references auth.tenant (tenant_id) on delete cascade default 1,
-	title       text  not null,
-	description text,
-	api_key     text  not null unique,
-	secret_hash bytea not null
+	api_key_id         int   not null primary key generated always as identity,
+	tenant_id          int   not null references auth.tenant (tenant_id) on delete cascade default 1,
+	title              text  not null,
+	description        text,
+	api_key            text  not null unique,
+	secret_hash        bytea not null,
+	expire_at          timestamptz,
+	notification_email text
 ) inherits (_template_timestamps);
 
 /***
@@ -930,14 +932,14 @@ where ug.is_active
 
 create view auth.effective_permissions as
 (
-select distinct ps.perm_set_id,
-								ps.code          as perm_set_code,
-								ps.title         as perm_set_title,
-								ps.is_assignable as perm_set_is_assignable,
-								sp.permission_id,
-								sp.title         as permission_title,
-								sp.full_code     as permission_code,
-								sp.is_assignable as permission_is_assignable
+select distinct ps.perm_set_id
+							, ps.code          as perm_set_code
+							, ps.title         as perm_set_title
+							, ps.is_assignable as perm_set_is_assignable
+							, sp.permission_id
+							, sp.title         as permission_title
+							, sp.full_code     as permission_code
+							, sp.is_assignable as permission_is_assignable
 from auth.perm_set ps
 			 inner join auth.perm_set_perm psp on ps.perm_set_id = psp.perm_set_id
 			 inner join auth.permission p on psp.permission_id = p.permission_id
@@ -1009,8 +1011,8 @@ create or replace function search_journal_msgs(_user_id int,
 																							 _data_group text default null,
 																							 _data_object_id bigint default null,
 																							 _data_object_code text default null,
-																							 _payload_criteria jsonb DEFAULT NULL::jsonb,
-																							 _page integer DEFAULT 1, _page_size integer DEFAULT 10,
+																							 _payload_criteria jsonb default null::jsonb,
+																							 _page integer default 1, _page_size integer default 10,
 																							 _tenant_id int default 1
 )
 	returns
@@ -1035,15 +1037,15 @@ declare
 	__can_read_global_journal bool;
 begin
 
-	__can_read_global_journal = auth.has_permission(_user_id, 'system.journal.read_global_journal');
+	__can_read_global_journal = auth.has_permission(_user_id, 'journal.read_global_journal');
 
 	if (_tenant_id = 1) then
 		if not __can_read_global_journal then
-			perform auth.throw_no_permission(_user_id, 'system.journal.read_global_journal');
+			perform auth.throw_no_permission(_user_id, 'journal.read_global_journal');
 		end if;
 	else
 		perform
-			auth.has_permission(_user_id, 'system.journal.read_journal', _tenant_id);
+			auth.has_permission(_user_id, 'journal.read_journal', _tenant_id);
 	end if;
 
 	return query
@@ -1059,7 +1061,7 @@ begin
 								 and (_data_object_id is null or data_object_id = _data_object_id)
 								 and (_data_object_code is null or data_object_code = _data_object_code)
 								 and (_payload_criteria is null or data_payload @> _payload_criteria)
-								 and created between coalesce(_from, now() - INTERVAL '100 years') and coalesce(_to, now() + INTERVAL '100 years')
+								 and created between coalesce(_from, now() - interval '100 years') and coalesce(_to, now() + interval '100 years')
 							 order by created desc
 							 offset ((_page - 1) * _page_size) limit _page_size)
 		select created
@@ -1092,7 +1094,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.journal.get_payload', _tenant_id);
+		auth.has_permission(_user_id, 'journal.get_payload', _tenant_id);
 
 	return query
 		select journal_id
@@ -1257,8 +1259,8 @@ begin
 											 group by tenant_id)
 -- variable not really used, it's there just to avoid 'query has no destination for result data'
 	select at.tenant_id
-	from all_tenants at,
-			 lateral unsecure.clear_permission_cache(_created_by, _target_user_id, at.tenant_id) r
+	from all_tenants at
+		 , lateral unsecure.clear_permission_cache(_created_by, _target_user_id, at.tenant_id) r
 	into __not_really_used;
 
 	return query
@@ -1292,8 +1294,8 @@ begin
 							and expiration_date > now()) then
 
 		return query
-			select upc.groups,
-						 upc.permissions
+			select upc.groups
+					 , upc.permissions
 			from auth.user_permission_cache upc
 			where upc.tenant_id = _tenant_id
 				and upc.user_id = _target_user_id;
@@ -1312,8 +1314,8 @@ begin
 		with ugs as (select user_group_id, group_code
 								 from auth.user_group_members
 								 where (tenant_id = _tenant_id or tenant_id = 1)
-									 and user_id = _target_user_id),
-				 group_assignments as (select distinct ep.permission_code as full_code
+									 and user_id = _target_user_id)
+			 , group_assignments as (select distinct ep.permission_code as full_code
 															 from ugs ug
 																			inner join auth.permission_assignment pa
 																								 on ug.user_group_id = pa.group_id
@@ -1327,8 +1329,8 @@ begin
 																								 on ug.user_group_id = pa.group_id
 																			inner join auth.permission p on pa.permission_id = p.permission_id
 																			inner join auth.permission sp
-																								 on sp.node_path <@ p.node_path and sp.is_assignable = true),
-				 user_assignments as (select distinct ep.permission_code as full_code
+																								 on sp.node_path <@ p.node_path and sp.is_assignable = true)
+			 , user_assignments as (select distinct ep.permission_code as full_code
 															from auth.permission_assignment pa
 																		 inner join auth.effective_permissions ep
 																								on pa.perm_set_id = ep.perm_set_id
@@ -1347,17 +1349,16 @@ begin
 															where (pa.tenant_id = _tenant_id
 																or pa.tenant_id = 1)
 																and pa.user_id = _target_user_id)
-						,
-				 user_permissions as (select distinct full_code
+			 , user_permissions as (select distinct full_code
 															from group_assignments
 															union
 															select full_code
 															from user_assignments
 															order by full_code)
-		select coalesce(array_agg(distinct ugs.group_code), array []::text[])                   rs,
-					 coalesce(array_agg(distinct user_permissions.full_code::text), array []::text[]) ps
-		from ugs,
-				 user_permissions
+		select coalesce(array_agg(distinct ugs.group_code), array []::text[])                   rs
+				 , coalesce(array_agg(distinct user_permissions.full_code::text), array []::text[]) ps
+		from ugs
+			 , user_permissions
 		into __gs, __ps;
 
 		__expiration_date := now() + interval '1 second' * __perm_cache_timeout_in_s;
@@ -1368,11 +1369,11 @@ begin
 			values (_created_by, _target_user_id, _tenant_id, __gs, __ps, __expiration_date);
 		else
 			update auth.user_permission_cache upc
-			set modified        = now(),
-					modified_by     = _created_by,
-					groups          = __gs,
-					permissions     = __ps,
-					expiration_date = __expiration_date
+			set modified        = now()
+				, modified_by     = _created_by
+				, groups          = __gs
+				, permissions     = __ps
+				, expiration_date = __expiration_date
 			where tenant_id = _tenant_id
 				and user_id = _target_user_id;
 		end if;
@@ -1599,8 +1600,8 @@ create function unsecure.create_user_system()
 	rows 1
 as
 $$
-insert into auth.user_info(created_by, modified_by, user_type_code, can_login, email, display_name, username,
-													 original_username)
+insert into auth.user_info( created_by, modified_by, user_type_code, can_login, email, display_name, username
+													, original_username)
 values ('initial_script', 'initial_script', 'system', false, 'system', 'System', 'system', 'system')
 returning *;
 
@@ -1675,7 +1676,7 @@ declare
 begin
 
 	perform
-		auth.has_permission(_user_id, 'system.providers.create_provider');
+		auth.has_permission(_user_id, 'providers.create_provider');
 
 	insert into auth.provider (created_by, modified_by, code, name, is_active)
 	values (_created_by, _created_by, _provider_code, _provider_name, _is_active)
@@ -1711,7 +1712,7 @@ declare
 begin
 
 	perform
-		auth.has_permission(_user_id, 'system.providers.update_provider');
+		auth.has_permission(_user_id, 'providers.update_provider');
 
 	return query
 		update auth.provider
@@ -1747,7 +1748,7 @@ declare
 begin
 
 	perform
-		auth.has_permission(_user_id, 'system.providers.delete_provider');
+		auth.has_permission(_user_id, 'providers.delete_provider');
 
 	return query
 		delete
@@ -1781,7 +1782,7 @@ declare
 	__provider_id int;
 begin
 	perform
-		auth.has_permission(_user_id, 'system.manage_provider.get_users');
+		auth.has_permission(_user_id, 'manage_provider.get_users');
 
 	select provider_id
 	from auth.provider
@@ -1820,7 +1821,7 @@ declare
 begin
 
 	perform
-		auth.has_permission(_user_id, 'system.providers.update_provider');
+		auth.has_permission(_user_id, 'providers.update_provider');
 
 	return query
 		update auth.provider
@@ -1853,7 +1854,7 @@ declare
 begin
 
 	perform
-		auth.has_permission(_user_id, 'system.providers.update_provider');
+		auth.has_permission(_user_id, 'providers.update_provider');
 
 	return query
 		update auth.provider
@@ -1898,7 +1899,7 @@ $$
 declare
 	__requester_username text;
 begin
-	--     perform auth.has_permission( _user_id, 'system.authentication.create_user_event');
+	--     perform auth.has_permission( _user_id, 'authentication.create_user_event');
 
 	if
 			_user_id is not null and (__requester_username is null or __requester_username = '') then
@@ -1927,17 +1928,8 @@ begin
 																						user_agent,
 																						origin,
 																						event_data)
-		values (_created_by,
-						_event_type_code,
-						_user_id,
-						__requester_username,
-						_target_user_id,
-						_target_user_oid,
-						_target_username,
-						_ip_address,
-						_user_agent,
-						_origin,
-						_event_data)
+		values ( _created_by, _event_type_code, _user_id, __requester_username, _target_user_id, _target_user_oid
+					 , _target_username, _ip_address, _user_agent, _origin, _event_data)
 		returning user_event_id;
 end;
 $$;
@@ -1979,9 +1971,9 @@ create function unsecure.expire_tokens(_created_by text)
 	language sql as
 $$
 update auth.token
-set modified         = now(),
-		modified_by      = _created_by,
-		token_state_code = 'expired'
+set modified         = now()
+	, modified_by      = _created_by
+	, token_state_code = 'expired'
 where token_state_code = 'valid'
 	and expires_at
 	< now();
@@ -2012,7 +2004,7 @@ declare
 	__token_expires_at              timestamptz;
 begin
 	perform
-		auth.has_permission(_user_id, 'system.tokens.create_token');
+		auth.has_permission(_user_id, 'tokens.create_token');
 
 	if
 		_expires_at is null then
@@ -2029,9 +2021,9 @@ begin
 		_target_user_id is not null then
 		-- invalidate all previous tokens of the same type for the same user that are still valid
 		update auth.token
-		set modified         = now(),
-				modified_by      = _created_by,
-				token_state_code = 'invalid'
+		set modified         = now()
+			, modified_by      = _created_by
+			, token_state_code = 'invalid'
 		where user_id = _target_user_id
 			and token_type_code = _token_type_code
 			and token_state_code = 'valid';
@@ -2047,9 +2039,8 @@ begin
 	end if;
 
 
-	insert into auth.token (created_by,
-													user_id, user_oid, user_event_id, token_type_code, token_channel_code,
-													token, expires_at, token_data)
+	insert into auth.token ( created_by, user_id, user_oid, user_event_id, token_type_code, token_channel_code, token
+												 , expires_at, token_data)
 	values ( _created_by
 				 , _target_user_id
 				 , _target_user_oid
@@ -2106,7 +2097,7 @@ declare
 	__token_user_id    bigint;
 begin
 	perform
-		auth.has_permission(_user_id, 'system.tokens.validate_token');
+		auth.has_permission(_user_id, 'tokens.validate_token');
 
 	select token_id, uid, token_state_code, user_id
 	from auth.token
@@ -2193,7 +2184,7 @@ declare
 begin
 
 	perform
-		auth.has_permission(_user_id, 'system.tokens.set_as_used');
+		auth.has_permission(_user_id, 'tokens.set_as_used');
 
 	select token_id, uid
 	from auth.token
@@ -2301,7 +2292,7 @@ $$;
 --     __ug_id int;
 -- begin
 --     perform
---         auth.has_permission(1, _user_id, 'system.tenants.assign_owner');
+--         auth.has_permission(1, _user_id, 'tenants.assign_owner');
 --
 --     select ug.user_group_id
 --     from auth.user_group ug
@@ -2342,10 +2333,10 @@ declare
 	__last_id int;
 begin
 
-	insert into auth.user_group (created_by, modified_by, tenant_id, title, is_default, is_system, is_assignable,
-															 is_active, is_external)
-	values (_created_by, _created_by, _tenant_id, _title, _is_default, _is_system, _is_assignable, _is_active,
-					_is_external)
+	insert into auth.user_group ( created_by, modified_by, tenant_id, title, is_default, is_system, is_assignable
+															, is_active, is_external)
+	values ( _created_by, _created_by, _tenant_id, _title, _is_default, _is_system, _is_assignable, _is_active
+				 , _is_external)
 	returning user_group_id
 		into __last_id;
 
@@ -2396,7 +2387,7 @@ $$
 begin
 	perform
 		auth.has_permission(_user_id,
-												'system.groups.create_group', _tenant_id);
+												'groups.create_group', _tenant_id);
 
 	return query
 		select *
@@ -2420,7 +2411,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.groups.update_group', _tenant_id);
+		auth.has_permission(_user_id, 'groups.update_group', _tenant_id);
 
 	return query
 		update auth.user_group
@@ -2466,7 +2457,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.groups.update_group', _tenant_id);
+		auth.has_permission(_user_id, 'groups.update_group', _tenant_id);
 
 	return query
 		update auth.user_group
@@ -2508,7 +2499,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.groups.update_group', _tenant_id);
+		auth.has_permission(_user_id, 'groups.update_group', _tenant_id);
 
 	return query
 		update auth.user_group
@@ -2549,7 +2540,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.groups.lock_group', _tenant_id);
+		auth.has_permission(_user_id, 'groups.lock_group', _tenant_id);
 
 	return query
 		update auth.user_group
@@ -2590,7 +2581,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.groups.update_group', _tenant_id);
+		auth.has_permission(_user_id, 'groups.update_group', _tenant_id);
 
 	return query
 		update auth.user_group
@@ -2630,7 +2621,7 @@ declare
 begin
 
 	perform
-		auth.has_permission(_user_id, 'system.groups.delete_group', _tenant_id);
+		auth.has_permission(_user_id, 'groups.delete_group', _tenant_id);
 
 	select is_system, tenant_id
 	from auth.user_group ug
@@ -2757,7 +2748,7 @@ create function auth.create_user_group_member(_created_by text, _user_id bigint,
 as
 $$
 begin
-	perform auth.can_manage_user_group(_user_id, _user_group_id, 'system.groups.create_member', _tenant_id);
+	perform auth.can_manage_user_group(_user_id, _user_group_id, 'groups.create_member', _tenant_id);
 
 	return query
 		select *
@@ -2775,7 +2766,7 @@ create function auth.delete_user_group_member(_deleted_by text, _user_id bigint,
 as
 $$
 begin
-	perform auth.can_manage_user_group(_user_id, _user_group_id, 'system.groups.delete_member', _tenant_id);
+	perform auth.can_manage_user_group(_user_id, _user_group_id, 'groups.delete_member', _tenant_id);
 
 	delete
 	from auth.user_group_member
@@ -2876,7 +2867,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.groups.get_members', _tenant_id);
+		auth.has_permission(_user_id, 'groups.get_members', _tenant_id);
 
 	return query
 		select *
@@ -2893,7 +2884,7 @@ as
 $$
 begin
 
-	perform auth.has_permission(_user_id, 'system.groups.get_mapping', _tenant_id);
+	perform auth.has_permission(_user_id, 'groups.get_mapping', _tenant_id);
 
 	return query select *
 							 from auth.user_group_mapping ugm
@@ -2936,7 +2927,7 @@ begin
 	end if;
 
 	perform
-		auth.has_permission(_user_id, 'system.groups.create_mapping', _tenant_id);
+		auth.has_permission(_user_id, 'groups.create_mapping', _tenant_id);
 
 	select is_active, tenant_id
 	from auth.user_group ug
@@ -2951,8 +2942,8 @@ begin
 	return query insert into auth.user_group_mapping (created_by, group_id, provider_code, mapped_object_id,
 																										mapped_object_name,
 																										mapped_role)
-		values (_created_by, _user_group_id, _provider_code, lower(_mapped_object_id), _mapped_object_name,
-						lower(_mapped_role))
+		values ( _created_by, _user_group_id, _provider_code, lower(_mapped_object_id), _mapped_object_name
+					 , lower(_mapped_role))
 		returning ug_mapping_id;
 
 
@@ -2961,9 +2952,9 @@ begin
 													where lower(_mapped_object_id) = any (provider_groups)
 														 or lower(_mapped_object_id) = any (provider_roles))
 	update auth.user_permission_cache
-	set modified_by     = _created_by,
-			modified        = now(),
-			expiration_date = now() - '1 sec':: interval
+	set modified_by     = _created_by
+		, modified        = now()
+		, expiration_date = now() - '1 sec':: interval
 	where user_id in (select user_id
 										from affected_users);
 
@@ -2996,16 +2987,16 @@ declare
 	__mapped_role        text;
 begin
 	perform
-		auth.has_permission(_user_id, 'system.groups.delete_mapping', _tenant_id);
+		auth.has_permission(_user_id, 'groups.delete_mapping', _tenant_id);
 
 	-- expire user_permission_cache for affected users
 	with affected_users as (select user_id
 													from auth.user_group_member ugm
 													where ugm.mapping_id = _ug_mapping_id)
 	update auth.user_permission_cache
-	set modified_by     = _deleted_by,
-			modified        = now(),
-			expiration_date = now() - '1 sec':: interval
+	set modified_by     = _deleted_by
+		, modified        = now()
+		, expiration_date = now() - '1 sec':: interval
 	where user_id in (select user_id
 										from affected_users);
 
@@ -3049,7 +3040,7 @@ declare
 begin
 	perform
 		auth.has_permission(_user_id,
-												'system.groups.create_group', _tenant_id);
+												'groups.create_group', _tenant_id);
 
 
 	select *
@@ -3075,7 +3066,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.groups.update_group', _tenant_id);
+		auth.has_permission(_user_id, 'groups.update_group', _tenant_id);
 
 	delete
 	from auth.user_group_member ugm
@@ -3083,9 +3074,9 @@ begin
 		and ugm.manual_assignment = true;
 
 	update auth.user_group
-	set modified    = now(),
-			modified_by = _modified_by,
-			is_external = true
+	set modified    = now()
+		, modified_by = _modified_by
+		, is_external = true
 	where user_group_id = _user_group_id;
 
 
@@ -3108,12 +3099,12 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.groups.update_group', _tenant_id);
+		auth.has_permission(_user_id, 'groups.update_group', _tenant_id);
 
 	update auth.user_group
-	set modified    = now(),
-			modified_by = _modified_by,
-			is_external = false
+	set modified    = now()
+		, modified_by = _modified_by
+		, is_external = false
 	where user_group_id = _user_group_id;
 
 	perform
@@ -3187,7 +3178,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.groups.get_group', _tenant_id);
+		auth.has_permission(_user_id, 'groups.get_group', _tenant_id);
 
 	return query
 		select *
@@ -3216,12 +3207,12 @@ begin
 
 	return query
 --         Get all assigned permissions from permsets
-		select distinct ep.permission_code::text as full_code,
-										ep.permission_title,
-										ep.perm_set_title,
-										ep.perm_set_code,
-										ep.perm_set_id,
-										pa.assignment_id
+		select distinct ep.permission_code::text as full_code
+									, ep.permission_title
+									, ep.perm_set_title
+									, ep.perm_set_code
+									, ep.perm_set_id
+									, pa.assignment_id
 		from auth.permission_assignment pa
 					 inner join auth.effective_permissions ep
 											on pa.perm_set_id = ep.perm_set_id and pa.group_id = _user_group_id
@@ -3229,12 +3220,12 @@ begin
 			and ep.permission_is_assignable = true
 		union
 --         Get permissions that are directly assigned
-		select distinct sp.full_code::text,
-										sp.title,
-										null,
-										null,
-										null::integer,
-										pa.assignment_id
+		select distinct sp.full_code::text
+									, sp.title
+									, null
+									, null
+									, null::integer
+									, pa.assignment_id
 		from auth.permission_assignment pa
 					 inner join auth.permission p on pa.permission_id = p.permission_id and _user_group_id = pa.group_id
 					 inner join auth.permission sp
@@ -3265,8 +3256,8 @@ create function auth.get_effective_group_permissions(_requested_by text, _user_i
 	language plpgsql
 as
 $$
-BEGIN
-	perform auth.has_permission(_user_id, 'system.groups.get_permissions', _tenant_id);
+begin
+	perform auth.has_permission(_user_id, 'groups.get_permissions', _tenant_id);
 
 	return query select * from unsecure.get_effective_group_permissions(_requested_by, _user_id, _group_id, _tenant_id);
 end;
@@ -3291,23 +3282,23 @@ $$
 begin
 
 	return query
-		with permission_ids as (select distinct coalesce(pa.permission_id, psp.permission_id) as permission_id,
-																						ps.title                                      as perm_set_title,
-																						pa.perm_set_id,
-																						ps.code,
-																						pa.assignment_id
-														from permission_assignment pa
-																	 left join perm_set ps on ps.perm_set_id = pa.perm_set_id
-																	 left join perm_set_perm psp on ps.perm_set_id = psp.perm_set_id
+		with permission_ids as (select distinct coalesce(pa.permission_id, psp.permission_id) as permission_id
+																					, ps.title                                      as perm_set_title
+																					, pa.perm_set_id
+																					, ps.code
+																					, pa.assignment_id
+														from auth.permission_assignment pa
+																	 left join auth.perm_set ps on ps.perm_set_id = pa.perm_set_id
+																	 left join auth.perm_set_perm psp on ps.perm_set_id = psp.perm_set_id
 														where group_id = _user_group_id)
 		select jsonb_agg(jsonb_build_object('code', p.full_code, 'title', p.title, 'id',
-																				p.permission_id)) as permissions,
-					 pids.perm_set_title,
-					 pids.perm_set_id,
-					 pids.code                                      as perm_set_code,
-					 pids.assignment_id
+																				p.permission_id)) as permissions
+				 , pids.perm_set_title
+				 , pids.perm_set_id
+				 , pids.code                                      as perm_set_code
+				 , pids.assignment_id
 		from permission_ids pids
-					 inner join permission p on pids.permission_id = p.permission_id
+					 inner join auth.permission p on pids.permission_id = p.permission_id
 		group by pids.assignment_id, pids.perm_set_title, pids.perm_set_id, pids.code
 		order by perm_set_title nulls last;
 
@@ -3336,8 +3327,8 @@ create function auth.get_assigned_group_permissions(_requested_by text, _user_id
 	language plpgsql
 as
 $$
-BEGIN
-	perform auth.has_permission(_user_id, 'system.groups.get_permissions', _tenant_id);
+begin
+	perform auth.has_permission(_user_id, 'groups.get_permissions', _tenant_id);
 
 	return query select *
 							 from unsecure.get_assigned_group_permissions(_requested_by, _user_id, _user_group_id, _tenant_id);
@@ -3369,11 +3360,10 @@ declare
 	__tenant_member_group_id int;
 begin
 	perform
-		auth.has_permission(_user_id, 'system.tenants.create_tenant');
+		auth.has_permission(_user_id, 'tenants.create_tenant');
 
 	insert into tenant (created_by, modified_by, title, code, is_removable, is_assignable)
-	values (_created_by, _created_by, _title, coalesce(_code, helpers.get_code(_title)), _is_removable,
-					_is_assignable)
+	values (_created_by, _created_by, _title, coalesce(_code, helpers.get_code(_title)), _is_removable, _is_assignable)
 	returning tenant_id
 		into __last_id;
 
@@ -3433,19 +3423,19 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.tenants.get_tenants');
+		auth.has_permission(_user_id, 'tenants.get_tenants');
 
 	return query
-		select created,
-					 created_by,
-					 modified,
-					 modified_by,
-					 tenant_id,
-					 uuid::text,
-					 title,
-					 code,
-					 is_removable,
-					 is_assignable
+		select created
+				 , created_by
+				 , modified
+				 , modified_by
+				 , tenant_id
+				 , uuid::text
+				 , title
+				 , code
+				 , is_removable
+				 , is_assignable
 		from auth.tenant t
 		order by t.title;
 end;
@@ -3468,16 +3458,16 @@ create function auth.get_tenant_by_id(_tenant_id int default 1)
 	language sql
 as
 $$
-select created,
-			 created_by,
-			 modified,
-			 modified_by,
-			 tenant_id,
-			 uuid::text,
-			 title,
-			 code,
-			 is_removable,
-			 is_assignable
+select created
+		 , created_by
+		 , modified
+		 , modified_by
+		 , tenant_id
+		 , uuid::text
+		 , title
+		 , code
+		 , is_removable
+		 , is_assignable
 from auth.tenant t
 where tenant_id = _tenant_id;
 $$;
@@ -3496,15 +3486,15 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.tenants.get_users', _tenant_id);
+		auth.has_permission(_user_id, 'tenants.get_users', _tenant_id);
 
-	return query with tenant_users as (select ui.user_id,
-																						ui.username,
-																						ui.display_name,
-																						ugs.user_group_id,
-																						ugs.group_title,
-																						ugs.group_code,
-																						jsonb_build_object(variadic
+	return query with tenant_users as (select ui.user_id
+																					, ui.username
+																					, ui.display_name
+																					, ugs.user_group_id
+																					, ugs.group_title
+																					, ugs.group_code
+																					, jsonb_build_object(variadic
 																															 array ['user_group_id', ugs.user_group_id::text, 'code', ugs.group_code, 'title', ugs.group_title]) group_data
 																		 from auth.user_group_members ugs
 																						inner join auth.user_info ui on ugs.user_id = ui.user_id
@@ -3543,20 +3533,19 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.tenants.get_groups', _tenant_id);
+		auth.has_permission(_user_id, 'tenants.get_groups', _tenant_id);
 
 	return query
-		select ugs.user_group_id,
-					 ugs.group_title,
-					 ugs.group_code,
-					 ugs.is_external,
-					 ugs.is_assignable,
-					 ugs.is_active,
-					 count(ugs.user_id)
+		select ugs.user_group_id
+				 , ugs.group_title
+				 , ugs.group_code
+				 , ugs.is_external
+				 , ugs.is_assignable
+				 , ugs.is_active
+				 , count(ugs.user_id)
 		from auth.user_group_members ugs
 		where ugs.tenant_id = _tenant_id
-		group by ugs.user_group_id, ugs.group_title, ugs.group_code, ugs.is_external, ugs.is_assignable,
-						 ugs.is_active
+		group by ugs.user_group_id, ugs.group_title, ugs.group_code, ugs.is_external, ugs.is_assignable, ugs.is_active
 		order by ugs.group_title;
 
 	perform
@@ -3585,14 +3574,14 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.tenants.get_tenants', _tenant_id);
+		auth.has_permission(_user_id, 'tenants.get_tenants', _tenant_id);
 
 	return query
-		select ugs.user_id,
-					 ui.display_name as user_display_name,
-					 ui.code         as user_code,
-					 ui.uuid::text   as user_uuid,
-					 array_to_json(array_agg(distinct
+		select ugs.user_id
+				 , ui.display_name as user_display_name
+				 , ui.code         as user_code
+				 , ui.uuid::text   as user_uuid
+				 , array_to_json(array_agg(distinct
 																	 jsonb_build_object('user_group_id', ugs.user_group_id, 'group_title',
 																											ugs.group_title,
 																											'group_code', ugs.group_code))) ::text
@@ -3641,10 +3630,10 @@ begin
 	then
 		if _user_group_id is not null then
 			perform auth.has_permission(_user_id
-				, 'system.tenants.assign_group_owner', _tenant_id);
+				, 'tenants.assign_group_owner', _tenant_id);
 		else
 			perform auth.has_permission(_user_id
-				, 'system.tenants.assign_owner', _tenant_id);
+				, 'tenants.assign_owner', _tenant_id);
 		end if;
 	end if;
 
@@ -3676,10 +3665,10 @@ begin
 	then
 		if _user_group_id is not null then
 			perform auth.has_permission(_user_id
-				, 'system.tenants.assign_group_owner', _tenant_id);
+				, 'tenants.assign_group_owner', _tenant_id);
 		else
 			perform auth.has_permission(_user_id
-				, 'system.tenants.assign_owner', _tenant_id);
+				, 'tenants.assign_owner', _tenant_id);
 		end if;
 	end if;
 
@@ -3767,7 +3756,7 @@ begin
 	if _perm_code is not null then
 		select permission.permission_id, is_assignable
 		from auth.permission
-		where full_code = _perm_code::ltree
+		where full_code = _perm_code::ext.ltree
 		into __permission_id, __permission_assignable;
 
 		if __permission_id is null then
@@ -3888,9 +3877,9 @@ begin
 	end if;
 
 	update auth.permission
-	set modified      = now(),
-			modified_by   = _modified_by,
-			is_assignable = _is_assignable
+	set modified      = now()
+		, modified_by   = _modified_by
+		, is_assignable = _is_assignable
 	where permission_id = __permission_id
 	returning full_code
 		into __permission_full_code;
@@ -3916,7 +3905,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.permissions.update_permission');
+		auth.has_permission(_user_id, 'permissions.update_permission');
 
 	return query
 		select *
@@ -3953,7 +3942,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.permissions.assign_permission', _tenant_id);
+		auth.has_permission(_user_id, 'permissions.assign_permission', _tenant_id);
 
 	return query
 		select *
@@ -3974,7 +3963,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.permissions.unassign_permission', _tenant_id);
+		auth.has_permission(_user_id, 'permissions.unassign_permission', _tenant_id);
 
 	return query
 		select *
@@ -3989,19 +3978,19 @@ as
 $$
 update auth.permission p
 set full_title =
-			case
-				when _perm_path = '1'::ext.ltree then 'System'
-				else
-					(select array_to_string(
-													ARRAY(SELECT p_n2.title
-																FROM auth.permission as p_n2
-																WHERE p_n2.node_path @> p_n.node_path
-																	and p_n2.permission_id <> 1
-																ORDER BY p_n2.node_path),
-													' > ')
-					 FROM auth.permission As p_n
-					 where p_n.permission_id = p.permission_id)
-				end
+			-- 			case
+-- 				when _perm_path = '1'::ext.ltree then 'System'
+-- 				else
+			(select array_to_string(
+											ARRAY(select p_n2.title
+														from auth.permission as p_n2
+														where p_n2.node_path @> p_n.node_path
+															and p_n2.permission_id <> 1
+														order by p_n2.node_path),
+											' > ')
+			 from auth.permission as p_n
+			 where p_n.permission_id = p.permission_id)
+-- 				end
 where p.node_path <@ _perm_path
 returning *;
 $$;
@@ -4013,16 +4002,26 @@ as
 $$
 update auth.permission p
 set full_code = (select ext.text2ltree(array_to_string(
-				ARRAY(SELECT coalesce(p_n2.code, helpers.get_code(p_n2.title, '_'))
-							FROM auth.permission as p_n2
-							WHERE p_n2.node_path @> p_n.node_path
-							ORDER BY p_n2.node_path),
+				ARRAY(select coalesce(p_n2.code, helpers.get_code(p_n2.title, '_'))
+							from auth.permission as p_n2
+							where p_n2.node_path @> p_n.node_path
+							order by p_n2.node_path),
 				'.'))
-								 FROM auth.permission As p_n
+								 from auth.permission as p_n
 								 where p_n.permission_id = p.permission_id)
 where p.node_path <@ _perm_path
 returning *;
 $$;
+
+-- create function unsecure.create_system_permission()
+-- 	returns setof auth.permission
+-- 	language sql
+-- 	rows 1
+-- as
+-- $$
+-- insert into auth.permission(created_by, modified_by, title, is_assignable, code)
+-- values ('system', 'system', 'System', false, 'system');
+-- $$;
 
 create
 	or replace function unsecure.create_permission_by_path_as_system(_title text
@@ -4046,14 +4045,15 @@ begin
 		into __last_id;
 
 	if
-		(_parent_code = '') then
+		helpers.is_empty_string(_parent_code) then
 		begin
-			if
-				(lower(_title) = 'system') then
-				__p := ext.text2ltree(__last_id::text);
-			else
-				__p := ext.text2ltree('1.' || __last_id::text);
-			end if;
+			-- 			if
+-- 				(lower(_title) = 'system') then
+-- 				__p := ext.text2ltree(__last_id::text);
+-- 			else
+-- 				__p := ext.text2ltree('1.' || __last_id::text);
+			__p := ext.text2ltree(__last_id::text);
+-- 			end if;
 
 			update auth.permission
 			set node_path = __p
@@ -4104,9 +4104,9 @@ declare
 begin
 
 	-- TODO add _data_node_path to perm check
-	-- auth.has_permission(_user_id, _data_node_path::ext.ltree, 'system.permissions.add_permission');
+	-- auth.has_permission(_user_id, _data_node_path::ext.ltree, 'permissions.add_permission');
 	perform
-		auth.has_permission(_user_id, 'system.permissions.add_permission');
+		auth.has_permission(_user_id, 'permissions.add_permission');
 
 	insert into auth.permission(created_by, modified_by, title, is_assignable, code)
 	values (_created_by, _created_by, _title, _is_assignable, helpers.get_code(_title))
@@ -4114,15 +4114,15 @@ begin
 		into __last_id;
 
 	if
-		(_parent_path = '') then
+		helpers.is_empty_string(_parent_path) then
 		begin
-			if
-				(lower(_title) != 'system')
-			then
-				__p := ext.text2ltree('1.' || __last_id::text);
-			else
-				__p := ext.text2ltree('1');
-			end if;
+			-- 			if
+-- 				(lower(_title) = 'system') then
+-- 				__p := ext.text2ltree(__last_id::text);
+-- 			else
+-- 				__p := ext.text2ltree('1.' || __last_id::text);
+			__p := ext.text2ltree(__last_id::text);
+-- 			end if;
 
 			update auth.permission
 			set node_path = __p
@@ -4170,7 +4170,7 @@ declare
 begin
 
 	perform
-		auth.has_permission(_user_id, 'system.permissions.add_permission');
+		auth.has_permission(_user_id, 'permissions.add_permission');
 
 	insert into auth.permission(created_by, modified_by, title, is_assignable, code)
 	values (_created_by, _created_by, _title, _is_assignable, helpers.get_code(_title))
@@ -4261,7 +4261,7 @@ create or replace function auth.get_all_permissions(
 as
 $$
 begin
-	perform auth.has_permission(_user_id, 'system.permissions.get_perm_sets', _tenant_id);
+	perform auth.has_permission(_user_id, 'permissions.get_perm_sets', _tenant_id);
 
 	return query select * from unsecure.get_all_permissions(_requested_by, _user_id, _tenant_id);
 end;
@@ -4286,22 +4286,18 @@ as
 $$
 begin
 	return query
-		select ps.perm_set_id,
-					 ps.title,
-					 ps.code,
-					 ps.is_system,
-					 ps.is_assignable,
-					 jsonb_agg(jsonb_build_object('code', p.full_code, 'title', p.title, 'id',
+		select ps.perm_set_id
+				 , ps.title
+				 , ps.code
+				 , ps.is_system
+				 , ps.is_assignable
+				 , jsonb_agg(jsonb_build_object('code', p.full_code, 'title', p.title, 'id',
 																				p.permission_id))
 		from auth.perm_set ps
 					 inner join auth.perm_set_perm psp on ps.perm_set_id = psp.perm_set_id
 					 inner join auth.permission p on p.permission_id = psp.permission_id
 		where ps.tenant_id = _tenant_id
-		group by ps.perm_set_id,
-						 ps.title,
-						 ps.code,
-						 ps.is_system,
-						 ps.is_assignable;
+		group by ps.perm_set_id, ps.title, ps.code, ps.is_system, ps.is_assignable;
 
 	perform
 		add_journal_msg(_requested_by, _user_id
@@ -4332,7 +4328,7 @@ create or replace function auth.get_perm_sets(
 as
 $$
 begin
-	perform auth.has_permission(_user_id, 'system.permissions.get_perm_sets', _tenant_id);
+	perform auth.has_permission(_user_id, 'permissions.get_perm_sets', _tenant_id);
 
 	return query select * from unsecure.get_perm_sets(_requested_by, _user_id, _tenant_id);
 end;
@@ -4358,7 +4354,7 @@ declare
 begin
 
 	if
-		exists(SELECT
+		exists(select
 					 from unnest(_permissions) as perm_code
 									inner join auth.permission p
 														 on p.full_code = perm_code::ext.ltree and not p.is_assignable) then
@@ -4372,7 +4368,7 @@ begin
 		into __last_id;
 
 	insert into auth.perm_set_perm(created_by, perm_set_id, permission_id)
-	SELECT _created_by, __last_id, p.permission_id
+	select _created_by, __last_id, p.permission_id
 	from unnest(_permissions) as perm_code
 				 inner join auth.permission p
 										on p.full_code = perm_code::ext.ltree;
@@ -4427,7 +4423,7 @@ $$
 begin
 
 	perform
-		auth.has_permission(_user_id, 'system.permissions.create_permission_set', _tenant_id);
+		auth.has_permission(_user_id, 'permissions.create_permission_set', _tenant_id);
 
 	return query
 		select *
@@ -4455,10 +4451,10 @@ begin
 
 	-- noinspection SqlInsertValues
 	update perm_set
-	set modified      = now(),
-			modified_by   = _modified_by,
-			title         = _title,
-			is_assignable = _is_assignable
+	set modified      = now()
+		, modified_by   = _modified_by
+		, title         = _title
+		, is_assignable = _is_assignable
 	where perm_set_id = _perm_set_id
 	returning perm_set_id
 		into __last_id;
@@ -4501,7 +4497,7 @@ begin
 	end if;
 
 	perform
-		auth.has_permission(_user_id, 'system.permissions.update_permission_set', _tenant_id);
+		auth.has_permission(_user_id, 'permissions.update_permission_set', _tenant_id);
 
 	return query
 		select *
@@ -4533,7 +4529,7 @@ begin
 	end if;
 
 	insert into auth.perm_set_perm(created_by, perm_set_id, permission_id)
-	SELECT _created_by, _perm_set_id, p.permission_id
+	select _created_by, _perm_set_id, p.permission_id
 	from unnest(_permissions) as perm_code
 				 left join auth.permission p
 									 on p.full_code = perm_code::ext.ltree
@@ -4579,7 +4575,7 @@ $$
 begin
 
 	perform
-		auth.has_permission(_user_id, 'system.permissions.update_permission_set', _tenant_id);
+		auth.has_permission(_user_id, 'permissions.update_permission_set', _tenant_id);
 
 	return query
 		select *
@@ -4614,7 +4610,7 @@ begin
 	delete
 	from auth.perm_set_perm
 	where perm_set_id = _perm_set_id
-		and permission_id in (SELECT p.permission_id
+		and permission_id in (select p.permission_id
 													from unnest(_permissions) as perm_code
 																 inner join auth.permission p on p.full_code = perm_code::ext.ltree
 																 inner join auth.perm_set_perm psp
@@ -4659,7 +4655,7 @@ $$
 begin
 
 	perform
-		auth.has_permission(_user_id, 'system.permissions.update_permission_set', _tenant_id);
+		auth.has_permission(_user_id, 'permissions.update_permission_set', _tenant_id);
 
 	return query
 		select *
@@ -4691,7 +4687,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.users.enable_user');
+		auth.has_permission(_user_id, 'users.enable_user');
 
 	return query
 		update auth.user_info
@@ -4728,7 +4724,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.users.disable_user');
+		auth.has_permission(_user_id, 'users.disable_user');
 
 	return query
 		update auth.user_info
@@ -4765,7 +4761,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.users.unlock_user');
+		auth.has_permission(_user_id, 'users.unlock_user');
 
 	return query
 		update auth.user_info
@@ -4802,7 +4798,7 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.users.lock_user');
+		auth.has_permission(_user_id, 'users.lock_user');
 
 	return query
 		update auth.user_info
@@ -4841,7 +4837,7 @@ declare
 	__user_identity_id bigint;
 begin
 	perform
-		auth.has_permission(_user_id, 'system.users.enable_user_identity');
+		auth.has_permission(_user_id, 'users.enable_user_identity');
 
 	select user_identity_id
 	from auth.user_identity uid
@@ -4891,7 +4887,7 @@ declare
 	__user_identity_id bigint;
 begin
 	perform
-		auth.has_permission(_user_id, 'system.users.disable_user_identity');
+		auth.has_permission(_user_id, 'users.disable_user_identity');
 
 	select user_identity_id
 	from auth.user_identity uid
@@ -4956,13 +4952,13 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.authentication.ensure_permissions');
+		auth.has_permission(_user_id, 'authentication.ensure_permissions');
 
 	update auth.user_identity
-	set modified_by     = _created_by,
-			modified        = now(),
-			provider_groups = _provider_groups,
-			provider_roles  = _provider_roles
+	set modified_by     = _created_by
+		, modified        = now()
+		, provider_groups = _provider_groups
+		, provider_roles  = _provider_roles
 	where provider_code = _provider_code
 		and user_id = _target_user_id;
 
@@ -5000,10 +4996,10 @@ begin
 
 	if
 		__last_id is null then
-		insert into auth.user_info (created_by, modified_by, user_type_code, username, original_username, email,
-																display_name, last_used_provider_code)
-		values (_created_by, _created_by, 'normal', __normalized_username, trim(_username), __normalized_email,
-						_display_name, _last_provider_code)
+		insert into auth.user_info ( created_by, modified_by, user_type_code, username, original_username, email
+															 , display_name, last_used_provider_code)
+		values ( _created_by, _created_by, 'normal', __normalized_username, trim(_username), __normalized_email
+					 , _display_name, _last_provider_code)
 		returning user_id into __last_id;
 	end if;
 
@@ -5037,10 +5033,9 @@ declare
 begin
 	__normalized_username := 'api_key_' || _api_key;
 
-	insert into auth.user_info (created_by, modified_by, user_type_code, code, username, original_username,
-															display_name)
-	values (_created_by, _created_by, 'api', __normalized_username, __normalized_username, __normalized_username,
-					__normalized_username)
+	insert into auth.user_info (created_by, modified_by, user_type_code, code, username, original_username, display_name)
+	values ( _created_by, _created_by, 'api', __normalized_username, __normalized_username, __normalized_username
+				 , __normalized_username)
 	returning user_id into __last_id;
 
 	return query
@@ -5050,7 +5045,7 @@ begin
 
 	perform
 		add_journal_msg('system', _user_id
-			, format('User: (id: %s) added new API key user: %s'
+			, format('User: (id: %s) created new API key user: %s'
 											, _user_id, __normalized_username)
 			, 'user', __last_id
 			, array ['username', __normalized_username]
@@ -5080,8 +5075,8 @@ begin
 
 	return query insert into auth.user_identity (created_by, modified_by, provider_code, uid, user_id,
 																							 user_data, password_hash, password_salt, is_active)
-		values (_created_by, _created_by, _provider_code, _provider_uid, _target_user_id,
-						_user_data::jsonb, _password_hash, _password_salt, _is_active)
+		values ( _created_by, _created_by, _provider_code, _provider_uid, _target_user_id, _user_data::jsonb, _password_hash
+					 , _password_salt, _is_active)
 		returning user_id, provider_code, uid;
 
 	perform
@@ -5148,7 +5143,7 @@ begin
 
 	if
 		_user_id <> _target_user_id then
-		perform auth.has_permission(_user_id, 'system.users.change_password');
+		perform auth.has_permission(_user_id, 'users.change_password');
 	end if;
 
 	perform unsecure.create_user_event(_modified_by, _user_id, 'change_password',
@@ -5185,7 +5180,7 @@ declare
 begin
 
 	perform
-		auth.has_permission(_user_id, 'system.users.register_user');
+		auth.has_permission(_user_id, 'users.register_user');
 
 	perform
 		auth.validate_provider_is_active('email');
@@ -5234,7 +5229,7 @@ create function unsecure.add_user_to_default_groups(_created_by text, _user_id b
 	language plpgsql
 as
 $$
-DECLARE
+declare
 	group_data RECORD;
 begin
 
@@ -5259,14 +5254,14 @@ begin
 																and ug.is_default);
 
 
-	FOR group_data IN
-		SELECT dg.*
-		FROM tmp_default_groups dg
-		LOOP
+	for group_data in
+		select dg.*
+		from tmp_default_groups dg
+		loop
 			perform unsecure.create_user_group_member(_created_by, _user_id, group_data.user_group_id,
 																								_target_user_id,
 																								_tenant_id) member;
-		END LOOP;
+		end loop;
 
 	return query
 		select user_id, user_group_id, group_code, group_title
@@ -5293,7 +5288,7 @@ $$
 begin
 
 	perform
-		auth.has_permission(_user_id, 'system.users.add_to_default_groups', _tenant_id);
+		auth.has_permission(_user_id, 'users.add_to_default_groups', _tenant_id);
 
 	return query
 		select *
@@ -5325,12 +5320,12 @@ begin
 	end if;
 
 	return query
-		select user_id,
-					 code,
-					 uuid::text,
-					 username,
-					 email,
-					 display_name
+		select user_id
+				 , code
+				 , uuid::text
+				 , username
+				 , email
+				 , display_name
 		from auth.user_info ui
 		where user_id = _user_id;
 end;
@@ -5353,17 +5348,17 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.users.get_user_identity');
+		auth.has_permission(_user_id, 'users.get_user_identity');
 
 	return query
-		select uid.user_identity_id,
-					 uid.provider_code,
-					 uid.uid,
-					 uid.uid,
-					 uid.user_id,
-					 uid.provider_groups,
-					 uid.provider_roles,
-					 uid.user_data
+		select uid.user_identity_id
+				 , uid.provider_code
+				 , uid.uid
+				 , uid.uid
+				 , uid.user_id
+				 , uid.provider_groups
+				 , uid.provider_roles
+				 , uid.user_data
 		from auth.user_identity uid
 		where user_id = _target_user_id
 			and provider_code = _provider_code;
@@ -5386,16 +5381,16 @@ as
 $$
 begin
 	perform
-		auth.has_permission(_user_id, 'system.users.get_user_identity');
+		auth.has_permission(_user_id, 'users.get_user_identity');
 
 	return query
-		select uid.user_identity_id,
-					 uid.provider_code,
-					 uid.uid,
-					 uid.user_id,
-					 uid.provider_groups,
-					 uid.provider_roles,
-					 uid.user_data
+		select uid.user_identity_id
+				 , uid.provider_code
+				 , uid.uid
+				 , uid.user_id
+				 , uid.provider_groups
+				 , uid.provider_roles
+				 , uid.user_data
 		from auth.user_info ui
 					 inner join auth.user_identity uid on ui.user_id = uid.user_id
 		where ui.email = _email
@@ -5433,7 +5428,7 @@ declare
 begin
 
 	perform
-		auth.has_permission(_user_id, 'system.authentication.get_data');
+		auth.has_permission(_user_id, 'authentication.get_data');
 
 	perform
 		auth.validate_provider_is_active('email');
@@ -5477,15 +5472,15 @@ begin
 	end if;
 
 	return query
-		select ui.user_id,
-					 ui.code,
-					 ui.uuid::text,
-					 ui.username,
-					 ui.email,
-					 ui.display_name,
-					 'email',
-					 uid.password_hash,
-					 uid.password_salt
+		select ui.user_id
+				 , ui.code
+				 , ui.uuid::text
+				 , ui.username
+				 , ui.email
+				 , ui.display_name
+				 , 'email'
+				 , uid.password_hash
+				 , uid.password_salt
 		from auth.user_identity uid
 					 inner join auth.user_info ui on uid.user_id = ui.user_id
 		where uid.provider_code = 'email'
@@ -5535,12 +5530,12 @@ begin
 	end if;
 
 	return query
-		select ui.user_id,
-					 ui.code,
-					 ui.uuid::text,
-					 ui.username,
-					 ui.email,
-					 ui.display_name
+		select ui.user_id
+				 , ui.code
+				 , ui.uuid::text
+				 , ui.username
+				 , ui.email
+				 , ui.display_name
 		from auth.user_info ui
 		where ui.user_id = __last_id;
 end;
@@ -5630,12 +5625,12 @@ begin
 	perform unsecure.update_last_used_provider(__last_id, _provider_code);
 
 	return query
-		select ui.user_id,
-					 ui.code,
-					 ui.uuid::text,
-					 ui.username,
-					 ui.email,
-					 ui.display_name
+		select ui.user_id
+				 , ui.code
+				 , ui.uuid::text
+				 , ui.username
+				 , ui.email
+				 , ui.display_name
 		from auth.user_identity uid
 					 inner join auth.user_info ui on uid.user_id = ui.user_id
 		where uid.provider_code = _provider_code
@@ -5658,10 +5653,108 @@ begin
 
 	--     if
 --         __user_id <> _target_user_id then
---         perform auth.has_permission(null, _user_id, 'system.users.update_user');
+--         perform auth.has_permission(null, _user_id, 'users.update_user');
 --     end if;
 
 
+end;
+$$;
+
+-- drop function auth.get_user_permissions(_user_id bigint, _target_user_id bigint)
+create or replace function auth.get_user_permissions(_user_id bigint, _target_user_id bigint)
+	returns table
+					(
+						__assignment_id               bigint,
+						__perm_set_code               text,
+						__perm_set_title              text,
+						__user_group_member_id        bigint,
+						__user_group_title            text,
+						__permission_inheritance_type text,
+						__permission_code             text,
+						__permission_title            text
+					)
+	language plpgsql
+	stable
+as
+$$
+begin
+	if _user_id <> _target_user_id then
+		perform auth.has_permission(_user_id, 'users.get_permissions');
+	end if;
+
+	return query
+		with __user_group_permissions as (select pa.assignment_id
+																					 , ugm.member_id
+																					 , ug.title as user_group_title
+																					 , p.full_code::text
+																					 , p.title
+																			from auth.user_group_member ugm
+																						 inner join auth.user_group ug on ugm.group_id = ug.user_group_id
+																						 inner join auth.permission_assignment pa on ug.user_group_id = pa.group_id
+																						 inner join auth.permission p on pa.permission_id = p.permission_id
+																			where ugm.user_id = _target_user_id
+																				and ug.is_active)
+			 , __user_perm_set_permissions as (select pa.assignment_id
+																							, ps.code
+																							, ps.title as perm_set_title
+																							, pspp.full_code::text
+																							, pspp.title
+																				 from auth.permission_assignment pa
+																								inner join auth.perm_set ps on pa.perm_set_id = ps.perm_set_id
+																								inner join auth.perm_set_perm psp on ps.perm_set_id = psp.perm_set_id
+																								inner join auth.permission pspp on pspp.permission_id = psp.permission_id
+																				 where pa.user_id = _target_user_id)
+			 , __user_permission_assignemnts as (select pa.assignment_id
+																								, p.full_code::text
+																								, p.title
+																					 from auth.permission_assignment pa
+																									inner join auth.permission p on pa.permission_id = p.permission_id
+																					 where pa.user_id = _target_user_id)
+		select assignment_id
+				 , null
+				 , null
+				 , member_id
+				 , user_group_title
+				 , 'group'
+				 , full_code
+				 , title
+		from __user_group_permissions
+		union all
+		select assignment_id
+				 , code
+				 , perm_set_title
+				 , null
+				 , null
+				 , 'perm_set'
+				 , full_code
+				 , title
+		from __user_perm_set_permissions
+		union all
+		select assignment_id
+				 , null
+				 , null
+				 , null
+				 , null
+				 , 'assignment'
+				 , full_code
+				 , title
+		from __user_permission_assignemnts;
+
+
+	--   return query
+--     select pa.assignment_id
+--          , coalesce(p.full_code, pspp.full_code)::text
+--          , coalesce(p.title, pspp.title)
+--          , ps.perm_set_id
+--          , ps.code
+--          , ps.title
+--     from auth.user_info ui
+--            inner join auth.permission_assignment pa on ui.user_id = pa.user_id
+--            left join auth.permission p on pa.permission_id = p.permission_id
+--            left join auth.perm_set ps on pa.perm_set_id = ps.perm_set_id
+--            left join auth.perm_set_perm psp on ps.perm_set_id = psp.perm_set_id
+--            left join auth.permission pspp on pspp.permission_id = psp.permission_id
+--     where ui.user_id = _target_user_id;
 end;
 $$;
 
@@ -5674,7 +5767,7 @@ begin
 
 	if
 		_user_id <> _target_user_id then
-		perform auth.has_permission(_user_id, 'system.users.get_data');
+		perform auth.has_permission(_user_id, 'users.get_data');
 	end if;
 
 	select *
@@ -5799,21 +5892,17 @@ begin
 																		 or tenant_id = 1))
 							 select jsonb_agg(jsonb_build_object('code', p.full_code, 'title', p.title, 'id',
 																									 p.permission_id))
-															as permissions,
-											ps.title,
-											ps.perm_set_id,
-											ps.code as perm_set_code,
-											a.assignment_id,
-											a.group_id
+															as permissions
+										, ps.title
+										, ps.perm_set_id
+										, ps.code as perm_set_code
+										, a.assignment_id
+										, a.group_id
 							 from assigments a
 											left join auth.perm_set ps on a.perm_set_id = ps.perm_set_id
 											left join auth.perm_set_perm psp on ps.perm_set_id = psp.perm_set_id
-											left join auth.permission p
-																on (coalesce(a.permission_id, psp.permission_id) = p.permission_id)
-							 group by ps.title,
-												ps.perm_set_id,
-												a.assignment_id,
-												a.group_id
+											left join auth.permission p on (coalesce(a.permission_id, psp.permission_id) = p.permission_id)
+							 group by ps.title, ps.perm_set_id, a.assignment_id, a.group_id
 							 order by ps.title nulls last;
 
 
@@ -5845,7 +5934,7 @@ create or replace function auth.get_assigned_user_permissions(_requested_by text
 as
 $$
 begin
-	perform auth.has_permission(_user_id, 'system.users.get_permissions', _tenant_id);
+	perform auth.has_permission(_user_id, 'users.get_permissions', _tenant_id);
 
 	return query select *
 							 from unsecure.get_assigned_user_permissions(_requested_by, _user_id, _target_user_id, _tenant_id);
@@ -5904,10 +5993,16 @@ $$
 select sha256(convert_to(_secret, 'UTF8')::bytea);
 $$;
 
+-- drop function auth.create_api_key(_created_by text, _user_id bigint
+-- , _title text, _description text
+-- , _perm_set_code text, _permission_codes text[]
+-- , _api_key text , _api_secret text
+-- , _tenant_id int );
 create or replace function auth.create_api_key(_created_by text, _user_id bigint
 , _title text, _description text
 , _perm_set_code text, _permission_codes text[]
 , _api_key text default null, _api_secret text default null
+, _expire_at timestamptz default null, _notification_email text default null
 , _tenant_id bigint default 1)
 	returns table
 					(
@@ -5920,6 +6015,7 @@ create or replace function auth.create_api_key(_created_by text, _user_id bigint
 as
 $$
 declare
+	__permission_code text;
 	__api_secret      text;
 	__api_secret_hash bytea;
 	__api_key         text;
@@ -5928,64 +6024,190 @@ declare
 	__null_bigint     bigint;
 begin
 
+	-- TODO: Permission check
+
+
 	__api_key := coalesce(_api_key, auth.generate_api_key());
 	__api_secret := coalesce(_api_secret, auth.generate_api_secret());
 	__api_secret_hash := auth.generate_api_secret_hash(__api_secret);
 
-	insert into auth.api_key(created_by, modified_by, tenant_id, title, description, api_key, secret_hash)
-	values (_created_by, _created_by, _tenant_id, _title, _description, __api_key, __api_secret_hash)
+	insert into auth.api_key(created_by, modified_by, tenant_id, title, description, api_key, secret_hash, expire_at,
+													 notification_email)
+	values (_created_by, _created_by, _tenant_id, _title, _description, __api_key, __api_secret_hash, _expire_at,
+					_notification_email)
 	returning api_key_id
 		into __last_id;
 
 	select user_id
-	from unsecure.create_api_user(_created_by, _user_id, __api_key)
+	from unsecure.create_api_user(_created_by, _user_id, __api_key, coalesce(_tenant_id, 1))
 	into __api_user_id;
 
-	if _perm_set_code is not null then
-		select p.assignment_id
-		from unsecure.assign_permission(_created_by, _target_user_id := __api_user_id,
-																		_perm_set_code := _perm_set_code) as p
-		into __null_bigint;
+	if _perm_set_code is not null and _perm_set_code <> '' then
+		perform unsecure.assign_permission(_created_by, _user_id, _target_user_id := __api_user_id,
+																			 _perm_set_code := _perm_set_code);
 	end if;
 
-	if _permission_codes is not null then
-		select p.assignment_id
-		from unnest(_permission_codes) as permission_code,
-				 lateral unsecure.assign_permission(_created_by, _target_user_id := __api_user_id,
-																						_perm_code := permission_code) as p
-		into __null_bigint;
+	if _permission_codes is not null and _permission_codes <> (array [])::text[] then
+		foreach __permission_code in array _permission_codes
+			loop
+				perform unsecure.assign_permission(_created_by, _user_id, _target_user_id := __api_user_id,
+																					 _perm_code := __permission_code);
+			end loop;
 	end if;
 
 	return query
 		select __last_id, __api_key, __api_secret;
 
+	perform
+		add_journal_msg(_created_by, _user_id
+			, format('User: %s created API key: %s in tenant: %s'
+											, _created_by, coalesce(_title, __api_key), _tenant_id)
+			, 'api_key', __last_id
+			, array ['api_key', __api_key, 'title', _title, 'description', _description,
+											'expire_at', _expire_at::text,
+											'notification_email', _notification_email]
+			, 50501
+			, _tenant_id := coalesce(_tenant_id, 1));
+
+end;
+$$;
+
+-- Search api keys by search text (filtering title or application id) with pagination (page, page_size). Exclude sensitive information (secret_hash) from result
+
+create or replace function auth.search_api_keys(_user_id bigint, _search_text text,
+																								_page int default 1, _page_size int default 10,
+																								_tenant_id int default 1)
+	returns table
+					(
+						__created_by         text,
+						__created            timestamptz,
+						__modified_by        text,
+						__modified           timestamptz,
+						__api_key_id         int,
+						__tenant_id          int,
+						__title              text,
+						__description        text,
+						__api_key            text,
+						__expire_at          timestamptz,
+						__notification_email text,
+						__total_items        bigint
+					)
+	language plpgsql
+	stable
+	rows 100
+as
+$$
+declare
+	__search_text text;
+begin
+	perform auth.has_permission(_user_id, 'api_keys.search', _tenant_id);
+
+	__search_text := helpers.unaccent_text(_search_text);
+
+	_page := case when _page is null then 1 else _page end;
+	_page_size := case when _page_size is null then 10 else least(_page_size, 100) end;
+
+	return query
+		with filtered_rows
+					 as (select ak.api_key_id
+										, count(*) over () as total_items
+							 from auth.api_key ak
+							 where (_tenant_id is null or ak.tenant_id = _tenant_id)
+								 and (helpers.is_empty_string(__search_text) or lower(ak.title) like '%' || __search_text || '%')
+							 order by ak.title, ak.api_key
+							 offset ((_page - 1) * _page_size) limit _page_size)
+		select ak.created_by
+				 , ak.created
+				 , ak.modified_by
+				 , ak.modified
+				 , ak.api_key_id
+				 , ak.tenant_id
+				 , ak.title
+				 , ak.description
+				 , ak.api_key
+				 , ak.expire_at
+				 , ak.notification_email
+				 , total_items
+		from filtered_rows fr
+					 inner join auth.api_key ak on fr.
+																					 api_key_id = ak.api_key_id;
+end;
+$$;
+
+-- drop function auth.get_api_key_permissions(_user_id bigint, _api_key_id bigint)
+create or replace function auth.get_api_key_permissions(_user_id bigint, _api_key_id bigint, _tenant_id int)
+	returns table
+					(
+						__assignment_id               bigint,
+						__perm_set_code               text,
+						__perm_set_title              text,
+						__user_group_member_id        bigint,
+						__user_group_title            text,
+						__permission_inheritance_type text,
+						__permission_code             text,
+						__permission_title            text
+					)
+	language plpgsql
+	stable
+as
+$$
+begin
+	return query
+		select p.*
+		from auth.api_key ak
+					 inner join auth.user_info ui on user_type_code = 'api' and code = auth.generate_api_key_username(ak.api_key)
+			 , lateral (select * from auth.get_user_permissions(_user_id, ui.user_id)) as p
+		where ak.api_key_id = _api_key_id
+			and tenant_id = _tenant_id;
 end;
 $$;
 
 create or replace function auth.update_api_key(_updated_by text, _user_id bigint
-, _api_key_id bigint, _title text, _description text)
+, _api_key_id bigint, _title text, _description text, _expire_at timestamptz, _notification_email text)
 	returns table
 					(
-						__api_key_id  int,
-						__title       text,
-						__description text
+						__api_key_id         int,
+						__title              text,
+						__description        text,
+						__expire_at          timestamptz,
+						__notification_email text
 					)
 	language plpgsql
 	rows 1
 as
 $$
+declare
+	__tenant_id int;
 begin
 
 	-- TODO: check if user has permission to update api key
 
+	update auth.api_key
+	set modified_by        = _updated_by
+		, modified           = now()
+		, title              = _title
+		, description        = _description
+		, expire_at          = _expire_at
+		, notification_email = _notification_email
+	where api_key_id = _api_key_id
+	returning tenant_id
+		into __tenant_id;
+
 	return query
-		update auth.api_key
-			set modified_by = _updated_by
-				, modified = now()
-				, title = _title
-				, description = _description
-			where api_key_id = _api_key_id
-			returning api_key_id, title, description;
+		select api_key_id, title, description, expire_at, notification_email
+		from auth.api_key
+		where api_key_id = _api_key_id;
+
+	perform
+		add_journal_msg(_updated_by, _user_id
+			, format('User: %s updated API key: %s in tenant: %s'
+											, _updated_by, _title, __tenant_id)
+			, 'api_key', _api_key_id
+			, array ['title', _title, 'description', _description,
+											'expire_at', _expire_at::text,
+											'notification_email', _notification_email]
+			, 50502
+			, _tenant_id := coalesce(__tenant_id, 1));
 end;
 $$;
 
@@ -5996,6 +6218,7 @@ create or replace function auth.assign_api_key_permissions(_created_by text, _us
 	returns table
 					(
 						__assignment_id         bigint,
+						__tenant_id             int,
 						__perm_set_id           integer,
 						__perm_set_code         text,
 						__perm_set_title        text,
@@ -6008,8 +6231,8 @@ create or replace function auth.assign_api_key_permissions(_created_by text, _us
 as
 $$
 declare
-	__null_bigint bigint;
-	__api_user_id bigint;
+	__permission_code text;
+	__api_user_id     bigint;
 begin
 
 	-- TODO: check if user has permission to update api key
@@ -6021,35 +6244,47 @@ begin
 	into __api_user_id;
 
 	if _perm_set_code is not null then
-		select p.assignment_id
-		from unsecure.assign_permission(_created_by, _user_id, _target_user_id := __api_user_id,
-																		_perm_set_code := _perm_set_code,
-																		_tenant_id := _tenant_id) as p
-		into __null_bigint;
+		perform unsecure.assign_permission(_created_by, _user_id, _target_user_id := __api_user_id,
+																			 _perm_set_code := _perm_set_code,
+																			 _tenant_id := _tenant_id);
 	end if;
 
 	if _permission_codes is not null then
-		select p.assignment_id
-		from unnest(_permission_codes) as permission_code,
-				 lateral unsecure.assign_permission(_created_by, _user_id, _target_user_id := __api_user_id,
-																						_perm_code := permission_code,
-																						_tenant_id := _tenant_id) as p
-		into __null_bigint;
+		foreach __permission_code in array _permission_codes
+			loop
+				perform unsecure.assign_permission(_created_by, _user_id, _target_user_id := __api_user_id,
+																					 _perm_code := __permission_code,
+																					 _tenant_id := _tenant_id);
+			end loop;
 	end if;
 
 	return query
-		select pa.assignment_id, pa.perm_set_id, ps.code, ps.title, p.full_code::text, p.full_title, p.title
+		select pa.assignment_id,
+					 pa.tenant_id,
+					 pa.perm_set_id,
+					 ps.code,
+					 ps.title,
+					 p.full_code::text,
+					 p.full_title,
+					 p.title
 		from auth.permission_assignment pa
 					 left join auth.perm_set ps on pa.perm_set_id = ps.perm_set_id
 					 left join auth.permission p on pa.permission_id = p.permission_id
 		where pa.user_id = __api_user_id
 		order by ps.code nulls last, p.full_code;
 
--- TODO: add journal message
+	perform
+		add_journal_msg(_created_by, _user_id
+			, format('User: %s assigned permissions to API key in tenant: %s'
+											, _created_by, _tenant_id)
+			, 'api_key', _api_key_id
+			, array ['perm_set_code', _perm_set_code, 'permission_code', array_to_string(_permission_codes, ';')]
+			, 50504
+			, _tenant_id := _tenant_id);
 end;
 $$;
 
-create or replace function auth.unassign_api_key_permissions(_created_by text
+create or replace function auth.unassign_api_key_permissions(_deleted_by text
 , _user_id bigint
 , _api_key_id int
 , _perm_set_code text, _permission_codes text[]
@@ -6069,8 +6304,10 @@ create or replace function auth.unassign_api_key_permissions(_created_by text
 as
 $$
 declare
-	__null_bigint bigint;
-	__api_user_id bigint;
+	__permission_code text;
+	__assignment_id   bigint;
+	__null_bigint     bigint;
+	__api_user_id     bigint;
 begin
 
 	-- TODO: check if user has permission to update api key
@@ -6086,21 +6323,26 @@ begin
 		from auth.perm_set ps
 					 inner join auth.permission_assignment pa
 											on pa.user_id = __api_user_id and ps.perm_set_id = pa.perm_set_id and
-												 pa.tenant_id = _tenant_id,
-				 lateral unsecure.unassign_permission(_created_by, _user_id, pa.assignment_id, _tenant_id) as up
+												 pa.tenant_id = _tenant_id
+			 , lateral unsecure.unassign_permission(_deleted_by, _user_id, pa.assignment_id, _tenant_id) as up
 		where ps.code = _perm_set_code
 		into __null_bigint;
 	end if;
 
 	if _permission_codes is not null then
-		select up.assignment_id
-		from unnest(_permission_codes) as permission_code
-					 inner join auth.permission p on p.full_code = permission_code.permission_code::ltree
-					 inner join auth.permission_assignment pa
-											on pa.user_id = __api_user_id and p.permission_id = pa.permission_id and
-												 pa.tenant_id = _tenant_id,
-				 lateral unsecure.unassign_permission(_created_by, _user_id, pa.assignment_id, _tenant_id) as up
-		into __null_bigint;
+		foreach __permission_code in array _permission_codes
+			loop
+				for __assignment_id in
+					select pa.assignment_id
+					from auth.permission p
+								 inner join auth.permission_assignment pa
+														on pa.user_id = __api_user_id and p.permission_id = pa.permission_id and
+															 pa.tenant_id = _tenant_id
+					where p.full_code = __permission_code::ext.ltree
+					loop
+						perform unsecure.unassign_permission(_deleted_by, _user_id, __assignment_id, _tenant_id);
+					end loop;
+			end loop;
 	end if;
 
 	return query
@@ -6111,12 +6353,20 @@ begin
 		where pa.user_id = __api_user_id
 		order by ps.code nulls last, p.full_code;
 
-	-- TODO: add journal message
+	perform
+		add_journal_msg(_deleted_by, _user_id
+			, format('User: %s unassigned permissions to API key in tenant: %s'
+											, _deleted_by, _tenant_id)
+			, 'api_key', _api_key_id
+			, array ['perm_set_code', _perm_set_code, 'permission_code', array_to_string(_permission_codes, ';')]
+			, 50505
+			, _tenant_id := _tenant_id);
 
 end;
 $$;
 
-create or replace function auth.delete_api_key(_deleted_by text, _user_id bigint, _api_key_id int)
+create or replace function auth.delete_api_key(_deleted_by text, _user_id bigint, _api_key_id int,
+																							 _tenant_id int default 1)
 	returns table
 					(
 						__api_key_id int
@@ -6144,7 +6394,14 @@ begin
 		delete from auth.api_key where api_key_id = _api_key_id
 			returning api_key_id;
 
-	-- TODO: add journal message
+	perform
+		add_journal_msg(_deleted_by, _user_id
+			, format('User: %s deleted API key in tenant: %s'
+											, _deleted_by, _tenant_id)
+			, 'api_key', _api_key_id
+			, null
+			, 50503
+			, _tenant_id := _tenant_id);
 
 end;
 $$;
@@ -6161,6 +6418,7 @@ create function auth.update_api_key_secret(_updated_by text, _user_id bigint, _a
 as
 $$
 declare
+	__tenant_id       int;
 	__api_secret      text;
 	__api_secret_hash bytea;
 begin
@@ -6169,15 +6427,25 @@ begin
 	__api_secret := coalesce(_api_secret, auth.generate_api_secret());
 	__api_secret_hash := auth.generate_api_secret_hash(__api_secret);
 
-	return query
-		update auth.api_key
-			set modified_by = _updated_by
-				, modified = now()
-				, secret_hash = __api_secret_hash
-			where api_key_id = _api_key_id
-			returning _api_key_id, __api_secret;
+	update auth.api_key
+	set modified_by = _updated_by
+		, modified    = now()
+		, secret_hash = __api_secret_hash
+	where api_key_id = _api_key_id
+	returning tenant_id
+		into __tenant_id;
 
-	-- TODO: add journal message
+	return query
+		select __api_key_id, __api_secret;
+
+	perform
+		add_journal_msg(_updated_by, _user_id
+			, format('User: %s updated API key secret in tenant: %s'
+											, _updated_by, __tenant_id)
+			, 'api_key', _api_key_id
+			, null
+			, 50506
+			, _tenant_id := __tenant_id);
 
 end;
 $$;
@@ -6186,6 +6454,9 @@ create or replace function auth.validate_api_key(_requested_by text
 , _user_id bigint
 , _api_key text
 , _api_secret text
+, _ip_address text default null
+, _user_agent text default null
+, _origin text default null
 , _tenant_id int default 1)
 	returns table
 					(
@@ -6200,6 +6471,8 @@ $$
 declare
 	__api_user_id bigint;
 begin
+
+	-- TODO: check if user has permission to validate api key
 
 	select user_id
 	from auth.api_key ak
@@ -6216,8 +6489,8 @@ begin
 		with pa as (select pa.perm_set_id, pa.permission_id
 								from auth.permission_assignment pa
 								where pa.user_id = __api_user_id
-									and pa.tenant_id = _tenant_id),
-				 permissions as (select ep.permission_code::text
+									and pa.tenant_id = _tenant_id)
+			 , permissions as (select ep.permission_code::text
 												 from pa
 																inner join auth.effective_permissions ep on pa.perm_set_id = ep.perm_set_id
 												 union
@@ -6227,6 +6500,10 @@ begin
 																inner join auth.permission p on pa.permission_id = p.permission_id)
 		select __api_user_id, array_agg(permission_code)
 		from permissions;
+
+	perform auth.create_user_event(_requested_by, _user_id,
+																 'api_key_validating', __api_user_id, _ip_address,
+																 _user_agent, _origin, _tenant_id);
 
 end;
 $$;
@@ -6276,127 +6553,127 @@ begin
 	-- resetting sequence to 1000 to allocate space for system users
 	alter sequence auth.user_info_user_id_seq restart with 1000;
 
-	perform unsecure.create_permission_by_path_as_system('System', _is_assignable := true);
+	-- 	perform unsecure.create_permission_by_path_as_system('System', _is_assignable := true);
 
-	perform unsecure.create_user_group_as_system('System', true, true);
+-- 	perform unsecure.create_user_group_as_system('System', true, true);
 
-	perform unsecure.create_user_group_member_as_system('system', 'System');
+-- 	perform unsecure.create_user_group_member_as_system('system', 'System');
 
-	perform auth.lock_user_group('system', 1, 1);
+-- 	perform auth.lock_user_group('system', 1, 1);
 
-	perform unsecure.create_perm_set_as_system('System', true, _is_assignable := true,
-																						 _permissions := array ['system']);
+-- 	perform unsecure.create_perm_set_as_system('System', true, _is_assignable := true,
+-- 																						 _permissions := array ['system']);
 
-	perform unsecure.assign_permission_as_system(1, null, 'system');
-	perform unsecure.set_permission_as_assignable('system', 1, 1, null, false);
+-- 	perform unsecure.assign_permission_as_system(1, null, 'system');
+-- 	perform unsecure.set_permission_as_assignable('system', 1, 1, null, false);
 
-	perform unsecure.create_permission_by_path_as_system('Authentication', 'system', false);
-	perform unsecure.create_permission_by_path_as_system('Get data', 'system.authentication');
-	perform unsecure.create_permission_by_path_as_system('Create auth event', 'system.authentication');
+	perform unsecure.create_permission_by_path_as_system('Authentication', null, false);
+	perform unsecure.create_permission_by_path_as_system('Get data', 'authentication');
+	perform unsecure.create_permission_by_path_as_system('Create auth event', 'authentication');
 
 	perform unsecure.create_permission_by_path_as_system('Journal', _is_assignable := true);
-	perform unsecure.create_permission_by_path_as_system('Read journal', 'system.journal', _is_assignable := true);
-	perform unsecure.create_permission_by_path_as_system('Read global journal', 'system.journal',
+	perform unsecure.create_permission_by_path_as_system('Read journal', 'journal', _is_assignable := true);
+	perform unsecure.create_permission_by_path_as_system('Read global journal', 'journal',
 																											 _is_assignable := true);
-	perform unsecure.create_permission_by_path_as_system('Get payload', 'system.journal', _is_assignable := true);
+	perform unsecure.create_permission_by_path_as_system('Get payload', 'journal', _is_assignable := true);
 
-	perform unsecure.create_permission_by_path_as_system('Areas', 'system', false);
-	perform unsecure.create_permission_by_path_as_system('Public', 'system.areas');
-	perform unsecure.create_permission_by_path_as_system('Admin', 'system.areas');
+	perform unsecure.create_permission_by_path_as_system('Areas', null, false);
+	perform unsecure.create_permission_by_path_as_system('Public', 'areas');
+	perform unsecure.create_permission_by_path_as_system('Admin', 'areas');
 
-	perform unsecure.create_permission_by_path_as_system('Tokens', 'system', false);
-	perform unsecure.create_permission_by_path_as_system('Create token', 'system.tokens', true);
-	perform unsecure.create_permission_by_path_as_system('Validate token', 'system.tokens', true);
-	perform unsecure.create_permission_by_path_as_system('Set as used', 'system.tokens', true);
+	perform unsecure.create_permission_by_path_as_system('Tokens', null, false);
+	perform unsecure.create_permission_by_path_as_system('Create token', 'tokens', true);
+	perform unsecure.create_permission_by_path_as_system('Validate token', 'tokens', true);
+	perform unsecure.create_permission_by_path_as_system('Set as used', 'tokens', true);
 
-	perform unsecure.create_permission_by_path_as_system('Permissions', 'system', false);
-	perform unsecure.create_permission_by_path_as_system('Create permission', 'system.permissions');
-	perform unsecure.create_permission_by_path_as_system('Update permission', 'system.permissions');
-	perform unsecure.create_permission_by_path_as_system('Delete permission', 'system.permissions');
-	perform unsecure.create_permission_by_path_as_system('Create permission set', 'system.permissions');
-	perform unsecure.create_permission_by_path_as_system('Update permission set', 'system.permissions');
-	perform unsecure.create_permission_by_path_as_system('Delete permission set', 'system.permissions');
-	perform unsecure.create_permission_by_path_as_system('Assign permission', 'system.permissions');
-	perform unsecure.create_permission_by_path_as_system('Unassign permission', 'system.permissions');
-	perform unsecure.create_permission_by_path_as_system('Get perm sets', 'system.permissions');
+	perform unsecure.create_permission_by_path_as_system('Permissions', null, false);
+	perform unsecure.create_permission_by_path_as_system('Create permission', 'permissions');
+	perform unsecure.create_permission_by_path_as_system('Update permission', 'permissions');
+	perform unsecure.create_permission_by_path_as_system('Delete permission', 'permissions');
+	perform unsecure.create_permission_by_path_as_system('Create permission set', 'permissions');
+	perform unsecure.create_permission_by_path_as_system('Update permission set', 'permissions');
+	perform unsecure.create_permission_by_path_as_system('Delete permission set', 'permissions');
+	perform unsecure.create_permission_by_path_as_system('Assign permission', 'permissions');
+	perform unsecure.create_permission_by_path_as_system('Unassign permission', 'permissions');
+	perform unsecure.create_permission_by_path_as_system('Get perm sets', 'permissions');
 
-	perform unsecure.create_permission_by_path_as_system('Users', 'system');
-	perform unsecure.create_permission_by_path_as_system('Register user', 'system.users');
-	perform unsecure.create_permission_by_path_as_system('Add to default groups', 'system.users');
-	perform unsecure.create_permission_by_path_as_system('Enable user', 'system.users');
-	perform unsecure.create_permission_by_path_as_system('Disable user', 'system.users');
-	perform unsecure.create_permission_by_path_as_system('Lock user', 'system.users');
-	perform unsecure.create_permission_by_path_as_system('Unlock user', 'system.users');
-	perform unsecure.create_permission_by_path_as_system('Get user identity', 'system.users');
-	perform unsecure.create_permission_by_path_as_system('Enable user identity', 'system.users');
-	perform unsecure.create_permission_by_path_as_system('Disable user identity', 'system.users');
-	perform unsecure.create_permission_by_path_as_system('Change password', 'system.users');
-	perform unsecure.create_permission_by_path_as_system('Read user events', 'system.users');
-	perform unsecure.create_permission_by_path_as_system('Update user data', 'system.users');
-	perform unsecure.create_permission_by_path_as_system('Get data', 'system.users');
-	perform unsecure.create_permission_by_path_as_system('Get permissions', 'system.users');
+	perform unsecure.create_permission_by_path_as_system('Users');
+	perform unsecure.create_permission_by_path_as_system('Register user', 'users');
+	perform unsecure.create_permission_by_path_as_system('Add to default groups', 'users');
+	perform unsecure.create_permission_by_path_as_system('Enable user', 'users');
+	perform unsecure.create_permission_by_path_as_system('Disable user', 'users');
+	perform unsecure.create_permission_by_path_as_system('Lock user', 'users');
+	perform unsecure.create_permission_by_path_as_system('Unlock user', 'users');
+	perform unsecure.create_permission_by_path_as_system('Get user identity', 'users');
+	perform unsecure.create_permission_by_path_as_system('Enable user identity', 'users');
+	perform unsecure.create_permission_by_path_as_system('Disable user identity', 'users');
+	perform unsecure.create_permission_by_path_as_system('Change password', 'users');
+	perform unsecure.create_permission_by_path_as_system('Read user events', 'users');
+	perform unsecure.create_permission_by_path_as_system('Update user data', 'users');
+	perform unsecure.create_permission_by_path_as_system('Get data', 'users');
+	perform unsecure.create_permission_by_path_as_system('Get permissions', 'users');
 
-	perform unsecure.create_permission_by_path_as_system('Tenants', 'system');
-	perform unsecure.create_permission_by_path_as_system('Create tenant', 'system.tenants');
-	perform unsecure.create_permission_by_path_as_system('Update tenant', 'system.tenants');
-	perform unsecure.create_permission_by_path_as_system('Assign owner', 'system.tenants');
-	perform unsecure.create_permission_by_path_as_system('Assign group owner', 'system.tenants');
-	perform unsecure.create_permission_by_path_as_system('Get tenants', 'system.tenants');
-	perform unsecure.create_permission_by_path_as_system('Get users', 'system.tenants');
-	perform unsecure.create_permission_by_path_as_system('Get groups', 'system.tenants');
+	perform unsecure.create_permission_by_path_as_system('Tenants');
+	perform unsecure.create_permission_by_path_as_system('Create tenant', 'tenants');
+	perform unsecure.create_permission_by_path_as_system('Update tenant', 'tenants');
+	perform unsecure.create_permission_by_path_as_system('Assign owner', 'tenants');
+	perform unsecure.create_permission_by_path_as_system('Assign group owner', 'tenants');
+	perform unsecure.create_permission_by_path_as_system('Get tenants', 'tenants');
+	perform unsecure.create_permission_by_path_as_system('Get users', 'tenants');
+	perform unsecure.create_permission_by_path_as_system('Get groups', 'tenants');
 
 
-	perform unsecure.create_permission_by_path_as_system('Providers', 'system');
-	perform unsecure.create_permission_by_path_as_system('Create provider', 'system.providers');
-	perform unsecure.create_permission_by_path_as_system('Update provider', 'system.providers');
-	perform unsecure.create_permission_by_path_as_system('Delete provider', 'system.providers');
-	perform unsecure.create_permission_by_path_as_system('Get users', 'system.providers');
+	perform unsecure.create_permission_by_path_as_system('Providers');
+	perform unsecure.create_permission_by_path_as_system('Create provider', 'providers');
+	perform unsecure.create_permission_by_path_as_system('Update provider', 'providers');
+	perform unsecure.create_permission_by_path_as_system('Delete provider', 'providers');
+	perform unsecure.create_permission_by_path_as_system('Get users', 'providers');
 
-	perform unsecure.create_permission_by_path_as_system('Groups', 'system');
-	perform unsecure.create_permission_by_path_as_system('Get group', 'system.groups');
-	perform unsecure.create_permission_by_path_as_system('Get permissions', 'system.groups');
-	perform unsecure.create_permission_by_path_as_system('Create group', 'system.groups');
-	perform unsecure.create_permission_by_path_as_system('Update group', 'system.groups');
-	perform unsecure.create_permission_by_path_as_system('Delete group', 'system.groups');
-	perform unsecure.create_permission_by_path_as_system('Lock group', 'system.groups');
-	perform unsecure.create_permission_by_path_as_system('Get groups', 'system.groups');
-	perform unsecure.create_permission_by_path_as_system('Create member', 'system.groups');
-	perform unsecure.create_permission_by_path_as_system('Delete member', 'system.groups');
-	perform unsecure.create_permission_by_path_as_system('Get members', 'system.groups');
-	perform unsecure.create_permission_by_path_as_system('Get mapping', 'system.groups');
-	perform unsecure.create_permission_by_path_as_system('Create mapping', 'system.groups');
-	perform unsecure.create_permission_by_path_as_system('Delete mapping', 'system.groups');
+	perform unsecure.create_permission_by_path_as_system('Groups');
+	perform unsecure.create_permission_by_path_as_system('Get group', 'groups');
+	perform unsecure.create_permission_by_path_as_system('Get permissions', 'groups');
+	perform unsecure.create_permission_by_path_as_system('Create group', 'groups');
+	perform unsecure.create_permission_by_path_as_system('Update group', 'groups');
+	perform unsecure.create_permission_by_path_as_system('Delete group', 'groups');
+	perform unsecure.create_permission_by_path_as_system('Lock group', 'groups');
+	perform unsecure.create_permission_by_path_as_system('Get groups', 'groups');
+	perform unsecure.create_permission_by_path_as_system('Create member', 'groups');
+	perform unsecure.create_permission_by_path_as_system('Delete member', 'groups');
+	perform unsecure.create_permission_by_path_as_system('Get members', 'groups');
+	perform unsecure.create_permission_by_path_as_system('Get mapping', 'groups');
+	perform unsecure.create_permission_by_path_as_system('Create mapping', 'groups');
+	perform unsecure.create_permission_by_path_as_system('Delete mapping', 'groups');
 
-	perform unsecure.create_permission_by_path_as_system('Api keys', 'system');
-	perform unsecure.create_permission_by_path_as_system('Search', 'system.api_keys');
-	perform unsecure.create_permission_by_path_as_system('Update permissions', 'system.api_keys');
+	perform unsecure.create_permission_by_path_as_system('Api keys');
+	perform unsecure.create_permission_by_path_as_system('Search', 'api_keys');
+	perform unsecure.create_permission_by_path_as_system('Update permissions', 'api_keys');
 
 	perform unsecure.create_perm_set_as_system('System admin', true, _is_assignable := true,
-																						 _permissions := array ['system.tenants', 'system.providers'
-																							 , 'system.users','system.groups', 'system.journal']);
+																						 _permissions := array ['tenants', 'providers'
+																							 , 'users','groups', 'journal', 'api_keys']);
 
 	perform unsecure.create_perm_set_as_system('Tenant creator', true, _is_assignable := true,
-																						 _permissions := array ['system.tenants.create_tenant', 'system.journal.read_journal', 'system.journal.get_payload']);
+																						 _permissions := array ['tenants.create_tenant', 'journal.read_journal', 'journal.get_payload']);
 
 	perform unsecure.create_perm_set_as_system('Tenant admin', true, _is_assignable := true,
-																						 _permissions := array ['system.tenants', 'system.journal.read_journal', 'system.journal.get_payload']);
+																						 _permissions := array ['tenants', 'journal.read_journal', 'journal.get_payload']);
 
 	perform unsecure.create_perm_set_as_system('Tenant owner', true, _is_assignable := true,
-																						 _permissions := array ['system.groups'
-																							 , 'system.tenants.update_tenant'
-																							 , 'system.tenants.assign_owner'
-																							 , 'system.tenants.get_users'
-																							 , 'system.journal.read_journal', 'system.journal.get_journal_payload']);
+																						 _permissions := array ['groups'
+																							 , 'tenants.update_tenant'
+																							 , 'tenants.assign_owner'
+																							 , 'tenants.get_users'
+																							 , 'journal.read_journal', 'journal.get_journal_payload']);
 
 	perform unsecure.create_perm_set_as_system('Tenant member', true, _is_assignable := true,
-																						 _permissions := array ['system.tenants.get_groups'
-																							 , 'system.tenants.get_users']);
+																						 _permissions := array ['tenants.get_groups'
+																							 , 'tenants.get_users']);
 
 	perform unsecure.create_user_group_as_system('Tenant admins', true, true);
-	perform unsecure.assign_permission_as_system(2, null, 'tenant_admin');
+	perform unsecure.assign_permission_as_system(1, null, 'tenant_admin');
 
 	perform unsecure.create_user_group_as_system('System admins', true, true);
-	perform unsecure.assign_permission_as_system(3, null, 'system_admin');
+	perform unsecure.assign_permission_as_system(2, null, 'system_admin');
 
 
 	perform
@@ -6459,6 +6736,9 @@ begin
 	values ('external_data_update'); -- when data are about to be changed directly at identity provider or elsewhere
 	insert into const.user_event_type(code)
 	values ('external_data_updated'); -- when data are changed directly at identity provider or elsewhere
+
+	insert into const.user_event_type(code)
+	values ('api_key_validating');
 
 	insert into const.token_type(code, default_expiration_in_seconds)
 	values ('email_verification', 1 * 60 * 60);
